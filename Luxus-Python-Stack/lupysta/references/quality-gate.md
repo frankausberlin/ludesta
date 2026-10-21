@@ -1,8 +1,8 @@
 # Quality Gate
 
-Das Qualitätsgate ist der zentrale Prüfpunkt des Projekts. Es gilt für
-`core`; weitere Prüfungen kommen nur hinzu, wenn das Projekt sie in
-`AGENTS.md` ausweist.
+Das Qualitätsgate ist der zentrale Prüfpunkt des Projekts. Es gilt für jedes
+initialisierte Projekt; zusätzliche Prüfungen ergeben sich aus den vorhandenen
+`just`-Rezepten.
 
 ## `just check`
 
@@ -30,8 +30,7 @@ Ursache.
 | `just audit` | Abhängigkeiten auf bekannte Sicherheitslücken prüfen. |
 | `just clean` | Caches und generierte Artefakte entfernen; `.refactor/baselines/` bleibt erhalten. |
 
-`just clean` löscht keine Quellen, keine `.venv`, keine `SESSION.md` und keine
-`JOURNAL.md`.
+`just clean` löscht keine Quellen, keine `.venv` und keine `JOURNAL.md`.
 
 ## Fehlersuche
 
@@ -57,4 +56,5 @@ Ursache.
 
 - Das Gate ersetzt keine fachliche Prüfung.
 - Ein grünes Gate bedeutet nicht, dass die Änderung fachlich richtig ist.
-- Optionale Suiten wie `e2e` und `agent` sind nicht Teil von `just check`.
+- E2E- und Agent-Suiten sind nicht Teil von `just check`; sie werden separat
+  ausgeführt.

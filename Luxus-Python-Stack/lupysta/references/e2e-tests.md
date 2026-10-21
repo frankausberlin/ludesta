@@ -3,9 +3,10 @@
 Status: vorgesehen — nicht Teil der Basisversion.
 
 Dieses Rezept ist ein Überblick. Die vollständige Umsetzung ist eine spätere
-Stufe; im Kern erzeugt die Projektinitialisierung keine E2E-Suite. Lade dieses Rezept nur, wenn
-`AGENTS.md` `e2e` als verwendet nennt und das Projekt die zugehörigen Dateien
-tatsächlich enthält.
+Stufe; im Kern erzeugt die Projektinitialisierung keine E2E-Suite. Lade dieses
+Rezept nur, wenn das Projekt `tests/e2e/` mit Testdateien enthält oder die
+Aufgabe ausdrücklich die Einrichtung einer E2E-Suite verlangt. Die Einrichtung
+selbst ist ein eigener Auftrag und steht in der Stack-Dokumentation.
 
 ## Wann sinnvoll
 
@@ -55,7 +56,7 @@ if os.environ.get("LUPYSTA_AGENT") != "1":
 - Marker ergänzen das Gate, ersetzen es nicht.
 - Keine optionalen Importe auf Modulebene; Importe in Fixtures oder Tests.
 - `tests/conftest.py` gehört E2E und Agent gemeinsam und wird erst entfernt,
-  wenn keines der beiden Features bleibt.
+  wenn keine der beiden Suiten bleibt.
 
 ## Null-Test-Semantik
 
@@ -86,5 +87,4 @@ if os.environ.get("LUPYSTA_AGENT") != "1":
 ## Status
 
 Die Umsetzung erfolgt in einer späteren Stufe. Bis dahin gilt: keine
-E2E-Befehle erfinden und keine Suite anlegen, wenn `AGENTS.md` `e2e` nicht
-nennt.
+E2E-Befehle erfinden und ohne ausdrücklichen Auftrag keine Suite anlegen.

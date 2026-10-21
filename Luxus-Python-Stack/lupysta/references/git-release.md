@@ -1,7 +1,7 @@
 # Git und Release
 
-Dieses Rezept beschreibt Branch-, Merge- und Release-Abläufe. Es gilt, wenn
-`AGENTS.md` `core` nennt. Prüfe vor der Verwendung, welche Rezepte das
+Dieses Rezept beschreibt Branch-, Merge- und Release-Abläufe. Es gilt für
+jedes initialisierte Projekt. Prüfe vor der Verwendung, welche Rezepte das
 `Justfile` tatsächlich anbietet.
 
 ## Branch und Worktree
@@ -14,8 +14,8 @@ Dieses Rezept beschreibt Branch-, Merge- und Release-Abläufe. Es gilt, wenn
   ```
 - Im Worktree `uv sync` und `just check` ausführen.
 - Änderungen im Worktree committen.
-- Den Worktree erst entfernen, wenn keine lokalen `SESSION.md`- oder
-  `JOURNAL.md`-Inhalte verloren gehen.
+- Den Worktree erst entfernen, wenn keine lokalen `JOURNAL.md`-Inhalte
+  verloren gehen.
 
 ## `just merge`
 
@@ -24,9 +24,12 @@ Dieses Rezept beschreibt Branch-, Merge- und Release-Abläufe. Es gilt, wenn
 1. Es ermittelt den Worktree, in dem `main` ausgecheckt ist.
 2. Es führt dort `git merge --ff-only <branch>` aus.
 3. Es entfernt den Quell-Worktree nur, wenn dieser sauber ist und keine
-   lokalen `SESSION.md`/`JOURNAL.md` enthält.
+   lokalen `JOURNAL.md`-Inhalte enthält.
 4. Andernfalls bleibt der Worktree stehen; der Pfad wird genannt.
 5. Es pusht nie.
+6. Nach dem Merge die Eindeutigkeit der ADR- und AP-Nummern prüfen; der
+   spätere Branch nummeriert seine noch nicht veröffentlichten Einträge um
+   (siehe [`session-close.md`](session-close.md)).
 
 Ohne Argument sucht das Rezept einen eindeutigen Kandidaten: zuerst einen
 Branch in einem anderen Worktree, sonst den einzigen lokalen Branch, der
@@ -88,5 +91,5 @@ mehreren Worktrees mehrere Kandidaten sieht, den Branch explizit übergeben:
 
 - Kein Force-Push.
 - Kein `git reset --hard` auf fremde Arbeit.
-- Kein Entfernen eines Worktrees mit lokalen Session-Dateien.
+- Kein Entfernen eines Worktrees mit lokalen `JOURNAL.md`-Inhalten.
 - Keine manuellen Tags und keine manuellen Versionsnummern.

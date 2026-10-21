@@ -1,8 +1,8 @@
 # Refactoring
 
-Refactoring ist messbar und schrittweise. Dieses Rezept gilt, wenn
-`AGENTS.md` `refactor` nennt. Prüfe vor der Verwendung, welche
-`rate-design`- und `refactor`-Rezepte das Projekt tatsächlich anbietet.
+Refactoring ist messbar und schrittweise. Dieses Rezept gilt, wenn das Projekt
+`rate-design`- und `refactor`-Rezepte im `Justfile` anbietet. Prüfe vor der
+Verwendung die tatsächlich vorhandenen Befehle.
 
 ## Zuerst messen
 
@@ -65,5 +65,6 @@ für die folgenden Schritte; ein separater Worktree ist optional.
 
 - `just check` ist grün.
 - Die Änderungen sind in kleinen Commits dokumentiert.
-- `SESSION.md` und `JOURNAL.md` sind aktualisiert.
+- `JOURNAL.md` ist aktualisiert und [`session-close.md`](session-close.md)
+  wurde ausgeführt.
 - Der Branch wird über [`git-release.md`](git-release.md) gemergt.

@@ -1,18 +1,18 @@
 # Dokumentation
 
-Dokumentationsrezepte gelten nur, wenn `AGENTS.md` `docs-lib` oder `docs-cli`
-nennt. Prüfe vor der Verwendung, ob die genannten `just`-Rezepte im Projekt
-tatsächlich existieren.
+Dokumentationsrezepte gelten, wenn das Projekt `docs`-Rezepte im `Justfile`
+anbietet. Bibliotheken nutzen MkDocs, CLI-Apps eine generierte Referenz.
+Prüfe vor der Verwendung die tatsächlich vorhandenen Befehle.
 
 ## Varianten
 
-| Feature | Projekttyp | Quelle | Ausgabe |
+| Variante | Projekttyp | Quelle | Ausgabe |
 | --- | --- | --- | --- |
-| `docs-lib` | Bibliothek | `mkdocs.yml`, `docs/`, Docstrings | Statische MkDocs-Seite. |
-| `docs-cli` | App mit `--cli` | Typer-App in `src/<paket>/cli.py` | `docs/reference/cli.md`. |
+| MkDocs | Bibliothek | `mkdocs.yml`, `docs/`, Docstrings | Statische MkDocs-Seite. |
+| CLI-Referenz | App mit `--cli` | Typer-App in `src/<paket>/cli.py` | `docs/reference/cli.md`. |
 
-Beide Varianten können in einem Projekt nicht gleichzeitig entstehen:
-`docs-lib` gehört zur Bibliothek, `docs-cli` zur CLI-App.
+Eine Bibliothek nutzt MkDocs, eine CLI-App die generierte Referenz; beide
+Varianten entstehen im selben Projekt nicht gleichzeitig.
 
 ## Befehle
 
@@ -40,6 +40,9 @@ Ein veralteter Generatorstand lässt das Gate fehlschlagen.
 - `mkdocstrings` liest die öffentliche API aus den Docstrings.
 - Öffentliche Funktionen und Klassen brauchen Google-Style-Docstrings.
 - `just docs-serve` startet eine lokale Vorschau mit Live-Reload.
+- ADRs unter `docs/adr/` sind absichtlich nicht Teil der Navigation. Wenn
+  `docs-check` sie beanstandet, in `mkdocs.yml` über `not_in_nav` ausschließen
+  oder in die Navigation aufnehmen.
 
 ## CLI-Apps
 

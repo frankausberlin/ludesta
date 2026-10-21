@@ -4,9 +4,10 @@ Status: vorgesehen — nicht Teil der Basisversion.
 
 Dieses Rezept ist ein Überblick. Die vollständige Umsetzung ist eine spätere
 Stufe nach einem Go/No-Go; im Kern erzeugt die Projektinitialisierung keine
-Agent-Suite. Lade
-dieses Rezept nur, wenn `AGENTS.md` `agent` als verwendet nennt und das
-Projekt die zugehörigen Dateien tatsächlich enthält.
+Agent-Suite. Lade dieses Rezept nur, wenn das Projekt `tests/agent/` mit
+Testdateien enthält oder die Aufgabe ausdrücklich die Einrichtung einer
+Agent-Suite verlangt. Die Einrichtung selbst ist ein eigener Auftrag und steht
+in der Stack-Dokumentation.
 
 ## Wann sinnvoll
 
@@ -83,5 +84,5 @@ Ein Live-Lauf wird manuell dokumentiert und ist kein Release-Gate.
 ## Status
 
 Die Umsetzung erfolgt in einer späteren Stufe nach einem Go/No-Go. Bis dahin
-gilt: keine Agent-Befehle erfinden und keine Suite anlegen, wenn `AGENTS.md`
-`agent` nicht nennt.
+gilt: keine Agent-Befehle erfinden und ohne ausdrücklichen Auftrag keine Suite
+anlegen.

@@ -10,8 +10,8 @@ _LUXUS_REAL_SOURCE="$(readlink -f "$_LUXUS_SOURCE" 2>/dev/null || printf '%s\n' 
 _LUXUS_SCRIPT_DIR="$(cd "$(dirname "$_LUXUS_REAL_SOURCE")" && pwd)"
 unset _LUXUS_SOURCE _LUXUS_REAL_SOURCE
 
-_LUPYSTA_VERSION="0.5.0"
-_LUPYSTA_CONTRACT_VERSION="1"
+_LUPYSTA_VERSION="0.6.0"
+_LUPYSTA_CONTRACT_VERSION="2"
 
 
 
@@ -354,7 +354,7 @@ def test_package_version() -> None:
 PYINIT_LIB_TEST
         fi
 
-        # ─── Step 5b: design report tool (core, refactor feature) ─────────────
+        # ─── Step 5b: design report tool (rate-design/refactor recipes) ───────
         mkdir -p scripts
         cp "$_design_report" scripts/design_report.py \
             || _die "copying scripts/design_report.py failed"
@@ -436,8 +436,7 @@ site/
 # Refactoring artifacts (generated)
 .refactor/
 
-# Agent session files (volatile)
-SESSION.md
+# Agent journal (volatile)
 JOURNAL.md
 
 # Agent artifacts
@@ -537,7 +536,7 @@ fix:
     uv run ruff check --fix .
     uv run ruff format .
 
-# Remove local caches and generated artifacts (keeps baselines, .venv, sources and session files)
+# Remove local caches and generated artifacts (keeps baselines, .venv, sources and the journal)
 clean:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -548,7 +547,7 @@ clean:
     fi
     find . -path ./.venv -prune -o -path ./.git -prune -o -type d -name __pycache__ -print -exec rm -rf {} +
     find . -path ./.venv -prune -o -path ./.git -prune -o -type f \( -name '*.pyc' -o -name '*.pyo' \) -print -exec rm -f {} +
-    echo "Cleaned caches and generated artifacts (kept .refactor/baselines, .venv, SESSION.md and JOURNAL.md)."
+    echo "Cleaned caches and generated artifacts (kept .refactor/baselines, .venv and JOURNAL.md)."
 
 # Audit dependencies for known security vulnerabilities
 audit:
@@ -686,10 +685,10 @@ merge branch="" target="main":
             echo "merge: '$branch' merged into '$target'."
             echo "merge: source worktree is the current checkout; switch to '$target'"
             echo "       and remove the worktree and branch manually if you no longer need them."
-        elif [ -e "$source_path/SESSION.md" ] || [ -e "$source_path/JOURNAL.md" ]; then
+        elif [ -e "$source_path/JOURNAL.md" ]; then
             echo "merge: '$branch' merged into '$target'."
             echo "merge: worktree '$source_path' left in place because it contains"
-            echo "       SESSION.md or JOURNAL.md. Move or review those files, then remove"
+            echo "       JOURNAL.md. Move or review that file, then remove"
             echo "       the worktree and branch manually."
         elif [ -n "$(git -C "$source_path" status --porcelain)" ]; then
             echo "merge: '$branch' merged into '$target'."
@@ -785,27 +784,12 @@ PYINIT_RELEASE
         fi
 
         # ─── Step 12: AGENTS.md from the project template ─────────────────────
-        local PROJECT_TYPE ENTRY_KIND ENTRY_PATH ENTRY_NOTE
-        local FEATURES_USED FEATURES_UNUSED
+        local PROJECT_TYPE
         PROJECT_TYPE="App"
-        ENTRY_KIND="Einstiegspunkt"
-        ENTRY_PATH="src/${PACKAGE_NAME}/main.py:main"
-        ENTRY_NOTE="Ausführen mit \`just run\`."
-        FEATURES_USED="core, refactor"
-        FEATURES_UNUSED="e2e, agent"
         if [[ "$_type" == "lib" ]]; then
             PROJECT_TYPE="Bibliothek"
-            ENTRY_KIND="Öffentliche API"
-            ENTRY_PATH="src/${PACKAGE_NAME}/__init__.py"
-            ENTRY_NOTE="Typisiertes Paket: \`src/${PACKAGE_NAME}/py.typed\`."
-            FEATURES_USED="${FEATURES_USED}, docs-lib"
-            FEATURES_UNUSED="docs-cli, ${FEATURES_UNUSED}"
         elif [[ $_cli -eq 1 ]]; then
             PROJECT_TYPE="App (CLI)"
-            FEATURES_USED="${FEATURES_USED}, docs-cli"
-            FEATURES_UNUSED="docs-lib, ${FEATURES_UNUSED}"
-        else
-            FEATURES_UNUSED="docs-lib, docs-cli, ${FEATURES_UNUSED}"
         fi
         sed \
             -e "s|@PROJECT_NAME@|${PROJECT_NAME}|g" \
@@ -813,21 +797,12 @@ PYINIT_RELEASE
             -e "s|@PROJECT_TYPE@|${PROJECT_TYPE}|g" \
             -e "s|@PYTHON_VERSION@|${_py_version}|g" \
             -e "s|@SOURCE_PATH@|src/${PACKAGE_NAME}/|g" \
-            -e "s|@ENTRY_KIND@|${ENTRY_KIND}|g" \
-            -e "s|@ENTRY_PATH@|${ENTRY_PATH}|g" \
-            -e "s|@ENTRY_NOTE@|${ENTRY_NOTE}|g" \
-            -e "s|@FEATURES_USED@|${FEATURES_USED}|g" \
-            -e "s|@FEATURES_UNUSED@|${FEATURES_UNUSED}|g" \
             -e "s|@LUPYSTA_VERSION@|${_LUPYSTA_VERSION}|g" \
             -e "s|@CONTRACT_VERSION@|${_LUPYSTA_CONTRACT_VERSION}|g" \
             "$_agents_template" > AGENTS.md \
             || _die "rendering AGENTS.md failed"
 
-        # ─── Step 13: session and project documents ──────────────────────────
-        cat > SESSION.md <<'PYINIT_SESSION'
-Summary of the last session. Will be overwritten by every session.
-PYINIT_SESSION
-
+        # ─── Step 13: journal and project documents ───────────────────────────
         cat > JOURNAL.md <<'PYINIT_JOURNAL'
 Session history: past sessions are appended here (latest at the end).
 PYINIT_JOURNAL
@@ -924,7 +899,7 @@ uv sync           # install all dependencies
 4. Commit: \`git add -A && git commit -m "feat: ..."\`
 5. From any checkout, merge locally: \`just merge feat/my-feature\`
    (fast-forward only; it removes a clean source worktree and deletes the
-   branch, but keeps a worktree with local SESSION.md/JOURNAL.md)
+   branch, but keeps a worktree with local JOURNAL.md)
 6. Publishing is a maintainer step: review local \`main\` with
    \`git log --oneline origin/main..main\` and \`git diff origin/main..main\`, then
    \`git push origin main\`

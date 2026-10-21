@@ -1,9 +1,10 @@
 # AGENTS.md – @PROJECT_NAME@
 
-Diese Datei wurde einmalig bei der Projektinitialisierung erzeugt. Sie
-beschreibt die Projektauswahl für den lupysta-Skill. Die Arbeitsweisen selbst
-stehen im installierten lupysta-Skill; hier steht nur, was in diesem Projekt
-gilt.
+Diese Datei enthält die projektbezogenen Informationen und Regeln. Die
+Arbeitsweisen selbst stehen im lupysta-Skill; hier steht nur, was für dieses
+Projekt gilt.
+
+Verwende für die Entwicklung immer den lupysta-Skill.
 
 ## Projektprofil
 
@@ -13,29 +14,27 @@ gilt.
 - Python-Version: `@PYTHON_VERSION@`
 - Quellpfad: `@SOURCE_PATH@`
 - Testpfad: `tests/`
-- @ENTRY_KIND@: `@ENTRY_PATH@` — @ENTRY_NOTE@
 
-## Projektfeatures
+## ADRs
 
-Verwendet: @FEATURES_USED@
+Architekturentscheidungen liegen als Dateien in `docs/adr/`. Neue Einträge
+werden hier mit Nummer, Titel und Status verlinkt.
 
-Nicht verwendet: @FEATURES_UNUSED@
+| ADR | Titel | Status |
+| --- | --- | --- |
 
-<!-- `e2e` und `agent` sind vorgesehen, werden in der Basisversion aber nicht erzeugt. -->
+## Attention Points
 
-Die Feature-Liste ist die einzige Auswahl. Fehlende Features werden nicht
-vorausgesetzt und nicht ungefragt nachgebaut. Vor der Verwendung eines
-Befehls prüfen, ob er im `Justfile` tatsächlich vorhanden ist.
+<!--
+Format eines Eintrags:
 
-## Wichtige Befehle
+### AP-1: Kurztitel
 
-- Qualitätsgate: `just check`
-- Design-Report: `just rate-design run`, `just rate-design save <name>`,
-  `just rate-design compare <name>`
-
-## Lokale Regeln
-
-<!-- Projektlokale Regeln hier ergänzen. -->
+- **Situation**: ...
+- **Handhabung**: ...
+- **Involvierte ADRs**: ...
+- **Kontext**: ...
+-->
 
 ## Herkunft
 

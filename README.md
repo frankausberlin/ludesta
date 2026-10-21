@@ -48,9 +48,9 @@ Das Herz des Stacks ist das Stack-Init. Es ist ein Script das ein vorkonfigurier
 
 ### Projekt individualiesieren
 
-Der Agent-Skill beschreibt im vollen Umfang das Arbeiten mit allen unterstützten Features, basierende auf dem Stack-Init. Dafür ist er modular aufgebaut und lädt komplexe Rezepte nur bei Bedarf.
+Der Agent-Skill beschreibt im vollen Umfang das Arbeiten mit allen unterstützten Arbeitsweisen, basierend auf dem Stack-Init. Dafür ist er modular aufgebaut und lädt komplexe Rezepte nur bei Bedarf.
 
-In der AGENTS.md befindet sich in der generierten version eine kurze Anleitung wie die AGENTS.md individuell an das Projekt angepasst werden kann.
+Die `AGENTS.md` enthält das Projektprofil, den ADR-Index und die Attention Points. Attention Points sind projektbezogene Stolpersteine, die Agent und Nutzer gemeinsam pflegen; ADRs halten Architekturentscheidungen in `docs/adr/` fest.
 
 
 ## Installation

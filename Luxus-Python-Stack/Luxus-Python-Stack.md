@@ -18,8 +18,7 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 
 |Folder|File|Inhalt|
 |-|-|-|
-|**`lupysta/`**|*SKILL.md*|Deutsche Skill-Übersicht und Rezeptindex|
-||*SKILL_en.md*|Englische Fassung der Übersicht|
+|**`lupysta/`**|*SKILL.md*|Skill-Übersicht und Rezeptindex|
 |**`lupysta/references`**|*agent-tests.md*|Agent-Tests (vorgesehen, nicht Teil der Basisversion)|
 ||*documentation.md*|Dokumentationsrezepte für `just docs*`|
 ||*e2e-tests.md*|E2E-Tests (vorgesehen, nicht Teil der Basisversion)|
@@ -27,7 +26,8 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 ||*quality-gate.md*|Qualitätsgate und Fehlersuche|
 ||*refactoring-recipes.md*|Konkrete Refactoring-Rezepte|
 ||*refactoring.md*|Design-Report, Baseline und Refactoring-Ablauf|
-||*workflow.md*|Sitzungsstart, Session-Dateien, Branch und Commit|
+||*session-close.md*|Aufgabenabschluss: ADRs, Attention Points und `JOURNAL.md`|
+||*workflow.md*|Sitzungsstart und -ende, `JOURNAL.md`, Branch und Commit|
 
 ## Installation
 
@@ -67,7 +67,7 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 | 1 | Mamba / Jupyter | Mamba + UV | `act <envname>` oder Start über `~/.startenv` |
 | 2 | Projekte | UV + direnv | Automatisch über `direnv`, wenn `.venv` existiert |
 | 3 | CI/CD | GitHub Actions + UV | Bei Push/PR oder manuell |
-| 4 | KI-Agenten | `AGENTS.md` + Skill + `SESSION.md` | Start der Agentensitzung |
+| 4 | KI-Agenten | `AGENTS.md` + Skill + `JOURNAL.md` | Start der Agentensitzung |
 
 ### Ebene 0: Global / System
 
@@ -106,18 +106,19 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 src/<paketname>/
 tests/
 scripts/design_report.py
-docs/                       # optional (Lib oder --cli)
+docs/                       # optional (Lib, --cli oder ADRs)
+docs/adr/                   # Architekturentscheidungen (bei Bedarf)
 pyproject.toml
 uv.lock
 Justfile
 AGENTS.md
-SESSION.md / JOURNAL.md     # gitignored
+JOURNAL.md                  # gitignored
 .envrc
 .pre-commit-config.yaml
 .github/workflows/ci.yml    # release.yml bei Bibliotheken
 ```
 
-* `AGENTS.md` enthält das Projektprofil, die Feature-Auswahl und lokale Regeln.
+* `AGENTS.md` enthält das Projektprofil, den ADR-Index und die Attention Points.
 * Der Skill beschreibt die Arbeitsweisen; die Projektdateien bleiben die ausführbare Quelle.
 
 ### Ebene 3: CI/CD
@@ -130,27 +131,29 @@ SESSION.md / JOURNAL.md     # gitignored
 
 ### Ebene 4: KI-Agenten
 
-Die vierte Ebene besteht aus drei Teilen:
+Die vierte Ebene besteht aus vier Teilen:
 
 | Teil | Verantwortung |
 | --- | --- |
 | Installierter lupysta-Skill | Beschreibt alle möglichen Arbeitsweisen als Rezepte. |
-| Projekt-`AGENTS.md` | Wählt die Features und nennt lokale Regeln; enthält keine zweite Skill-Kopie. |
-| `SESSION.md` / `JOURNAL.md` | Flüchtiger Sitzungszustand bzw. chronologische Historie; gitignored. |
+| Projekt-`AGENTS.md` | Enthält Projektprofil, ADR-Index und Attention Points; keine zweite Skill-Kopie. |
+| `JOURNAL.md` | Chronologische Historie und aktueller Stand; gitignored. |
+| `docs/adr/` | Unveränderliche Architekturentscheidungen; bei Bedarf angelegt. |
 
 Ablauf:
 
-1. `AGENTS.md` lesen und die Feature-Auswahl prüfen.
-2. `SESSION.md` lesen, falls vorhanden.
-3. `uv sync` und `git status` ausführen.
-4. Nur die Rezepte laden, die zur Aufgabe und zur Feature-Auswahl passen.
-5. Am Ende `just check` grün halten, `SESSION.md` überschreiben und
-   `JOURNAL.md` ergänzen.
-6. Lokal mit `just merge` mergen; Agenten pushen nie.
+1. `AGENTS.md` lesen: Projektprofil, ADR-Index und Attention Points.
+2. Den letzten Eintrag in `JOURNAL.md` lesen, falls vorhanden.
+3. `docs/adr/` sichten, falls vorhanden.
+4. `uv sync` und `git status` ausführen.
+5. Nur die Rezepte laden, die zur Aufgabe passen.
+6. Am Ende `just check` grün halten, [`session-close.md`](lupysta/references/session-close.md)
+   ausführen und `JOURNAL.md` fortschreiben.
+7. Lokal mit `just merge` mergen; Agenten pushen nie.
 
-Die Feature-Auswahl in `AGENTS.md` ist die einzige Quelle für die Frage,
-welche Arbeitsweisen in einem Projekt gelten. Fehlende Features werden nicht
-vorausgesetzt und nicht ungefragt nachgebaut.
+`AGENTS.md` ist die Quelle für projektbezogene Regeln. Der Skill beschreibt die
+Arbeitsweisen; fehlende Befehle werden nicht vorausgesetzt und nicht ungefragt
+nachgebaut.
 
 ## Tägliche Befehle
 
@@ -163,6 +166,7 @@ Orientierung:
 | Dokumentation | `just docs`, `just docs-check`, `just docs-serve` | [`lupysta/references/documentation.md`](lupysta/references/documentation.md) |
 | Git und Release | `just merge`, `just bump patch\|minor\|major` | [`lupysta/references/git-release.md`](lupysta/references/git-release.md) |
 | Refactoring | `just rate-design run\|save\|compare`, `just refactor` | [`lupysta/references/refactoring.md`](lupysta/references/refactoring.md) |
+| Projektwissen | `AGENTS.md`, `docs/adr/`, `JOURNAL.md` | [`lupysta/references/session-close.md`](lupysta/references/session-close.md) |
 
 ## `pyinit`-Ablauf
 
@@ -180,13 +184,13 @@ Orientierung:
 | 10 | Tests | `tests/test_smoke.py` mit echtem Smoke-Test; kein `assert True`. |
 | 10b | Design-Report | `scripts/design_report.py` aus der Vorlage kopieren. |
 | 11 | Tool-Konfiguration | Ruff, basedpyright, pytest, Coverage, bump-my-version. |
-| 12 | `.gitignore` | Python, Umgebungen, Caches, Docs-Ausgabe, Session-Dateien, `ignore/`, `.refactor/`, `.kilo/`; `.vscode/` bleibt versionierbar. |
+| 12 | `.gitignore` | Python, Umgebungen, Caches, Docs-Ausgabe, `JOURNAL.md`, `ignore/`, `.refactor/`, `.kilo/`; `.vscode/` bleibt versionierbar. |
 | 13 | VS Code | `settings.json`, `launch.json`, `extensions.json`. |
 | 14 | direnv | `.envrc` mit Conda-Schutz, `watch_file uv.lock`, `layout uv`; kein automatisches `direnv allow`. |
 | 15 | Justfile | `test`, `lint`, `typecheck`, `check`, `fix`, `clean`, `audit`, `bump`, `rate-design`, `refactor`, `merge`; `check` ruft `docs-check` auf, wenn vorhanden. |
 | 16 | GitHub Actions | `ci.yml` immer; `release.yml` nur für Bibliotheken. |
-| 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, Feature-Liste, lokale Regeln, Herkunft. |
-| 18 | Session und Projektdokumente | `SESSION.md`, `JOURNAL.md`, `README.md`, `.editorconfig`, `CONTRIBUTING.md`, `LICENSE`. |
+| 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, ADR-Index, Attention Points, Herkunft. |
+| 18 | Journal und Projektdokumente | `JOURNAL.md`, `README.md`, `.editorconfig`, `CONTRIBUTING.md`, `LICENSE`. |
 | 19 | pre-commit | Standard-Hooks plus lokale Ruff-Hooks; basedpyright läuft im Gate und in CI. |
 | 20 | Dokumentation | Lib: MkDocs; App mit `--cli`: generierte CLI-Referenz. Generierte Seiten nie von Hand ändern. |
 | 21 | Git | `git init -q -b main`. |

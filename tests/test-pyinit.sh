@@ -128,6 +128,16 @@ assert_file() {
     fi
 }
 
+assert_no_file() {
+    local name="$1"
+    local file="$2"
+    if [[ ! -e "$file" ]]; then
+        pass "$name"
+    else
+        fail "$name (unexpected file: $file)"
+    fi
+}
+
 assert_dir() {
     local name="$1"
     local directory="$2"
@@ -201,9 +211,14 @@ echo "# Integration checks"
 APP="$TMP_ROOT/app"
 if expect_success "pyinit creates an app" pyinit "$APP" --python 3.12; then
     assert_file "app AGENTS.md exists" "$APP/AGENTS.md"
-    assert_contains "app selects core and refactor" "$APP/AGENTS.md" "Verwendet: core, refactor"
-    assert_contains "app does not select docs" "$APP/AGENTS.md" "Nicht verwendet: docs-lib, docs-cli, e2e, agent"
+    assert_contains "app AGENTS.md has project profile" "$APP/AGENTS.md" "## Projektprofil"
+    assert_contains "app AGENTS.md has ADR index" "$APP/AGENTS.md" "## ADRs"
+    assert_contains "app AGENTS.md has attention points" "$APP/AGENTS.md" "## Attention Points"
+    assert_contains "app AGENTS.md records the project type" "$APP/AGENTS.md" "Projekttyp: App"
+    assert_contains "app AGENTS.md records the contract version" "$APP/AGENTS.md" 'contract_version: `2`'
+    assert_not_contains "app AGENTS.md has no feature list" "$APP/AGENTS.md" "Verwendet:"
     assert_not_contains "app AGENTS.md has no old managed block" "$APP/AGENTS.md" "AGENTS_MANAGED_BEGIN"
+    assert_no_file "app has no SESSION.md" "$APP/SESSION.md"
     expect_success_in "app just check is green" "$APP" just check
     expect_success_in "app rate-design run works" "$APP" just rate-design run
     assert_file "app report.json exists" "$APP/.refactor/report.json"
@@ -249,26 +264,26 @@ if expect_success "pyinit creates an app" pyinit "$APP" --python 3.12; then
     printf '# worktree\n' >>"$TMP_ROOT/wt-session/README.md"
     (cd "$TMP_ROOT/wt-session" && git -c user.name=Test -c user.email=test@example.com \
         commit -q --no-verify -am worktree)
-    printf 'session state\n' >"$TMP_ROOT/wt-session/SESSION.md"
-    expect_success_in "merge protects session files" "$APP" just merge feat/session
-    assert_file "session file remains in worktree" "$TMP_ROOT/wt-session/SESSION.md"
+    printf 'journal state\n' >"$TMP_ROOT/wt-session/JOURNAL.md"
+    expect_success_in "merge protects journal files" "$APP" just merge feat/session
+    assert_file "journal file remains in worktree" "$TMP_ROOT/wt-session/JOURNAL.md"
     if git -C "$APP" worktree list | grep -q "wt-session"; then
-        pass "worktree with session files remains registered"
+        pass "worktree with journal remains registered"
     else
-        fail "worktree with session files remains registered"
+        fail "worktree with journal remains registered"
     fi
 fi
 
 LIB="$TMP_ROOT/lib"
 if expect_success "pyinit creates a library" pyinit "$LIB" --lib --python 3.12; then
-    assert_contains "library selects docs-lib" "$LIB/AGENTS.md" "Verwendet: core, refactor, docs-lib"
+    assert_contains "library is typed as library" "$LIB/AGENTS.md" "Projekttyp: Bibliothek"
     expect_success_in "library just check is green" "$LIB" just check
     expect_success_in "library docs-check is green" "$LIB" just docs-check
 fi
 
 CLI="$TMP_ROOT/cli"
 if expect_success "pyinit creates a CLI app" pyinit "$CLI" --cli --python 3.12; then
-    assert_contains "CLI app selects docs-cli" "$CLI/AGENTS.md" "Verwendet: core, refactor, docs-cli"
+    assert_contains "CLI app is typed as CLI app" "$CLI/AGENTS.md" "Projekttyp: App (CLI)"
     expect_success_in "CLI app just check is green" "$CLI" just check
     expect_success_in "CLI docs-check is green" "$CLI" just docs-check
 fi
