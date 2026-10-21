@@ -10,8 +10,6 @@ Das *luxoriös* steht für die verwendung komfortabler Mechanismen und Werkzeuge
 
 Ein **Luxus Stack** (z.b. Python) befindet sich im **gleichnamigen Folder** (*Luxus-&lt;domain>-Stack/*) und besteht aus der **Dokumentation** (*Luxus-&lt;domain>-Stack.md, Stack-Setup.md*), dem **Skill** (*&lt;skill-folder>/*) und dem **Stack-Script** (&lt;stack-script>.sh) mit der Stack-Init-Funktion.
 
-
-
 ```shell
 Luxus-Stack  
 ├── Stack-Dokumentation - Beschreibt das Arbeiten mit dem Stack
@@ -34,7 +32,7 @@ Luxus-Stack
 * Das Init ist hochgradig stackabhängig. Lediglich Grundanforderungen sind daran gestellt:
    > 1. es muss ein '--help' vorhanden sein mit einer ausführlichen beschreibung.
    > 2. durch aufruf ohne einen parameter wird in dem aktuellen folder eine default projektstruktur angelet.
-   > 3. das Init informiert darüber, was es getan hat.
+   > 3. das Init informiert darüber, was es getan hat und welche Schritte noch vom Anwender zu erledigen sind.
 
 
 ## Verwendung
@@ -52,7 +50,6 @@ Das Herz des Stacks ist das Stack-Init. Es ist ein Script das ein vorkonfigurier
 Der Agent-Skill beschreibt im vollen Umfang das Arbeiten mit allen unterstützten Features, basierende auf dem Stack-Init. Dafür ist er modular aufgebaut und lädt komplexe Rezepte nur bei Bedarf.
 
 In der AGENTS.md befindet sich in der generierten version eine kurze Anleitung wie die AGENTS.md individuell an das Projekt angepasst werden kann.
-
 
 
 ## Installation
