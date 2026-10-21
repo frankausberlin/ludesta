@@ -21,6 +21,8 @@ Verwendet: @FEATURES_USED@
 
 Nicht verwendet: @FEATURES_UNUSED@
 
+<!-- `e2e` und `agent` sind vorgesehen, werden in der Basisversion aber nicht erzeugt. -->
+
 Die Feature-Liste ist die einzige Auswahl. Fehlende Features werden nicht
 vorausgesetzt und nicht ungefragt nachgebaut. Vor der Verwendung eines
 Befehls prüfen, ob er im `Justfile` tatsächlich vorhanden ist.

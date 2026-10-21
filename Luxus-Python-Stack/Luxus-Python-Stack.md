@@ -6,41 +6,38 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 
 |Folder|File|Inhalt|
 |-|-|-|
-|**`/`**|*Luxus-Python-Stack.md*||
-||*Stack-Setup.md*||
-|**`lupesta/`**||Folder mit dem Stack-Skill (siehe unten)|
-|**`scripts/`**|*design_report.py*||
-||*luxuspythonstack.sh*||
-|**`templates/`**|*AGENTS.md*||
+|**`/`**|*Luxus-Python-Stack.md*|Stack-Dokumentation (dieses Dokument)|
+||*Stack-Setup.md*|Einrichtung des Stacks auf einem neuen System|
+|**`lupysta/`**||Stack-Skill für die Arbeit im initialisierten Projekt (siehe unten)|
+|**`scripts/`**|*luxuspythonstack.sh*|Stack-Laufzeit mit `pyinit` und Shell-Funktionen|
+|**`templates/`**|*AGENTS.md*|Vorlage für die projektbezogene `AGENTS.md`|
+||*scripts/design_report.py*|Vorlage für den Design-Report im Projekt|
 	  	     
      
 ## Aufbau des Skills
 
 |Folder|File|Inhalt|
 |-|-|-|
-|**`lupesta/`**|*SKILL.md*||
-|**`lupesta/references`**|*agent-tests.md*||
-||*documentation.md*||
-||*e2e-tests.md*||
-||*git-release.md*||
-||*migration.md*||
-||*quality-gate.md*||
-||*refactoring-recipes.md*||
-||*refactoring.md*||
-||*workflow.md*||
-|**`lupesta/scripts`**|*design_report.py*||
-||*luxuspythonstack.sh*||
-|**`lupesta/templates`**|*AGENTS.md*||
+|**`lupysta/`**|*SKILL.md*|Deutsche Skill-Übersicht und Rezeptindex|
+||*SKILL_en.md*|Englische Fassung der Übersicht|
+|**`lupysta/references`**|*agent-tests.md*|Agent-Tests (vorgesehen, nicht Teil der Basisversion)|
+||*documentation.md*|Dokumentationsrezepte für `just docs*`|
+||*e2e-tests.md*|E2E-Tests (vorgesehen, nicht Teil der Basisversion)|
+||*git-release.md*|Worktree, Merge, Versionierung und Release|
+||*quality-gate.md*|Qualitätsgate und Fehlersuche|
+||*refactoring-recipes.md*|Konkrete Refactoring-Rezepte|
+||*refactoring.md*|Design-Report, Baseline und Refactoring-Ablauf|
+||*workflow.md*|Sitzungsstart, Session-Dateien, Branch und Commit|
 
 ## Installation
 
 1. Repository an einen stabilen Ort klonen:
    ```shell
    mkdir -p ~/gits
-   git clone https://github.com/frankausberlin/luxus-skills ~/gits/luxus-skills
+   git clone https://github.com/frankausberlin/ludesta ~/gits/ludesta
    ```
-2. Die [Setup-Anleitung](Stack-Setup_de.md) befolgen.
-3. Den Skill verlinken und das Script in der Shell einbinden; die [Setup-Anleitung](Stack-Setup_de.md) beschreibt beide Schritte.
+2. Die [Setup-Anleitung](Stack-Setup.md) befolgen.
+3. Den Skill verlinken und das Script in der Shell einbinden; die [Setup-Anleitung](Stack-Setup.md) beschreibt beide Schritte.
 
 > **Hinweis:** Die Einrichtung in einer VM oder einer frischen Ubuntu-Installation wird
 > empfohlen. Andere Distributionen sind nicht getestet. Für ein bereits
@@ -48,8 +45,8 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 
 ## Überblick verwendete Werkzeuge
 
-| Werkzeug | Zweck | |
-| --- | --- ||
+| Werkzeug | Zweck |
+| --- | --- |
 | `uv` | Python-Versionen und Paketverwaltung|
 | `direnv` | Automatische Aktivierung der Projektumgebung|
 | `just` | Command-Runner|
@@ -175,7 +172,7 @@ Orientierung:
 | 02 | Python-Version | Format `X.Y`, mindestens `3.11` (z. B. `3.12`), sonst Abbruch. |
 | 03 | Name ableiten | Projektname aus dem Zielverzeichnis; Paketname kleingeschrieben und `-` → `_`; ungültige Identifier und Keywords werden abgelehnt. |
 | 04 | Ziel prüfen | Nicht vorhandenes oder leeres Ziel ist erlaubt; ein Ziel, das nur `.git` enthält, ebenfalls; Dateien und sonstige Inhalte werden abgelehnt. |
-| 05 | Werkzeuge und Vorlagen | `uv`, `just`, `git`, `awk` und die Vorlagen `templates/pyinit/AGENTS.md` sowie `templates/pyinit/scripts/design_report.py` werden vor dem ersten Schreibzugriff geprüft. |
+| 05 | Werkzeuge und Vorlagen | `uv`, `just`, `git`, `awk` und die Vorlagen `templates/AGENTS.md` sowie `templates/scripts/design_report.py` werden vor dem ersten Schreibzugriff geprüft. |
 | 06 | Ziel betreten, `uv init` | In einer Subshell; `UV_PYTHON_PREFERENCE=only-managed`; App: `uv init --app --package`; Lib: `uv init --lib`. |
 | 07 | Dev-Abhängigkeiten | `ruff`, `pytest`, `pytest-cov`, `basedpyright`, `colorlog`, `bump-my-version`, `pre-commit`, `pip-audit`, `radon`, `vulture`; Lib zusätzlich MkDocs; CLI zusätzlich `typer`. |
 | 08 | `pyproject.toml` patchen | Einstiegspunkt für Apps; Versionsmarker für `bump-my-version`. |
@@ -188,7 +185,7 @@ Orientierung:
 | 14 | direnv | `.envrc` mit Conda-Schutz, `watch_file uv.lock`, `layout uv`; kein automatisches `direnv allow`. |
 | 15 | Justfile | `test`, `lint`, `typecheck`, `check`, `fix`, `clean`, `audit`, `bump`, `rate-design`, `refactor`, `merge`; `check` ruft `docs-check` auf, wenn vorhanden. |
 | 16 | GitHub Actions | `ci.yml` immer; `release.yml` nur für Bibliotheken. |
-| 17 | `AGENTS.md` | Aus `templates/pyinit/AGENTS.md` gerendert: Projektprofil, Feature-Liste, lokale Regeln, Herkunft. |
+| 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, Feature-Liste, lokale Regeln, Herkunft. |
 | 18 | Session und Projektdokumente | `SESSION.md`, `JOURNAL.md`, `README.md`, `.editorconfig`, `CONTRIBUTING.md`, `LICENSE`. |
 | 19 | pre-commit | Standard-Hooks plus lokale Ruff-Hooks; basedpyright läuft im Gate und in CI. |
 | 20 | Dokumentation | Lib: MkDocs; App mit `--cli`: generierte CLI-Referenz. Generierte Seiten nie von Hand ändern. |

@@ -13,7 +13,7 @@ set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SCRIPT="$REPO_ROOT/Luxus-Python-Stack/luxuspythonstack.sh"
+SCRIPT="$REPO_ROOT/Luxus-Python-Stack/scripts/luxuspythonstack.sh"
 FAST_ONLY=0
 [[ "${1:-}" == "--fast" ]] && FAST_ONLY=1
 
@@ -138,7 +138,7 @@ assert_dir() {
     fi
 }
 
-# shellcheck source=../Luxus-Python-Stack/luxuspythonstack.sh
+# shellcheck source=../Luxus-Python-Stack/scripts/luxuspythonstack.sh
 # shellcheck disable=SC1091
 source "$SCRIPT"
 

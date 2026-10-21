@@ -32,10 +32,8 @@ chsh -s $(which zsh)
 
 ## ZSH with antidote and p10k
 ```shell
-cat << 'EOF' >> ~/.zshrc
 # insert from luxus-python-stack
 echo 'setopt INTERACTIVE_COMMENTS' >> ~/.zshrc
-EOF
 ```
 > ⚠️ **reopen zsh (necessary to be able to use comment characters '#')**
 
@@ -116,6 +114,9 @@ layout_uv() {
     export UV_PROJECT_ENVIRONMENT="$VIRTUAL_ENV"
 }
 EOF
+
+# Enable direnv in zsh
+grep -q 'direnv hook zsh' ~/.zshrc || echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
 exec zsh # resource zsh
 ```
 
@@ -127,7 +128,7 @@ cd ~/Downloads  && curl -L -O "https://github.com/conda-forge/miniforge/releases
 # Batch mode (-b): Installs silently without interactive queries to ~/miniforge3
 bash Miniforge3-$(uname)-$(uname -m).sh -b -p "$HOME/miniforge3"
 
-# Register UV safety net (instead of `conda init zsh` we put Conda and UV directly into the shlib)
+# Register UV safety net (instead of `conda init zsh` we write the setup directly into ~/.zshrc)
 cat << 'EOF' >> ~/.zshrc
 # --- UV ---
 # Strictly use own/managed Python versions (Protects System-Python!)
@@ -267,7 +268,7 @@ Important notes on the Mamba level:
 # load functions
 cat << 'EOF' >> ~/.zshrc
 # insert from luxus-python-stack
-source ~/gits/luxus-skills/Luxus-Python-Stack/luxuspythonstack.sh
+source ~/gits/ludesta/Luxus-Python-Stack/scripts/luxuspythonstack.sh
 EOF
 
 # insert the jupyter-prompt-element in .p10k.zsh
@@ -275,7 +276,7 @@ sed -i '/^[[:space:]]*anaconda/a \    my_jupyter              # custom jupyter s
 
 # make skill accessable
 mkdir -p ~/.agents/skills/
-ln -s ~/gits/luxus-skills/Luxus-Python-Stack/lupysta ~/.agents/skills/lupysta
+ln -s ~/gits/ludesta/Luxus-Python-Stack/lupysta ~/.agents/skills/lupysta
 
 exec zsh
 ```
@@ -285,7 +286,7 @@ exec zsh
 
 ```shell
 nala --version | head -1
-for c in just direnv yq fd yazi gcc; do command -v "$c" >/dev/null && echo "ok $c" || echo "MISSING $c"; done
+for c in just direnv gcc; do command -v "$c" >/dev/null && echo "ok $c" || echo "MISSING $c"; done
 
 [ -d ~/.antidote ] && echo "antidote present"
 [ -f ~/.zsh_plugins.txt ] && echo ".zsh_plugins.txt present"

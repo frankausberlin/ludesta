@@ -1,5 +1,7 @@
 # Agent-Tests
 
+Status: vorgesehen — nicht Teil der Basisversion.
+
 Dieses Rezept ist ein Überblick. Die vollständige Umsetzung ist eine spätere
 Stufe nach einem Go/No-Go; im Kern erzeugt die Projektinitialisierung keine
 Agent-Suite. Lade

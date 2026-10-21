@@ -3,13 +3,13 @@ name: lupysta
 description: >
   Arbeitsweise für bereits initialisierte Python-Projekte des
   Luxus-Python-Stacks: Qualitätsgate, Dokumentation, Git und Release,
-  Refactoring sowie optionale E2E- und Agent-Tests. Nur laden, wenn
-  AGENTS.md die jeweilige Arbeitsweise für das Projekt ausweist; für ältere
-  Projekte ohne Feature-Liste gilt die Migrationsanleitung.
+  Refactoring sowie vorgesehene E2E- und Agent-Tests (nicht Teil der
+  Basisversion). Nur laden, wenn
+  AGENTS.md die jeweilige Arbeitsweise für das Projekt ausweist.
 version: 0.5.0
 platforms: [linux]
 metadata:
-  tags: [python, uv, quality-gate, refactoring, e2e, agent-tests]
+  tags: [python, uv, quality-gate, refactoring]
 ---
 
 # lupysta
@@ -57,9 +57,9 @@ Die einzigen dauerhaft relevanten Dateien sind diese Übersicht und die
 | [`references/git-release.md`](references/git-release.md) | Worktree, `just merge`, `bump`, CI und Veröffentlichung. |
 | [`references/refactoring.md`](references/refactoring.md) | `rate-design run\|save\|compare`, `refactor`, Baseline und ein Rezept pro Schritt. |
 | [`references/refactoring-recipes.md`](references/refactoring-recipes.md) | Extract Function, Rename Internal Symbol und Remove Confirmed Dead Code. |
-| [`references/e2e-tests.md`](references/e2e-tests.md) | Optionale Docker-Suite; nur laden, wenn `AGENTS.md` `e2e` nennt. |
-| [`references/agent-tests.md`](references/agent-tests.md) | Optionale Provider-Suite; nur laden, wenn `AGENTS.md` `agent` nennt. |
-| [`references/migration.md`](references/migration.md) | Ältere Projekte ohne Feature-Liste; tatsächliche Befehle prüfen. |
+| [`references/e2e-tests.md`](references/e2e-tests.md) | Vorgesehene Docker-Suite (nicht Teil der Basisversion); nur laden, wenn `AGENTS.md` `e2e` nennt. |
+| [`references/agent-tests.md`](references/agent-tests.md) | Vorgesehene Provider-Suite (nicht Teil der Basisversion); nur laden, wenn `AGENTS.md` `agent` nennt. |
+
 
 ## Laden auf Bedarf
 
@@ -68,5 +68,3 @@ zugehörige Arbeitsweise in `AGENTS.md` nennt. Prüfe vor der Verwendung die
 tatsächlich vorhandenen Befehle im `Justfile` und in den Projektdateien.
 Weicht der Projektzustand von `AGENTS.md` ab, melde die Abweichung, statt
 Features stillschweigend zu reparieren oder neu anzulegen.
-
-Für ältere Projekte ohne Feature-Liste gilt [`references/migration.md`](references/migration.md).

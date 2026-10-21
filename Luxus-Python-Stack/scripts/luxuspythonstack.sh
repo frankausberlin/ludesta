@@ -175,7 +175,7 @@ PYINIT_HELP
         return 1
     fi
 
-    local _template_dir="${_LUXUS_SCRIPT_DIR}/templates/pyinit"
+    local _template_dir="${_LUXUS_SCRIPT_DIR}/../templates"
     local _agents_template="${_template_dir}/AGENTS.md"
     local _design_report="${_template_dir}/scripts/design_report.py"
     local _template

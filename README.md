@@ -23,10 +23,11 @@ Luxus-Stack
 │   ├── Beschreibung der Verwendung von Tools
 │   └── Anleitung zur Pflege von Dokumenten
 ├── Stack-Scripte - Beinhaltet die Stack-Init-Funktion und beliebige andere Stack-Funktionen
-│   ├── Stack-Init generiert das vorkonfigurierte Projektgerüst
-│   ├── Stackspezifische Funktionen (z.b. jupyter-launcher)
-│   ├── Funktionen zur Systemintegration (z.b. zsh-prompt)
-│   └── Hilfsfunktionen, Einrichtungsunterstützung, Aliase
+│   ├── Stack-Init generiert das vorkonfigurierte Projektgerüst
+│   ├── Stackspezifische Funktionen (z.b. jupyter-launcher)
+│   ├── Funktionen zur Systemintegration (z.b. zsh-prompt)
+│   └── Hilfsfunktionen, Einrichtungsunterstützung, Aliase
+└── Stack-Templates - Vorlagen für das generierte Projektgerüst
 ```
 
 * Das Init ist hochgradig stackabhängig. Lediglich Grundanforderungen sind daran gestellt:
@@ -62,7 +63,7 @@ In der AGENTS.md befindet sich in der generierten version eine kurze Anleitung w
    mkdir -p ~/gits
    git clone https://github.com/frankausberlin/ludesta ~/gits/ludesta
    ```
-3. Stack-Setup befolgen.
+3. Die [Setup-Anleitung](Luxus-Python-Stack/Stack-Setup.md) befolgen.
 
 ## Die Luxus Stacks
 
@@ -73,7 +74,7 @@ Das [Stack-Dokument](Luxus-Python-Stack/Luxus-Python-Stack.md) befindet sich im 
 * Alles wird zusammengehalten von einem **5-Stuffigen Konezpt** mit klaren Zuständigkeiten, um immer den Überblick über *dein* Python zu haben.
 * Du hast eine komplette **CI/CD** basierend auf **Github Actions** und **Bump-my-version**.
 * Die Sichererung der **Codequalität** wird durch die Verwendung moderner Tools erreicht: **Ruff, Basedpyright, Pytest, Coverage**.
-* Ein echter **Stabilitätsbooster** ist das **dreistuffiges Testkonzept** mit automatischen **Unittests** und auf Abruf **e2e-tests** und **e2e-agent-tests** (mit autonom arbeitenden **Testagenten**). 
+* Ein echter **Stabilitätsbooster** ist das **dreistuffiges Testkonzept** mit automatischen **Unittests**; **e2e-tests** und **e2e-agent-tests** (mit autonom arbeitenden **Testagenten**) sind vorgesehen, nicht Teil der Basisversion.
 * Bewertung der **Codestruktur** mit **just rate-design** dient dem Skill mit seinem **Refactoring-Rezept** Vorschläge für ein Refactoring zu machen und **dieses dann umzusetzen**.
 * Auch **Agenten** bekommen Unterstützung mit **AGENTS.md** und **JOURNAL.md** und ihrem **Agenten-Skill**.
 * Das **Sahnehäubchen** ist dann noch eine **DataScience Umgebung** mit **Jupyter und Colab**.

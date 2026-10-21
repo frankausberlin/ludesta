@@ -1,5 +1,7 @@
 # E2E-Tests
 
+Status: vorgesehen — nicht Teil der Basisversion.
+
 Dieses Rezept ist ein Überblick. Die vollständige Umsetzung ist eine spätere
 Stufe; im Kern erzeugt die Projektinitialisierung keine E2E-Suite. Lade dieses Rezept nur, wenn
 `AGENTS.md` `e2e` als verwendet nennt und das Projekt die zugehörigen Dateien

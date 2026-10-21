@@ -28,7 +28,7 @@ cd "$CLONE"
 bash tests/test-pyinit.sh --fast
 
 # shellcheck source=/dev/null
-source "$CLONE/Luxus-Python-Stack/luxuspythonstack.sh"
+source "$CLONE/Luxus-Python-Stack/scripts/luxuspythonstack.sh"
 pyinit "$TMP_ROOT/app" --python 3.12
 
 cd "$TMP_ROOT/app"
