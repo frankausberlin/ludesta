@@ -1,129 +1,84 @@
-# LUDESTA — Luxus Development Stack
+# LUDESTA - Luxus Development Stack
 
-Wiederverwendbare Agent-Skills für einen komfortablen, konsistenten
-Entwicklungsworkflow.
+Wiederverwendbare Agent-Skills für einen komfortablen, konsistenten Entwicklungsworkflow.
 
-„Luxuriös“ bedeutet hier: komfortable Mechanismen und Werkzeuge im
-Entwicklungsprozess. Die Idee ist, einem Agenten (Skill + Harness) eine
-umfangreiche, komfortable Projektstruktur vorzugeben und ihn anzuleiten,
-diese effektiv einzusetzen. Automatismen in der CI/CD erhöhen die Stabilität
-der agentischen Arbeit.
+Das *luxoriös* steht für die verwendung komfortabler Mechanismen und Werkzeuge im Entwicklungsprozess. Die Idee ist, einem Agenten (Skill + Harness) eine umfangreiche, komfortable Projektstruktur vorzugeben und ihn anzuleiten, diese effektiv einzusetzen. Automatismen in der CI/CD erhöhen die Stabilität der agentischen Arbeit.
 
-> Das Repository heißt derzeit noch `luxus-skills` und wird in `ludesta`
-> umbenannt. Pfade in dieser Dokumentation verwenden bereits den neuen Namen,
-> wo es möglich ist.
+> **⚠️ Im Moment gibt es nur den Luxus-Python-Stack**
 
 ## Komponenten
 
-Ein Luxus-Stack (z. B. Python) besteht aus drei Komponenten:
+Ein **Luxus Stack** (z.b. Python) befindet sich im **gleichnamigen Folder** (*Luxus-&lt;domain>-Stack/*) und besteht aus der **Dokumentation** (*Luxus-&lt;domain>-Stack.md, Stack-Setup.md*), dem **Skill** (*&lt;skill-folder>/*) und dem **Stack-Script** (&lt;stack-script>.sh) mit der Stack-Init-Funktion.
 
-| Komponente | Beschreibung |
-| --- | --- |
-| [Stack-Dokumentation](Luxus-Python-Stack/Luxus-Python-Stack_de.md) | Beschreibung des Stacks, seiner Ebenen und des `pyinit`-Ablaufs. Die [Setup-Anleitung](Luxus-Python-Stack/Stack-Setup_de.md) gehört zur Dokumentation. |
-| [Stack-Skill](Luxus-Python-Stack/lupysta/SKILL.md) | Arbeitsweisen für Agenten in bereits initialisierten Projekten. Rezepte werden bei Bedarf geladen. |
-| [Stack-Script](Luxus-Python-Stack/luxuspythonstack.sh) | `pyinit` und weitere Shell-Funktionen; wird in der Shell eingebunden. |
 
-Die englischen Fassungen `Luxus-Python-Stack.md`, `Stack-Setup.md` und
-`lupysta/SKILL_en.md` bleiben als Referenz erhalten. Während der Entwicklung
-ist die deutsche Fassung die Arbeitsgrundlage.
+
+```shell
+Luxus-Stack  
+├── Stack-Dokumentation - Beschreibt das Arbeiten mit dem Stack
+│   ├── Setupanleitung der benötigten Software
+│   ├── Beschreibung der Verwendung von dem Stack-Init
+│   ├── Beschreibung der Anpassung des generierten Projektgerüstes
+│   └── Beschreibung des Aufbau des Skills
+├── Stack-Skill  - Beschreibt das Arbeiten in einem Projekt
+│   ├── Beschreibungen von Standard Workflows
+│   ├── Rezepte zur Verwendung des Stacks
+│   ├── Beschreibung der Verwendung von Tools
+│   └── Anleitung zur Pflege von Dokumenten
+├── Stack-Scripte - Beinhaltet die Stack-Init-Funktion und beliebige andere Stack-Funktionen
+│   ├── Stack-Init generiert das vorkonfigurierte Projektgerüst
+│   ├── Stackspezifische Funktionen (z.b. jupyter-launcher)
+│   ├── Funktionen zur Systemintegration (z.b. zsh-prompt)
+│   └── Hilfsfunktionen, Einrichtungsunterstützung, Aliase
+```
+
+* Das Init ist hochgradig stackabhängig. Lediglich Grundanforderungen sind daran gestellt:
+   > 1. es muss ein '--help' vorhanden sein mit einer ausführlichen beschreibung.
+   > 2. durch aufruf ohne einen parameter wird in dem aktuellen folder eine default projektstruktur angelet.
+   > 3. das Init informiert darüber, was es getan hat.
+
+
+## Verwendung
+
+### Projekt anlegen mit Stack Init
+
+Das Herz des Stacks ist das Stack-Init. Es ist ein Script das ein vorkonfiguriertes Projektgerüst erzeugt und es wird vom Benutzer des Stacks verwendet. Dem Agenten-Skill ist das Script unbekannt, er weiß nicht, ob es sich um eine vorgefertigte Schablone handelt oder ein individuell angelegtes Projekt.
+
+* Es wird ein neuer Folder mit dem Projektnamen angelegt, 
+* da hinein wechseln
+* das Stackinit-Kommndo ausführen.
+
+### Projekt individualiesieren
+
+Der Agent-Skill beschreibt im vollen Umfang das Arbeiten mit allen unterstützten Features, basierende auf dem Stack-Init. Dafür ist er modular aufgebaut und lädt komplexe Rezepte nur bei Bedarf.
+
+In der AGENTS.md befindet sich in der generierten version eine kurze Anleitung wie die AGENTS.md individuell an das Projekt angepasst werden kann.
+
+
 
 ## Installation
 
-1. Repository klonen:
+1. ⚠️ Empfohlen: VM aufsetzen 
+   > Probiere es erstmal in einer VM aus bevor du einen Agenten anweißt es in dein System einzubauen oder du das selbst machst.
+
+2. Repository klonen:
    ```shell
    mkdir -p ~/gits
-   git clone https://github.com/frankausberlin/luxus-skills ~/gits/luxus-skills
+   git clone https://github.com/frankausberlin/ludesta ~/gits/ludesta
    ```
-2. [Stack-Setup](Luxus-Python-Stack/Stack-Setup_de.md) befolgen.
-3. Das Script in der Shell einbinden:
-   ```shell
-   export LUXUS_REPO="${LUXUS_REPO:-$HOME/gits/luxus-skills}"
-   source "$LUXUS_REPO/Luxus-Python-Stack/luxuspythonstack.sh"
-   ```
-4. Den Skill verlinken:
-   ```shell
-   mkdir -p ~/.agents/skills
-   ln -s "$LUXUS_REPO/Luxus-Python-Stack/lupysta" ~/.agents/skills/lupysta
-   ```
+3. Stack-Setup befolgen.
 
-Der Skill wird **nicht** in generierte Projekte kopiert. Ein zentral
-installierter Skill beschreibt alle Arbeitsweisen; die `AGENTS.md` des
-Projekts wählt aus, welche davon gelten.
+## Die Luxus Stacks
 
-### Nicht-interaktive Shells
+### Luxus Python Stack
 
-`pyinit` ist eine Shell-Funktion. In Skripten und nicht-interaktiven Shells
-das Script zuerst sourcen; bei Bedarf einen kleinen Wrapper verwenden, der
-das Script sourct und `pyinit` aufruft.
+Das [Stack-Dokument](Luxus-Python-Stack/Luxus-Python-Stack.md) befindet sich im Stackfolder. Zum Appetit machen hier einige Highlights:
 
-### Migration und Koexistenz
+* Alles wird zusammengehalten von einem **5-Stuffigen Konezpt** mit klaren Zuständigkeiten, um immer den Überblick über *dein* Python zu haben.
+* Du hast eine komplette **CI/CD** basierend auf **Github Actions** und **Bump-my-version**.
+* Die Sichererung der **Codequalität** wird durch die Verwendung moderner Tools erreicht: **Ruff, Basedpyright, Pytest, Coverage**.
+* Ein echter **Stabilitätsbooster** ist das **dreistuffiges Testkonzept** mit automatischen **Unittests** und auf Abruf **e2e-tests** und **e2e-agent-tests** (mit autonom arbeitenden **Testagenten**). 
+* Bewertung der **Codestruktur** mit **just rate-design** dient dem Skill mit seinem **Refactoring-Rezept** Vorschläge für ein Refactoring zu machen und **dieses dann umzusetzen**.
+* Auch **Agenten** bekommen Unterstützung mit **AGENTS.md** und **JOURNAL.md** und ihrem **Agenten-Skill**.
+* Das **Sahnehäubchen** ist dann noch eine **DataScience Umgebung** mit **Jupyter und Colab**.
 
-- Den alten `luxuspythonstack`-Skill und `lupysta` nicht parallel installieren.
-- Bestehende Projekte werden nicht automatisch aktualisiert; ihre vorhandenen
-  Befehle bleiben gültig.
-- Zum Deinstallieren den Skill-Link entfernen und die `source`-Zeile aus der
-  Shell-Konfiguration löschen. Generierte Projekte bleiben unabhängig vom
-  installierten Skill nutzbar.
 
-## Projektmodell
-
-`pyinit` erzeugt ein Projekt mit:
-
-- `AGENTS.md` mit Projektprofil, Feature-Auswahl und lokalen Regeln,
-- `Justfile` mit dem Qualitätsgate und den Projektbefehlen,
-- `scripts/design_report.py` für designbezogene Messungen,
-- optionaler Dokumentation für Bibliotheken und CLI-Apps,
-- CI-Workflows und einem Smoke-Test.
-
-Die Feature-Auswahl in `AGENTS.md` ist die einzige Quelle für die Frage,
-welche Arbeitsweisen in einem Projekt gelten. Fehlende Features werden nicht
-vorausgesetzt und nicht ungefragt nachgebaut.
-
-| Feature | Standard | Einstieg |
-| --- | --- | --- |
-| `core` | immer | `just check` |
-| `refactor` | immer | `just rate-design`, `just refactor` |
-| `docs-lib` | Bibliothek | `just docs`, `just docs-check` |
-| `docs-cli` | App mit `--cli` | `just docs`, `just docs-check` |
-| `e2e` | nicht erzeugt | `just test-e2e` (später) |
-| `agent` | nicht erzeugt | `just test-agent` (später) |
-
-## Unterstützte Umgebung
-
-Linux ist die Referenzplattform. macOS ist derzeit keine unterstützte Zusage;
-mehrere Werkzeuge im Script und in den erzeugten Projekten setzen
-GNU-Werkzeuge voraus. macOS-Unterstützung kommt erst mit CI- und
-Testabdeckung zurück.
-
-## Entwicklung
-
-```shell
-bash tests/test-pyinit.sh --fast   # Argumente, Guards, Template-Preflight
-bash tests/test-pyinit.sh          # zusätzlich generierte Projekte und just check
-bash tests/fresh-clone.sh          # letzter Commit als frischer Clone
-bash scripts/check-links.sh        # relative Markdown-Links prüfen
-shellcheck -s bash Luxus-Python-Stack/luxuspythonstack.sh tests/*.sh scripts/*.sh
-```
-
-Die CI führt den schnellen Test, den Integrationstest, den Fresh-Clone-Test,
-den Link-Check und Shellcheck aus. Der Fresh-Clone-Test stellt sicher, dass
-das Repository ohne `ignore/` und ohne lokale Altlasten funktioniert.
-
-## Repository-Layout
-
-```text
-Luxus-Python-Stack/
-├── Luxus-Python-Stack_de.md     # deutsche Arbeitsfassung
-├── Luxus-Python-Stack.md        # englische Referenz
-├── Stack-Setup_de.md            # deutsche Setup-Anleitung
-├── Stack-Setup.md               # englische Referenz
-├── luxuspythonstack.sh          # pyinit und Shell-Funktionen
-├── lupysta/                     # Skill (SKILL.md deutsch, SKILL_en.md englisch)
-│   └── references/              # Rezepte, nur bei Bedarf geladen
-└── templates/pyinit/            # AGENTS.md-Vorlage und design_report.py
-tests/                           # Skill-Repository-Tests
-scripts/                         # Link-Checker
-.github/workflows/               # CI
-```
-
-`ignore/` ist lokal, nicht versioniert und für den Betrieb nicht erforderlich.
