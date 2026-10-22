@@ -345,6 +345,18 @@ exec zsh
 ```
 
 
+## Docker (optional, für E2E)
+
+Docker ist keine Voraussetzung für `pyinit` oder `just check`. Es wird nur für
+die opt-in E2E-Suite benötigt. Ohne Docker läuft `just test-e2e` im leeren
+Gerüst weiterhin mit Hinweis und Exit 0.
+
+```shell
+docker --version
+docker buildx version
+docker info
+```
+
 ## Verify
 
 ```shell

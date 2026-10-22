@@ -1,13 +1,11 @@
 # Agent-Tests
 
-Status: vorgesehen — nicht Teil der Basisversion.
+Status: Das Skelett wird von `pyinit` erzeugt; der Harness ist
+projektspezifisch.
 
-Dieses Rezept ist ein Überblick. Die vollständige Umsetzung ist eine spätere
-Stufe nach einem Go/No-Go; im Kern erzeugt die Projektinitialisierung keine
-Agent-Suite. Lade dieses Rezept nur, wenn das Projekt `tests/agent/` mit
-Testdateien enthält oder die Aufgabe ausdrücklich die Einrichtung einer
-Agent-Suite verlangt. Die Einrichtung selbst ist ein eigener Auftrag und nicht
-Teil der Basisversion.
+`pyinit` legt für App, Bibliothek und CLI-App ein Gerüst unter `tests/agent/`
+an. Es enthält bewusst keine `test_*.py`-Dateien, keinen Provider-Adapter und
+keinen Harness. Echte Agent-Tests werden nicht generiert.
 
 ## Wann sinnvoll
 
@@ -20,25 +18,30 @@ Teil der Basisversion.
 Agent-Tests ergänzen das deterministische Gate; sie ersetzen es nicht.
 Modellabhängige Qualität ist keine stabile Release-Bedingung.
 
-## Geplanter Aufbau
+## Struktur
 
 ```text
-tests/agent/
-├── conftest.py
-├── agent.toml
-└── test_*.py
+tests/
+├── conftest.py              # Verzeichnis-Gate für e2e und agent
+└── agent/
+    ├── README.md
+    ├── conftest.py          # Opt-in-Guard, Fail-on-Skips
+    └── test_*.py            # projektseitig ergänzt
+scripts/test-agent.sh
 ```
 
-- `just test-agent` ruft den Runner auf.
+- `just test-agent` ruft `scripts/test-agent.sh` auf.
 - Der Runner prüft **zuerst** auf `test_*.py`-Dateien.
-- Bei leerer Suite: klare Meldung und Exitcode 0, ohne Provider.
-- Erst danach folgt der Provider-Preflight.
+- Bei leerer Suite: klare Meldung und Exitcode 0, ohne `uv` und ohne Provider.
+- Erst danach folgt der Lauf mit `LUPYSTA_AGENT=1`.
 
 ## Collection-Gate
 
 Das Gate liegt in `tests/conftest.py` und schließt `agent` nur aus, wenn
 `LUPYSTA_AGENT` nicht auf `1` gesetzt ist. Einzelheiten stehen in
-[`e2e-tests.md`](e2e-tests.md).
+[`e2e-tests.md`](e2e-tests.md). `tests/agent/conftest.py` schlägt fehl, wenn die
+Suite trotzdem ohne Opt-in gesammelt wird; im opt-in-Lauf werden Skips zu
+Fehlern.
 
 ## Provider-Preflight
 
@@ -48,6 +51,9 @@ Vor einem Lauf mit echten Tests prüfen:
 - Zugangsdaten sind vorhanden.
 - Zeit-, Schritt- und Kostenlimits sind gesetzt.
 - Ein fehlender Provider ist ein lauter Fehler, kein stiller Skip.
+
+Der Preflight gehört in den projektspezifischen Harness, nicht in das
+generierte Skelett.
 
 ## Limits
 
@@ -81,8 +87,16 @@ Fake-Provider-Tests decken ohne Live-Modell ab:
 
 Ein Live-Lauf wird manuell dokumentiert und ist kein Release-Gate.
 
-## Status
+## Erster Test
 
-Die Umsetzung erfolgt in einer späteren Stufe nach einem Go/No-Go. Bis dahin
-gilt: keine Agent-Befehle erfinden und ohne ausdrücklichen Auftrag keine Suite
-anlegen.
+1. Harness und Provider-Preflight implementieren.
+2. Ein Szenario unter `tests/agent/test_*.py` ergänzen.
+3. `just test-agent` ausführen.
+4. Kosten, Laufzeit und Ergebnis dokumentieren.
+
+## Grenzen
+
+- Agent-Tests laufen nie in der CI.
+- Das Gerüst ist kein funktionierender Harness; ein grüner Lauf vor der
+  Implementierung ist nicht zu erwarten.
+- Details zum Gate stehen in [`e2e-tests.md`](e2e-tests.md).

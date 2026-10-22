@@ -157,6 +157,8 @@ echo "# Fast checks"
 expect_success "pyinit --help exits 0" pyinit --help
 assert_contains "help shows usage" "$LOG" "Usage: pyinit"
 assert_contains "help shows --no-check" "$LOG" "--no-check"
+assert_contains "help shows the opt-in e2e runner" "$LOG" "test-e2e"
+assert_contains "help shows the opt-in agent runner" "$LOG" "test-agent"
 
 expect_failure "unknown option is rejected" pyinit --does-not-exist "$TMP_ROOT/unknown"
 expect_failure "--python without value is rejected" pyinit --python
@@ -203,6 +205,45 @@ else
     fail "missing template aborts before writing (target was created)"
 fi
 
+E2E_RUNNER="$REPO_ROOT/Luxus-Python-Stack/templates/e2e/test-e2e.sh"
+AGENT_RUNNER="$REPO_ROOT/Luxus-Python-Stack/templates/agent/test-agent.sh"
+
+expect_success "e2e runner has valid syntax" bash -n "$E2E_RUNNER"
+expect_success "agent runner has valid syntax" bash -n "$AGENT_RUNNER"
+
+mkdir -p "$TMP_ROOT/fake-bin"
+DOCKER_MARKER="$TMP_ROOT/docker-called"
+UV_MARKER="$TMP_ROOT/uv-called"
+cat >"$TMP_ROOT/fake-bin/docker" <<FAKE_DOCKER
+#!/usr/bin/env bash
+printf 'called\n' >"$DOCKER_MARKER"
+exit 99
+FAKE_DOCKER
+cat >"$TMP_ROOT/fake-bin/uv" <<FAKE_UV
+#!/usr/bin/env bash
+printf 'called\n' >"$UV_MARKER"
+exit 99
+FAKE_UV
+chmod +x "$TMP_ROOT/fake-bin/docker" "$TMP_ROOT/fake-bin/uv"
+
+E2E_IDLE="$TMP_ROOT/e2e-idle"
+mkdir -p "$E2E_IDLE/scripts" "$E2E_IDLE/tests/e2e"
+cp "$E2E_RUNNER" "$E2E_IDLE/scripts/test-e2e.sh"
+rm -f "$DOCKER_MARKER"
+expect_success "e2e runner exits 0 without tests" \
+    env PATH="$TMP_ROOT/fake-bin:$PATH" bash "$E2E_IDLE/scripts/test-e2e.sh"
+assert_contains "e2e runner prints the empty-suite hint" "$LOG" "No E2E tests configured"
+assert_no_file "e2e runner does not call docker when empty" "$DOCKER_MARKER"
+
+AGENT_IDLE="$TMP_ROOT/agent-idle"
+mkdir -p "$AGENT_IDLE/scripts" "$AGENT_IDLE/tests/agent"
+cp "$AGENT_RUNNER" "$AGENT_IDLE/scripts/test-agent.sh"
+rm -f "$UV_MARKER"
+expect_success "agent runner exits 0 without tests" \
+    env PATH="$TMP_ROOT/fake-bin:$PATH" bash "$AGENT_IDLE/scripts/test-agent.sh"
+assert_contains "agent runner prints the empty-suite hint" "$LOG" "No agent tests configured"
+assert_no_file "agent runner does not call uv when empty" "$UV_MARKER"
+
 if command -v zsh >/dev/null 2>&1; then
     mkdir -p "$TMP_ROOT/zsh-data"
     if XDG_DATA_HOME="$TMP_ROOT/zsh-data" \
@@ -241,12 +282,86 @@ if expect_success "pyinit creates an app" pyinit "$APP" --python 3.12; then
     assert_not_contains "app AGENTS.md has no legacy ADR directory" "$APP/AGENTS.md" "docs/decisions"
     assert_contains "app AGENTS.md has attention points" "$APP/AGENTS.md" "## Attention Points"
     assert_contains "app AGENTS.md records the project type" "$APP/AGENTS.md" "Projekttyp: App"
-    assert_contains "app AGENTS.md records the contract version" "$APP/AGENTS.md" 'contract_version: `2`'
+    assert_contains "app AGENTS.md has a testing section" "$APP/AGENTS.md" "## Testing"
+    assert_contains "app AGENTS.md records the contract version" "$APP/AGENTS.md" 'contract_version: `3`'
     assert_not_contains "app AGENTS.md has no feature list" "$APP/AGENTS.md" "Verwendet:"
     assert_not_contains "app AGENTS.md has no old managed block" "$APP/AGENTS.md" "AGENTS_MANAGED_BEGIN"
     assert_no_file "app has no SESSION.md" "$APP/SESSION.md"
     assert_no_file "app without --cli has no docs scaffold" "$APP/docs/index.md"
+    assert_file "app has the collection gate" "$APP/tests/conftest.py"
+    assert_file "app has the e2e README" "$APP/tests/e2e/README.md"
+    assert_file "app has the e2e conftest" "$APP/tests/e2e/conftest.py"
+    assert_file "app has the e2e Dockerfile" "$APP/tests/e2e/Dockerfile"
+    assert_file "app has the agent README" "$APP/tests/agent/README.md"
+    assert_file "app has the agent conftest" "$APP/tests/agent/conftest.py"
+    assert_file "app has the e2e runner" "$APP/scripts/test-e2e.sh"
+    assert_file "app has the agent runner" "$APP/scripts/test-agent.sh"
+    assert_file "app has a .dockerignore" "$APP/.dockerignore"
+    assert_file "app has an e2e workflow" "$APP/.github/workflows/e2e.yml"
+    assert_contains "app Justfile runs the e2e suite" "$APP/Justfile" "test-e2e:"
+    assert_contains "app Justfile runs the agent suite" "$APP/Justfile" "test-agent:"
+    assert_contains "app pyproject registers the e2e marker" "$APP/pyproject.toml" '"e2e: opt-in Docker suite'
+    assert_contains "app pyproject registers the agent marker" "$APP/pyproject.toml" '"agent: opt-in provider suite'
+    assert_contains "app pyproject has the e2e dependency group" "$APP/pyproject.toml" "[dependency-groups]"
+    if awk '/^e2e = \[/ { inside = 1 } inside && /pytest/ { found = 1 } inside && /^\]/ { inside = 0 } END { exit !found }' \
+        "$APP/pyproject.toml"; then
+        pass "app pyproject lists pytest in the e2e group"
+    else
+        fail "app pyproject lists pytest in the e2e group"
+    fi
+    assert_contains "app .gitignore ignores e2e artifacts" "$APP/.gitignore" "e2e-artifacts.*"
+    assert_contains "app .gitignore ignores agent artifacts" "$APP/.gitignore" "agent-artifacts.*"
+    assert_contains "app README mentions the e2e runner" "$APP/README.md" "just test-e2e"
+    assert_contains "app CONTRIBUTING mentions the agent runner" "$APP/CONTRIBUTING.md" "just test-agent"
     expect_success_in "app just check is green" "$APP" just check
+    rm -f "$DOCKER_MARKER" "$UV_MARKER"
+    expect_success_in "app empty e2e suite exits 0" "$APP" \
+        env PATH="$TMP_ROOT/fake-bin:$PATH" just test-e2e
+    assert_contains "app empty e2e suite prints a hint" "$LOG" "No E2E tests configured"
+    assert_no_file "app empty e2e suite does not call docker" "$DOCKER_MARKER"
+    expect_success_in "app empty agent suite exits 0" "$APP" \
+        env PATH="$TMP_ROOT/fake-bin:$PATH" just test-agent
+    assert_contains "app empty agent suite prints a hint" "$LOG" "No agent tests configured"
+    assert_no_file "app empty agent suite does not call uv" "$UV_MARKER"
+
+    cat >"$APP/tests/e2e/test_gate_probe.py" <<'GATE_PROBE'
+"""Gate probe: must never be collected by the default run."""
+
+
+def test_gate_probe() -> None:
+    """Fail if the collection gate is bypassed."""
+    raise AssertionError("the collection gate was bypassed")
+GATE_PROBE
+    expect_success_in "e2e gate probe does not affect just check" "$APP" just check
+    rm -f "$APP/tests/e2e/test_gate_probe.py"
+
+    cat >"$APP/tests/agent/test_gate_probe.py" <<'GATE_PROBE'
+"""Gate probe: must never be collected by the default run."""
+
+
+def test_gate_probe() -> None:
+    """Fail if the collection gate is bypassed."""
+    raise AssertionError("the collection gate was bypassed")
+GATE_PROBE
+    expect_success_in "agent gate probe does not affect just check" "$APP" just check
+    rm -f "$APP/tests/agent/test_gate_probe.py"
+
+    if docker info >/dev/null 2>&1; then
+        cat >"$APP/tests/e2e/test_gate_probe.py" <<'GATE_PROBE'
+"""Gate probe: must fail when the Docker runner executes it."""
+
+
+def test_gate_probe() -> None:
+    """Fail because the runner must not hide real failures."""
+    raise AssertionError("the Docker runner executed the probe")
+GATE_PROBE
+        expect_failure_in "e2e runner executes real tests" "$APP" just test-e2e
+        rm -f "$APP/tests/e2e/test_gate_probe.py"
+        rm -rf "$APP"/e2e-artifacts.*
+    else
+        printf 'skip - e2e runner executes real tests (Docker not available)\n'
+    fi
+
     expect_success_in "app rate-design run works" "$APP" just rate-design run
     assert_file "app report.json exists" "$APP/.refactor/report.json"
     expect_success_in "app rate-design save works" "$APP" just rate-design save before
@@ -304,6 +419,12 @@ fi
 LIB="$TMP_ROOT/lib"
 if expect_success "pyinit creates a library" pyinit "$LIB" --lib --python 3.12; then
     assert_contains "library is typed as library" "$LIB/AGENTS.md" "Projekttyp: Bibliothek"
+    assert_file "library has the collection gate" "$LIB/tests/conftest.py"
+    assert_file "library has the e2e runner" "$LIB/scripts/test-e2e.sh"
+    assert_file "library has the agent runner" "$LIB/scripts/test-agent.sh"
+    assert_file "library has the e2e Dockerfile" "$LIB/tests/e2e/Dockerfile"
+    assert_file "library has the agent conftest" "$LIB/tests/agent/conftest.py"
+    assert_file "library has an e2e workflow" "$LIB/.github/workflows/e2e.yml"
     assert_file "library has a tutorials section" "$LIB/docs/tutorials/index.md"
     assert_file "library has a how-to section" "$LIB/docs/how-to/index.md"
     assert_file "library has a reference section" "$LIB/docs/reference/index.md"
@@ -332,6 +453,10 @@ fi
 CLI="$TMP_ROOT/cli"
 if expect_success "pyinit creates a CLI app" pyinit "$CLI" --cli --python 3.12; then
     assert_contains "CLI app is typed as CLI app" "$CLI/AGENTS.md" "Projekttyp: App (CLI)"
+    assert_file "CLI app has the collection gate" "$CLI/tests/conftest.py"
+    assert_file "CLI app has the e2e runner" "$CLI/scripts/test-e2e.sh"
+    assert_file "CLI app has the agent runner" "$CLI/scripts/test-agent.sh"
+    assert_file "CLI app has the agent conftest" "$CLI/tests/agent/conftest.py"
     expect_success_in "CLI app just check is green" "$CLI" just check
     expect_success_in "CLI docs-check is green" "$CLI" just docs-check
 fi

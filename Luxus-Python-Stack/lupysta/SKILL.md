@@ -4,8 +4,9 @@ description: >
   Arbeitsweise für bereits initialisierte Python-Projekte des
   Luxus-Python-Stacks: Qualitätsgate, Dokumentation, Git und Release,
   Refactoring, Projektjournal, ADRs und Attention Points. E2E- und
-  Agent-Tests sind vorgesehen, aber nicht Teil der Basisversion.
-version: 0.8.0
+  Agent-Tests werden als opt-in Gerüste erzeugt und sind nicht Teil von
+  `just check`.
+version: 0.9.0
 platforms: [linux]
 metadata:
   tags: [python, uv, quality-gate, refactoring, adr]
@@ -70,8 +71,8 @@ Attention Points), `JOURNAL.md` (Sitzungsgedächtnis) und `docs/adr/`
 | [`references/git-release.md`](references/git-release.md) | Worktree, `just merge`, `bump`, CI und Veröffentlichung. |
 | [`references/refactoring.md`](references/refactoring.md) | `rate-design run\|save\|compare`, `refactor`, Baseline und ein Rezept pro Schritt. |
 | [`references/refactoring-recipes.md`](references/refactoring-recipes.md) | Extract Function, Rename Internal Symbol und Remove Confirmed Dead Code. |
-| [`references/e2e-tests.md`](references/e2e-tests.md) | Vorgesehene Docker-Suite; nur laden, wenn das Projekt `tests/e2e/` enthält. |
-| [`references/agent-tests.md`](references/agent-tests.md) | Vorgesehene Provider-Suite; nur laden, wenn das Projekt `tests/agent/` enthält. |
+| [`references/e2e-tests.md`](references/e2e-tests.md) | Opt-in Docker-Suite; Gerüst von `pyinit`, Tests projektspezifisch. |
+| [`references/agent-tests.md`](references/agent-tests.md) | Opt-in Provider-Suite; Skelett von `pyinit`, Harness projektspezifisch. |
 
 ## Laden auf Bedarf
 
@@ -80,9 +81,10 @@ die tatsächlich vorhandenen Befehle im `Justfile` und die Projektdateien.
 Weicht der Projektzustand von `AGENTS.md` ab, melde die Abweichung, statt sie
 stillschweigend zu reparieren oder neu anzulegen.
 
-E2E- und Agent-Tests sind nicht Teil der Basisversion. Ihre Einrichtung ist
-ein eigener Auftrag; der Skill beschreibt nur die Arbeit mit einer bereits
-vorhandenen Suite.
+E2E- und Agent-Tests sind opt-in und nicht Teil von `just check`. `pyinit`
+erzeugt die Gerüste; echte Tests und der Agent-Harness bleiben
+projektspezifisch. Lade die Rezepte, wenn das Projekt Testdateien in
+`tests/e2e/` oder `tests/agent/` enthält oder die Aufgabe sie berührt.
 
 ## Tägliche Entwicklungsbefehle
 
@@ -92,6 +94,8 @@ uv add --dev <package>    # Abhängigkeit nur für die Entwicklung
 uv sync                   # Umgebung synchronisieren
 just run                  # Hauptskript ausführen (nur Apps)
 just test                 # pytest mit Coverage
+just test-e2e             # opt-in Docker-E2E-Suite (Leerlauf: Hinweis + Exit 0)
+just test-agent           # opt-in Provider-Suite (Leerlauf: Hinweis + Exit 0)
 just lint                 # ruff + basedpyright
 just typecheck            # nur Typprüfung
 just check                # vollständiges Qualitätsgate (Lint + Typecheck + Docs + Tests)

@@ -10,8 +10,8 @@ _LUXUS_REAL_SOURCE="$(readlink -f "$_LUXUS_SOURCE" 2>/dev/null || printf '%s\n' 
 _LUXUS_SCRIPT_DIR="$(cd "$(dirname "$_LUXUS_REAL_SOURCE")" && pwd)"
 unset _LUXUS_SOURCE _LUXUS_REAL_SOURCE
 
-_LUPYSTA_VERSION="0.8.0"
-_LUPYSTA_CONTRACT_VERSION="2"
+_LUPYSTA_VERSION="0.9.0"
+_LUPYSTA_CONTRACT_VERSION="3"
 
 
 
@@ -64,6 +64,12 @@ Examples:
   pyinit my-app --cli             # app with a generated CLI reference
   pyinit my-project --python 3.11
   pyinit --python=3.11 my-project
+
+Opt-in test scaffolds:
+  Every project gets tests/e2e/ (Docker) and tests/agent/ (provider), both
+  without test_*.py files. They are not part of `just check`. Run them with:
+    just test-e2e     # empty suite prints a hint and exits 0, no Docker call
+    just test-agent   # empty suite prints a hint and exits 0, no provider call
 PYINIT_HELP
                 return 0
                 ;;
@@ -179,8 +185,15 @@ PYINIT_HELP
     local _template_dir="${_LUXUS_SCRIPT_DIR}/../templates"
     local _agents_template="${_template_dir}/AGENTS.md"
     local _design_report="${_template_dir}/scripts/design_report.py"
+    local _e2e_template_dir="${_template_dir}/e2e"
+    local _agent_template_dir="${_template_dir}/agent"
     local _template
-    for _template in "$_agents_template" "$_design_report"; do
+    for _template in "$_agents_template" "$_design_report" \
+        "$_e2e_template_dir/README.md" "$_e2e_template_dir/conftest.py" \
+        "$_e2e_template_dir/Dockerfile" "$_e2e_template_dir/dockerignore" \
+        "$_e2e_template_dir/test-e2e.sh" \
+        "$_agent_template_dir/README.md" "$_agent_template_dir/conftest.py" \
+        "$_agent_template_dir/test-agent.sh"; do
         if [[ ! -f "$_template" ]]; then
             echo "Error: required project template not found at '$_template'." >&2
             return 1
@@ -221,6 +234,8 @@ PYINIT_HELP
         uv add --dev ruff pytest pytest-cov basedpyright colorlog bump-my-version pre-commit pip-audit \
             radon vulture \
             || _die "adding dev dependencies failed"
+        uv add --group e2e pytest \
+            || _die "adding the e2e dependency group failed"
         if [[ "$_type" == "lib" ]]; then
             uv add --dev "mkdocs-material" "mkdocstrings[python]" \
                 || _die "adding documentation dependencies failed"
@@ -298,7 +313,18 @@ PYINIT_MAIN
         fi
 
         # ─── Step 5: tests ────────────────────────────────────────────────────
-        mkdir -p tests
+        mkdir -p tests tests/e2e tests/agent scripts
+        cat > tests/conftest.py <<'PYINIT_TEST_GATE'
+"""Collection gate for the opt-in E2E and agent suites."""
+
+import os
+
+collect_ignore: list[str] = []
+if os.environ.get("LUPYSTA_E2E") != "1":
+    collect_ignore.append("e2e")
+if os.environ.get("LUPYSTA_AGENT") != "1":
+    collect_ignore.append("agent")
+PYINIT_TEST_GATE
         if [[ "$_type" == "app" ]]; then
             if [[ $_cli -eq 1 ]]; then
                 cat > tests/test_smoke.py <<PYINIT_APP_CLI_TEST
@@ -356,8 +382,26 @@ def test_package_version() -> None:
 PYINIT_LIB_TEST
         fi
 
+        cp "$_e2e_template_dir/README.md" tests/e2e/README.md \
+            || _die "copying tests/e2e/README.md failed"
+        cp "$_e2e_template_dir/conftest.py" tests/e2e/conftest.py \
+            || _die "copying tests/e2e/conftest.py failed"
+        cp "$_e2e_template_dir/Dockerfile" tests/e2e/Dockerfile \
+            || _die "copying tests/e2e/Dockerfile failed"
+        cp "$_e2e_template_dir/dockerignore" .dockerignore \
+            || _die "copying .dockerignore failed"
+        cp "$_e2e_template_dir/test-e2e.sh" scripts/test-e2e.sh \
+            || _die "copying scripts/test-e2e.sh failed"
+        cp "$_agent_template_dir/README.md" tests/agent/README.md \
+            || _die "copying tests/agent/README.md failed"
+        cp "$_agent_template_dir/conftest.py" tests/agent/conftest.py \
+            || _die "copying tests/agent/conftest.py failed"
+        cp "$_agent_template_dir/test-agent.sh" scripts/test-agent.sh \
+            || _die "copying scripts/test-agent.sh failed"
+        chmod +x scripts/test-e2e.sh scripts/test-agent.sh \
+            || _die "making the test runners executable failed"
+
         # ─── Step 5b: design report tool (rate-design/refactor recipes) ───────
-        mkdir -p scripts
         cp "$_design_report" scripts/design_report.py \
             || _die "copying scripts/design_report.py failed"
 
@@ -383,7 +427,11 @@ venv = ".venv"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = ["-ra", "-q"]
+addopts = ["-ra", "-q", "--strict-markers"]
+markers = [
+    "e2e: opt-in Docker suite; run only via \`just test-e2e\`",
+    "agent: opt-in provider suite; run only via \`just test-agent\`",
+]
 
 [tool.coverage.report]
 fail_under = 90
@@ -444,6 +492,10 @@ JOURNAL.md
 
 # Agent artifacts
 .kilo/
+
+# Opt-in suite artifacts
+e2e-artifacts.*
+agent-artifacts.*
 
 # Freestyle scratch space
 ignore/
@@ -524,6 +576,14 @@ set shell := ["bash", "-uc"]
 test:
     uv run pytest --cov=src --cov-report=term-missing
 
+# Run the opt-in Docker E2E suite (prints a hint until tests exist)
+test-e2e:
+    bash scripts/test-e2e.sh
+
+# Run the opt-in provider suite (prints a hint until tests exist)
+test-agent:
+    bash scripts/test-agent.sh
+
 # Run linters and type checker (find errors)
 lint:
     uv run ruff check .
@@ -545,12 +605,13 @@ clean:
     set -euo pipefail
     rm -rf .pytest_cache .ruff_cache .mypy_cache .coverage htmlcov site
     rm -rf build dist ./*.egg-info
+    rm -rf e2e-artifacts.* agent-artifacts.*
     if [ -d .refactor ]; then
         find .refactor -mindepth 1 -maxdepth 1 ! -name baselines -exec rm -rf {} +
     fi
     find . -path ./.venv -prune -o -path ./.git -prune -o -type d -name __pycache__ -print -exec rm -rf {} +
     find . -path ./.venv -prune -o -path ./.git -prune -o -type f \( -name '*.pyc' -o -name '*.pyo' \) -print -exec rm -f {} +
-    echo "Cleaned caches and generated artifacts (kept .refactor/baselines, .venv and JOURNAL.md)."
+    echo "Cleaned caches and generated artifacts, including e2e-artifacts.* and agent-artifacts.* (kept .refactor/baselines, .venv and JOURNAL.md)."
 
 # Audit dependencies for known security vulnerabilities
 audit:
@@ -758,6 +819,21 @@ jobs:
       - run: uv run pip-audit
 PYINIT_CI
 
+        cat > .github/workflows/e2e.yml <<'PYINIT_E2E_CI'
+name: E2E
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: extractions/setup-just@v2
+      - run: just test-e2e
+PYINIT_E2E_CI
+
         if [[ "$_type" == "lib" ]]; then
             cat > .github/workflows/release.yml <<'PYINIT_RELEASE'
 name: Release
@@ -847,8 +923,13 @@ just rate-design save <name>     # save an immutable baseline
 just rate-design compare <name>  # compare the current run with a baseline
 just refactor                    # prepare a refactoring session
 just merge       # fast-forward main to a branch from any checkout (no push)
-just check       # full quality gate
+just check       # full quality gate (unit/smoke tests only)
+just test-e2e    # opt-in Docker E2E suite (hint + exit 0 until tests exist)
+just test-agent  # opt-in provider suite (hint + exit 0 until tests exist)
 \`\`\`
+
+\`just check\` runs unit and smoke tests only. The E2E and agent suites are
+opt-in and never part of the gate.
 
 ${_readme_docs}## Release
 
@@ -919,8 +1000,13 @@ just rate-design save <name>     # save an immutable baseline
 just rate-design compare <name>  # compare the current run with a baseline
 just refactor                    # prepare a refactoring session
 ${_docs_gate}just check        # ${_check_desc}
+just test-e2e     # opt-in Docker E2E suite (not part of just check)
+just test-agent   # opt-in provider suite (not part of just check)
 just fix          # auto-fix formatting and lint issues
 \`\`\`
+
+\`just check\` runs unit and smoke tests only. E2E and agent suites are
+opt-in; an empty suite prints a hint and exits 0.
 
 ## Conventions
 
@@ -1249,6 +1335,10 @@ PYINIT_JUST_CLI_DOCS
             echo "  3. just docs         # build documentation"
         fi
         echo "  4. just check        # full quality gate"
+        echo ""
+        echo "  Opt-in tests:"
+        echo "  just test-e2e      # Docker E2E suite (hint + exit 0 until tests exist)"
+        echo "  just test-agent    # provider suite (hint + exit 0 until tests exist)"
         echo ""
         echo "  To release:"
         echo "  just bump patch"

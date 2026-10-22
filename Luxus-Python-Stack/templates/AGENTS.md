@@ -15,6 +15,19 @@ Verwende für die Entwicklung immer den lupysta-Skill.
 - Quellpfad: `@SOURCE_PATH@`
 - Testpfad: `tests/`
 
+## Testing
+
+- `just test` und `just check` führen die Unit-/Smoke-Tests aus. Die opt-in
+  Suiten laufen dort nie.
+- `tests/e2e/` ist die Docker-Suite. Nur mit `just test-e2e` ausführen, nie mit
+  einem direkten `pytest` und nie auf dem Host.
+- `tests/agent/` ist die opt-in Provider-Suite. Nur mit `just test-agent`
+  ausführen; sie ist beratend und nie Teil der CI.
+- Beide Suiten melden bei leerer Suite einen Hinweis und Exit 0. Sobald
+  `test_*.py`-Dateien existieren, sind Fehler echte Fehler.
+- Das Verzeichnis-Gate steht in `tests/conftest.py`; die Suite-Guards schlagen
+  fehl, wenn eine Suite ohne Opt-in gesammelt wird.
+
 ## ADRs
 
 Architekturentscheidungen liegen als Dateien in `docs/adr/`. Verschaffe dir mit

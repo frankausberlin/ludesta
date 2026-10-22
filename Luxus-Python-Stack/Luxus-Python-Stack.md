@@ -51,6 +51,7 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 | `just` | Command-Runner|
 | `ruff` | Linting und Formatierung|
 | `basedpyright` | Strenge Typprüfung|
+| `vulture` | Dead-Code-Analyse |
 | `pytest` | Durchführung Unittests|
 | `coverage` | Testabdeckung|
 | `mamba` | Bereitstellung Data-Science-Umgebungen|
@@ -109,7 +110,12 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 ```text
 src/<paketname>/
 tests/
+├── conftest.py             # Gate für die opt-in Suiten
+├── e2e/                    # Docker-Gerüst, zunächst ohne test_*.py
+└── agent/                  # Provider-Skelett, zunächst ohne test_*.py
 scripts/design_report.py
+scripts/test-e2e.sh
+scripts/test-agent.sh
 docs/                       # Lib: Diátaxis-Gerüst + index.md/api.md; App --cli: reference/cli.md
 docs/adr/                   # bei Bedarf, nicht von pyinit angelegt
 pyproject.toml
@@ -118,9 +124,15 @@ Justfile
 AGENTS.md
 JOURNAL.md                  # gitignored
 .envrc
+.dockerignore
 .pre-commit-config.yaml
 .github/workflows/ci.yml    # release.yml bei Bibliotheken
+.github/workflows/e2e.yml   # opt-in Docker-Suite
 ```
+
+Testkonzept: Unit- und Smoke-Tests unter `tests/` sind das automatische Gate.
+`tests/e2e/` und `tests/agent/` sind opt-in Gerüste; echte Tests bleiben
+projektspezifisch. `just check` sammelt sie nicht.
 
 Bibliotheken erhalten von `pyinit` ein Diátaxis-Gerüst: `docs/tutorials/`,
 `docs/how-to/`, `docs/reference/` und `docs/explanation/` mit je einer
@@ -173,6 +185,7 @@ Orientierung:
 | Bereich | Befehle | Rezept |
 | --- | --- | --- |
 | Qualität | `just check`, `just fix`, `just test`, `just lint`, `just typecheck`, `just audit`, `just clean` | [`lupysta/references/quality-gate.md`](lupysta/references/quality-gate.md) |
+| Opt-in-Tests | `just test-e2e`, `just test-agent` | [`lupysta/references/e2e-tests.md`](lupysta/references/e2e-tests.md), [`lupysta/references/agent-tests.md`](lupysta/references/agent-tests.md) |
 | Dokumentation | `just docs`, `just docs-check`, `just docs-serve` | [`lupysta/references/documentation.md`](lupysta/references/documentation.md) |
 | Git und Release | `just merge`, `just bump patch\|minor\|major` | [`lupysta/references/git-release.md`](lupysta/references/git-release.md) |
 | Refactoring | `just rate-design run\|save\|compare`, `just refactor` | [`lupysta/references/refactoring.md`](lupysta/references/refactoring.md) |
@@ -186,21 +199,21 @@ Orientierung:
 | 02 | Python-Version | Format `X.Y`, mindestens `3.11` (z. B. `3.12`), sonst Abbruch. |
 | 03 | Name ableiten | Projektname aus dem Zielverzeichnis; Paketname kleingeschrieben und `-` → `_`; ungültige Identifier und Keywords werden abgelehnt. |
 | 04 | Ziel prüfen | Nicht vorhandenes oder leeres Ziel ist erlaubt; ein Ziel, das nur `.git` enthält, ebenfalls; Dateien und sonstige Inhalte werden abgelehnt. |
-| 05 | Werkzeuge und Vorlagen | `uv`, `just`, `git`, `awk` und die Vorlagen `templates/AGENTS.md` sowie `templates/scripts/design_report.py` werden vor dem ersten Schreibzugriff geprüft. |
+| 05 | Werkzeuge und Vorlagen | `uv`, `just`, `git`, `awk` und alle Vorlagen (`AGENTS.md`, `scripts/design_report.py`, `e2e/*`, `agent/*`) werden vor dem ersten Schreibzugriff geprüft. |
 | 06 | Ziel betreten, `uv init` | In einer Subshell; `UV_PYTHON_PREFERENCE=only-managed`; App: `uv init --app --package`; Lib: `uv init --lib`. |
-| 07 | Dev-Abhängigkeiten | `ruff`, `pytest`, `pytest-cov`, `basedpyright`, `colorlog`, `bump-my-version`, `pre-commit`, `pip-audit`, `radon`, `vulture`; Lib zusätzlich MkDocs; CLI zusätzlich `typer`. |
+| 07 | Dev-Abhängigkeiten | `ruff`, `pytest`, `pytest-cov`, `basedpyright`, `colorlog`, `bump-my-version`, `pre-commit`, `pip-audit`, `radon`, `vulture`; zusätzlich `uv add --group e2e pytest`; Lib zusätzlich MkDocs; CLI zusätzlich `typer`. |
 | 08 | `pyproject.toml` patchen | Einstiegspunkt für Apps; Versionsmarker für `bump-my-version`. |
 | 09 | Paketquelle | `__init__.py` mit Docstring und Version; App: `main.py`; Lib: `py.typed`. |
-| 10 | Tests | `tests/test_smoke.py` mit echtem Smoke-Test; kein `assert True`. |
+| 10 | Tests und Gerüste | `tests/test_smoke.py` mit echtem Smoke-Test; `tests/conftest.py` als Gate; `tests/e2e/` (README, conftest, Dockerfile), `tests/agent/` (README, conftest), `.dockerignore`, `scripts/test-e2e.sh`, `scripts/test-agent.sh` aus den Vorlagen. |
 | 10b | Design-Report | `scripts/design_report.py` aus der Vorlage kopieren. |
-| 11 | Tool-Konfiguration | Ruff, basedpyright, pytest, Coverage, bump-my-version. |
-| 12 | `.gitignore` | Python, Umgebungen, Caches, Docs-Ausgabe, `JOURNAL.md`, `ignore/`, `.refactor/`, `.kilo/`; `.vscode/` bleibt versionierbar. |
+| 11 | Tool-Konfiguration | Ruff, basedpyright, pytest (`--strict-markers`, Marker `e2e` und `agent`, kein `-m`-Filter), Coverage, bump-my-version. |
+| 12 | `.gitignore` | Python, Umgebungen, Caches, Docs-Ausgabe, `JOURNAL.md`, `ignore/`, `.refactor/`, `.kilo/`, `e2e-artifacts.*`, `agent-artifacts.*`; `.vscode/` bleibt versionierbar. |
 | 13 | VS Code | `settings.json`, `launch.json`, `extensions.json`. |
 | 14 | direnv | `.envrc` mit Conda-Schutz, `watch_file uv.lock`, `layout uv`; kein automatisches `direnv allow`. |
-| 15 | Justfile | `test`, `lint`, `typecheck`, `check`, `fix`, `clean`, `audit`, `bump`, `rate-design`, `refactor`, `merge`; `run` nur für Apps; `check` ruft `docs-check` auf, wenn vorhanden. |
-| 16 | GitHub Actions | `ci.yml` immer; `release.yml` nur für Bibliotheken. |
-| 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, ADR-Konventionen, Attention Points, Herkunft. |
-| 18 | Journal und Projektdokumente | `JOURNAL.md`, `README.md`, `.editorconfig`, `CONTRIBUTING.md`, `LICENSE`. |
+| 15 | Justfile | `test`, `test-e2e`, `test-agent`, `lint`, `typecheck`, `check`, `fix`, `clean`, `audit`, `bump`, `rate-design`, `refactor`, `merge`; `run` nur für Apps; `check` ruft `docs-check` auf, wenn vorhanden. |
+| 16 | GitHub Actions | `ci.yml` immer; `release.yml` nur für Bibliotheken; `e2e.yml` für die opt-in Docker-Suite. |
+| 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, Testing, ADR-Konventionen, Attention Points, Herkunft (Contract-Version 3). |
+| 18 | Journal und Projektdokumente | `JOURNAL.md`, `README.md` und `CONTRIBUTING.md` mit `just test-e2e`/`just test-agent`, `.editorconfig`, `LICENSE`. |
 | 19 | pre-commit | Standard-Hooks plus lokale Ruff-Hooks; basedpyright läuft im Gate und in CI. |
 | 20 | Dokumentation | Lib: `mkdocs.yml`, `docs/index.md`, `docs/api.md`, Diátaxis-Gerüst (`tutorials/`, `how-to/`, `reference/`, `explanation/`), `just docs*`; App mit `--cli`: `scripts/gen_cli_docs.py`, `docs/reference/cli.md`, `just docs*`; sonst kein Docs-Gerüst. |
 | 21 | Git | `git init -q -b main`. |

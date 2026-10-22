@@ -24,7 +24,9 @@ Ursache.
 | --- | --- |
 | `just check` | Vollständiges Gate. |
 | `just fix` | Ruff automatisch korrigieren und formatieren. |
-| `just test` | Tests mit Coverage-Bericht. |
+| `just test` | Unit-/Smoke-Tests mit Coverage-Bericht. |
+| `just test-e2e` | Opt-in Docker-Suite; nicht Teil von `just check`. |
+| `just test-agent` | Opt-in Provider-Suite; nicht Teil von `just check` und nie in CI. |
 | `just lint` | Ruff plus basedpyright. |
 | `just typecheck` | Nur basedpyright. |
 | `just audit` | Abhängigkeiten auf bekannte Sicherheitslücken prüfen. |
@@ -57,4 +59,6 @@ Ursache.
 - Das Gate ersetzt keine fachliche Prüfung.
 - Ein grünes Gate bedeutet nicht, dass die Änderung fachlich richtig ist.
 - E2E- und Agent-Suiten sind nicht Teil von `just check`; sie werden separat
-  ausgeführt.
+  mit `just test-e2e` bzw. `just test-agent` ausgeführt.
+- Bei leerer Suite melden beide Runner einen Hinweis und Exitcode 0. Sobald
+  `test_*.py`-Dateien existieren, sind Fehler echte Fehler.
