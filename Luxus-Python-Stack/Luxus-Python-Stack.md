@@ -27,7 +27,6 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 ||*refactoring-recipes.md*|Konkrete Refactoring-Rezepte|
 ||*refactoring.md*|Design-Report, Baseline und Refactoring-Ablauf|
 ||*session-close.md*|Aufgabenabschluss: ADRs, Attention Points und `JOURNAL.md`|
-||*workflow.md*|Sitzungsstart und -ende, `JOURNAL.md`, Branch und Commit|
 
 ## Installation
 

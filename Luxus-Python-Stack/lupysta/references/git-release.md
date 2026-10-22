@@ -8,6 +8,9 @@ jedes initialisierte Projekt. Prüfe vor der Verwendung, welche Rezepte das
 
 - Auf einem Branch arbeiten: `feat/...`, `fix/...`, `docs/...`,
   `refactor/...` oder `chore/...`.
+- Commit-Nachrichten beschreiben die Änderung, zum Beispiel
+  `feat: add CSV export`.
+- Vor dem Commit `git status` und `git branch --show-current` prüfen.
 - Für längere Arbeiten einen separaten Worktree verwenden:
   ```shell
   git worktree add ../<projekt>-feature -b feat/my-feature

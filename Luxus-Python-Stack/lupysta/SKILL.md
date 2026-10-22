@@ -5,7 +5,7 @@ description: >
   Luxus-Python-Stacks: Qualitätsgate, Dokumentation, Git und Release,
   Refactoring, Projektjournal, ADRs und Attention Points. E2E- und
   Agent-Tests sind vorgesehen, aber nicht Teil der Basisversion.
-version: 0.7.0
+version: 0.8.0
 platforms: [linux]
 metadata:
   tags: [python, uv, quality-gate, refactoring, adr]
@@ -24,7 +24,7 @@ Die dauerhaft relevanten Projektdateien sind `AGENTS.md` (Profil, ADRs,
 Attention Points), `JOURNAL.md` (Sitzungsgedächtnis) und `docs/adr/`
 (Architekturentscheidungen). Alles Weitere wird nur bei Bedarf geladen.
 
-## Einstieg
+## Sitzungsstart
 
 1. `AGENTS.md` lesen: Projektprofil, ADR-Konventionen und Attention Points.
 2. Den letzten Eintrag in `JOURNAL.md` lesen, falls vorhanden.
@@ -46,15 +46,24 @@ Attention Points), `JOURNAL.md` (Sitzungsgedächtnis) und `docs/adr/`
 - **Agenten pushen nie.** Der Maintainer prüft und veröffentlicht.
 - **Keine destruktiven Git-Befehle.** Kein Force-Push, kein `reset --hard` auf
   fremde Arbeit, keine ungefragte Worktree-Entfernung.
-- **Am Ende jeder erfüllten Aufgabe** das Rezept
-  [`references/session-close.md`](references/session-close.md) ausführen:
-  `JOURNAL.md` fortschreiben, ADR- und Attention-Point-Kandidaten prüfen.
+- **Am Ende jeder erfüllten Aufgabe** den Abschnitt
+  [Sitzungsende](#sitzungsende) ausführen.
+
+## Sitzungsende
+
+1. `just check` ausführen; das Gate muss grün sein.
+2. [`references/session-close.md`](references/session-close.md) ausführen:
+   `JOURNAL.md` fortschreiben, ADR- und Attention-Point-Kandidaten prüfen und
+   bei Bedarf anlegen.
+3. Alle beabsichtigten Änderungen auf dem Branch committen; ADRs und Attention
+   Points gehören in denselben Commit. `JOURNAL.md` bleibt lokal.
+4. Den fertigen Branch lokal mit `just merge [branch]` mergen; Einzelheiten
+   stehen in [`references/git-release.md`](references/git-release.md).
 
 ## Rezeptindex
 
 | Rezept | Inhalt |
 | --- | --- |
-| [`references/workflow.md`](references/workflow.md) | Sitzungsstart und -ende, `JOURNAL.md`, Branch und Commit. |
 | [`references/session-close.md`](references/session-close.md) | Aufgabenabschluss: ADR- und Attention-Point-Kandidaten prüfen, `JOURNAL.md` fortschreiben. |
 | [`references/quality-gate.md`](references/quality-gate.md) | `just check`, `fix`, `test`, `lint`, `typecheck`, `audit`, `clean` und Fehlersuche. |
 | [`references/documentation.md`](references/documentation.md) | `docs`, `docs-check`, `docs-serve` und generierte Seiten. |

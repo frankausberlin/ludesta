@@ -1,7 +1,7 @@
 # LUDESTA - Luxus Development Stack
 
+<table><tr><td align=right><img src="https://lh3.googleusercontent.com/d/1qn2q-d_y_NP3lxD8gzCh7vnRi_qImnvd" width=1000><font size=-2><br>for agents, for humans, for the whole damned world<a href=https://suno.com/playlist/dea7acde-5886-407a-8193-db889a2af569>...</a></td></tr></table>
 
-<table><tr><td align=right><img src="https://lh3.googleusercontent.com/d/1qn2q-d_y_NP3lxD8gzCh7vnRi_qImnvd" width=1000><font size=-2><br>for agents, for humans, for the whole damned world</td></tr></table>
 
 
 

@@ -10,7 +10,7 @@ _LUXUS_REAL_SOURCE="$(readlink -f "$_LUXUS_SOURCE" 2>/dev/null || printf '%s\n' 
 _LUXUS_SCRIPT_DIR="$(cd "$(dirname "$_LUXUS_REAL_SOURCE")" && pwd)"
 unset _LUXUS_SOURCE _LUXUS_REAL_SOURCE
 
-_LUPYSTA_VERSION="0.7.0"
+_LUPYSTA_VERSION="0.8.0"
 _LUPYSTA_CONTRACT_VERSION="2"
 
 
