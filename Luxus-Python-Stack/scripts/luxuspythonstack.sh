@@ -10,7 +10,7 @@ _LUXUS_REAL_SOURCE="$(readlink -f "$_LUXUS_SOURCE" 2>/dev/null || printf '%s\n' 
 _LUXUS_SCRIPT_DIR="$(cd "$(dirname "$_LUXUS_REAL_SOURCE")" && pwd)"
 unset _LUXUS_SOURCE _LUXUS_REAL_SOURCE
 
-_LUPYSTA_VERSION="0.6.0"
+_LUPYSTA_VERSION="0.7.0"
 _LUPYSTA_CONTRACT_VERSION="2"
 
 
@@ -129,8 +129,9 @@ PYINIT_HELP
         _target_name="$(basename "$_dir")"
     fi
     _package_name="${_target_name//-/_}"
+    _package_name="$(printf '%s' "$_package_name" | tr '[:upper:]' '[:lower:]')"
 
-    if [[ ! "$_package_name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+    if [[ ! "$_package_name" =~ ^[a-z_][a-z0-9_]*$ ]]; then
         echo "Error: package name '$_package_name' (derived from directory '$_target_name')" >&2
         echo "       is not a valid Python identifier." >&2
         echo "       Project directories must use only [A-Za-z0-9_-] and no leading digit." >&2
@@ -138,7 +139,7 @@ PYINIT_HELP
     fi
 
     case "$_package_name" in
-        False|None|True|and|as|assert|async|await|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield|match|case)
+        and|as|assert|async|await|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield|match|case)
             echo "Error: '$_package_name' is a Python keyword and cannot be a package name." >&2
             return 1
             ;;
@@ -205,8 +206,7 @@ PYINIT_HELP
 
         local PROJECT_NAME PACKAGE_NAME
         PROJECT_NAME="$(basename "$PWD")"
-        PACKAGE_NAME="${PROJECT_NAME//-/_}"
-        PACKAGE_NAME="$(printf '%s' "$PACKAGE_NAME" | tr '[:upper:]' '[:lower:]')"
+        PACKAGE_NAME="$_package_name"
 
         # ─── Step 1: uv init (package layout for apps and libraries) ─────────
         if [[ "$_type" == "app" ]]; then
@@ -345,12 +345,14 @@ PYINIT_APP_TEST
             cat > tests/test_smoke.py <<PYINIT_LIB_TEST
 """Smoke test for the ${PROJECT_NAME} library."""
 
+from importlib.metadata import version
+
 import ${PACKAGE_NAME}
 
 
 def test_package_version() -> None:
-    """Verify the package exposes its version."""
-    assert ${PACKAGE_NAME}.__version__ == "0.1.0"
+    """Verify the package version matches the installed project metadata."""
+    assert ${PACKAGE_NAME}.__version__ == version("${PROJECT_NAME}")
 PYINIT_LIB_TEST
         fi
 
@@ -395,6 +397,7 @@ commit = true
 tag = true
 tag_name = "v{new_version}"
 message = "chore: bump version from {current_version} to {new_version}"
+pre_commit_hooks = ["uv lock", "git add uv.lock"]
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
@@ -1016,7 +1019,12 @@ plugins:
 
 nav:
   - Home: index.md
-  - API Reference: api.md
+  - Tutorials: tutorials/index.md
+  - How-to Guides: how-to/index.md
+  - Reference:
+      - Overview: reference/index.md
+      - API: api.md
+  - Explanation: explanation/index.md
 PYINIT_MKDOCS
 
             mkdir -p docs
@@ -1048,6 +1056,48 @@ PYINIT_DOCS_INDEX
 
 ::: ${PACKAGE_NAME}
 PYINIT_DOCS_API
+
+            mkdir -p docs/tutorials docs/how-to docs/reference docs/explanation
+            cat > docs/tutorials/index.md <<'PYINIT_DOCS_TUTORIALS'
+# Tutorials
+
+Learning-oriented guides for newcomers. A tutorial walks through a complete,
+working example and assumes no prior knowledge of the project.
+
+Use this section for getting-started lessons, not for reference details or
+background explanations.
+PYINIT_DOCS_TUTORIALS
+
+            cat > docs/how-to/index.md <<'PYINIT_DOCS_HOWTO'
+# How-to Guides
+
+Task-oriented guides for readers who already know the basics. A how-to guide
+solves one concrete problem and focuses on the steps needed to reach the goal.
+
+Use this section for recipes and procedures; conceptual background belongs in
+Explanation.
+PYINIT_DOCS_HOWTO
+
+            cat > docs/reference/index.md <<'PYINIT_DOCS_REFERENCE'
+# Reference
+
+Information-oriented pages that describe the system precisely: public APIs,
+configuration options, commands, and formats. Reference is lookup material, not
+a tutorial.
+
+- [API Reference](../api.md)
+PYINIT_DOCS_REFERENCE
+
+            cat > docs/explanation/index.md <<'PYINIT_DOCS_EXPLANATION'
+# Explanation
+
+Understanding-oriented pages that discuss background, design decisions, and
+trade-offs. Explanation answers "why" and "how does it fit together" rather
+than "how do I do this".
+
+Architecture decisions live in `docs/adr/` and are deliberately separate from
+this section.
+PYINIT_DOCS_EXPLANATION
 
             cat >> Justfile <<'PYINIT_JUST_DOCS'
 
@@ -1420,7 +1470,12 @@ alias jl='jupyter-launcher -n -c'
 function prompt_my_jupyter() {
   # Where Jupyter on Linux logs its active server processes
   local runtime_dir="${XDG_DATA_HOME:-$HOME/.local/share}/jupyter/runtime"
-  # Find all server JSONs (the '(N)' prevents errors if none exist)
+  # Under ZSH, unmatched globs must expand to an empty list. Bash parses the
+  # line as a simple command and never runs it; there the loop skips literal
+  # patterns via the [[ -e ... ]] check below.
+  if [ -n "${ZSH_VERSION:-}" ]; then
+    setopt localoptions nullglob
+  fi
   local json_files=()
   local _json_candidate
   for _json_candidate in "$runtime_dir"/jpserver-*.json "$runtime_dir"/nbserver-*.json; do

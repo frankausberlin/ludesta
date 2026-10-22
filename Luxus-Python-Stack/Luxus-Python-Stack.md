@@ -63,9 +63,9 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 
 | Ebene | Name | Werkzeug | Aktivierung |
 | --- | --- | --- | --- |
-| 0 | Global / System | `/usr/bin/python` | Immer aktiv (Fallback) |
-| 1 | Mamba / Jupyter | Mamba + UV | `act <envname>` oder Start über `~/.startenv` |
-| 2 | Projekte | UV + direnv | Automatisch über `direnv`, wenn `.venv` existiert |
+| 0 | Global / System | `/usr/bin/python` | Immer verfügbar (Fallback) |
+| 1 | Mamba / Jupyter | Mamba + UV | `act <envname>` oder beim Shellstart `~/.startenv`/`base`, solange keine `.envrc` im CWD liegt |
+| 2 | Projekte | UV + direnv | `.envrc` mit `layout uv` nach `direnv allow`; eine vorhandene `.venv` allein genügt nicht |
 | 3 | CI/CD | GitHub Actions + UV | Bei Push/PR oder manuell |
 | 4 | KI-Agenten | `AGENTS.md` + Skill + `JOURNAL.md` | Start der Agentensitzung |
 
@@ -74,14 +74,16 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 * Die Standard-Python-Installation (`/usr/bin/python`) liegt hier.
 * Systemwerkzeuge: `uv`, `just`, `direnv`, `mamba`.
 * Projektwerkzeuge: `ruff`, `basedpyright`, `pytest` (über `uv sync`).
-* Mamba ist installiert, aber inaktiv, bis es ausdrücklich aktiviert wird.
+* Mamba ist installiert; ob es beim Shellstart aktiv wird, regelt Ebene 1.
 * Diese Ebene ist der Fallback, wenn keine andere Umgebung aktiv ist.
 
 ### Ebene 1: Mamba / Jupyter
 
 * Gedacht für Data Science und Experimente.
 * Werkzeuge: Jupyter Lab, Scikit-Learn, JAX, Numba und weitere Pakete aus dem Setup.
-* Aktiv, solange kein `.venv` im aktuellen Verzeichnis existiert; direnv hat Vorrang.
+* Aktivierung beim Shellstart außerhalb eines Verzeichnisses mit `.envrc`; in
+  einem Projekt mit `.envrc` überspringt das Startskript die Mamba-Aktivierung,
+  direnv übernimmt nach `direnv allow`.
 * **Start:** `act <envname>` aktiviert die Umgebung und speichert den Namen in `~/.startenv`.
 * **Wegwerfcharakter:** Die Regel lautet „keine Updates, löschen und neu anlegen“.
 * **Namensschema:** `ds12` bedeutet „Data Science mit Python 3.12“.
@@ -91,9 +93,12 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 ### Ebene 2: Projekte
 
 - Standard-Python-Projekte mit `uv` und `direnv`.
-- Automatisch aktiviert, wenn ein Verzeichnis eine `.venv` enthält.
+- Aktiviert durch den direnv-Hook und `layout uv`; `layout uv` legt bei Bedarf
+  `.venv` an und setzt `VIRTUAL_ENV`/`PATH`. Eine vorhandene `.venv` allein
+  genügt nicht.
 - Initialisiert mit `pyinit` (App), `pyinit --lib` (Bibliothek) oder
-  `pyinit --cli` (App mit Typer-CLI-Referenz).
+  `pyinit --cli` (App mit Typer-CLI-Referenz). `pyinit` schreibt `.envrc`, ruft
+  aber kein `direnv allow` auf.
 - Qualitätsgate: `just check` → `ruff check`, `ruff format --check`,
   `basedpyright`, bei Bedarf `docs-check` und `pytest` mit Coverage.
 - Weitere Befehle: `just fix`, `just test`, `just lint`, `just typecheck`,
@@ -106,8 +111,8 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 src/<paketname>/
 tests/
 scripts/design_report.py
-docs/                       # Projektdokumentation nach dem Quasi-Standard Diátaxis
-docs/adr/                   # Architekturentscheidungen (bei Bedarf)
+docs/                       # Lib: Diátaxis-Gerüst + index.md/api.md; App --cli: reference/cli.md
+docs/adr/                   # bei Bedarf, nicht von pyinit angelegt
 pyproject.toml
 uv.lock
 Justfile
@@ -117,6 +122,12 @@ JOURNAL.md                  # gitignored
 .pre-commit-config.yaml
 .github/workflows/ci.yml    # release.yml bei Bibliotheken
 ```
+
+Bibliotheken erhalten von `pyinit` ein Diátaxis-Gerüst: `docs/tutorials/`,
+`docs/how-to/`, `docs/reference/` und `docs/explanation/` mit je einer
+Leitseite und Einträgen in der MkDocs-Navigation. Apps mit `--cli` erhalten nur
+`docs/reference/cli.md`; Apps ohne `--cli` kein Docs-Gerüst. `docs/adr/`
+entsteht mit der ersten ADR.
 
 * `AGENTS.md` enthält das Projektprofil, die ADR-Konventionen und die Attention Points.
 * Der Skill beschreibt die Arbeitsweisen; die Projektdateien bleiben die ausführbare Quelle.
@@ -192,7 +203,7 @@ Orientierung:
 | 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, ADR-Konventionen, Attention Points, Herkunft. |
 | 18 | Journal und Projektdokumente | `JOURNAL.md`, `README.md`, `.editorconfig`, `CONTRIBUTING.md`, `LICENSE`. |
 | 19 | pre-commit | Standard-Hooks plus lokale Ruff-Hooks; basedpyright läuft im Gate und in CI. |
-| 20 | Dokumentation | Lib: MkDocs; App mit `--cli`: generierte CLI-Referenz. Diátaxis: explanation/ how-to/, index.md, reference/, tutorials/; Architecture Decision Record: adr/ |
+| 20 | Dokumentation | Lib: `mkdocs.yml`, `docs/index.md`, `docs/api.md`, Diátaxis-Gerüst (`tutorials/`, `how-to/`, `reference/`, `explanation/`), `just docs*`; App mit `--cli`: `scripts/gen_cli_docs.py`, `docs/reference/cli.md`, `just docs*`; sonst kein Docs-Gerüst. |
 | 21 | Git | `git init -q -b main`. |
 | 22 | Sync, Hooks, Gate | `uv sync`, `uv run pre-commit install`, ggf. `just docs`, dann `just check`; mit `--no-check` entfällt nur das Gate. |
 

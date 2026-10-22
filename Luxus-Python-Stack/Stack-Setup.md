@@ -142,7 +142,7 @@ export DIRENV_LOG_FORMAT=""
 # Mamba 2.0+ requires this variable before initialization
 export MAMBA_ROOT_PREFIX="$HOME/miniforge3"
 # Here we explicitly load the 'mamba' hook, not 'conda'
-__mamba_setup="$('$HOME/miniforge3/bin/mamba' 'shell.zsh' 'hook' 2> /dev/null)"
+__mamba_setup="$("$HOME/miniforge3/bin/mamba" 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__mamba_setup"
 else
@@ -298,6 +298,7 @@ uv --version
 for t in ruff bump-my-version basedpyright nbstripout; do command -v "$t" >/dev/null && echo "ok $t" || echo "MISSING $t"; done
 direnv --version
 mamba --version | head -1
+zsh -ic 'mamba activate base && echo "mamba hook ok"'
 
 code --version
 ```

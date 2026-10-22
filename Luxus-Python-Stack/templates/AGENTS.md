@@ -42,6 +42,9 @@ Format eines Eintrags:
 - **Handhabung**: ...
 - **Involvierte ADRs**: ...
 - **Kontext**: ...
+
+Entfernte APs bleiben als `### AP-N: entfernt (YYYY-MM-DD)` stehen; ihre
+Nummer wird nicht neu vergeben.
 -->
 
 ## Herkunft

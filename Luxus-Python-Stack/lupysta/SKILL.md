@@ -5,7 +5,7 @@ description: >
   Luxus-Python-Stacks: Qualitätsgate, Dokumentation, Git und Release,
   Refactoring, Projektjournal, ADRs und Attention Points. E2E- und
   Agent-Tests sind vorgesehen, aber nicht Teil der Basisversion.
-version: 0.6.0
+version: 0.7.0
 platforms: [linux]
 metadata:
   tags: [python, uv, quality-gate, refactoring, adr]

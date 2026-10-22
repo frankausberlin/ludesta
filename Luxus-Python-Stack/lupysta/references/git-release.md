@@ -19,6 +19,16 @@ jedes initialisierte Projekt. Prüfe vor der Verwendung, welche Rezepte das
 
 ## `just merge`
 
+Vor dem Merge:
+
+1. Den Branch auf den aktuellen `main`-Stand rebasen (`git fetch`, falls ein
+   Remote existiert).
+2. Noch nicht veröffentlichte ADR- und AP-Nummern gegen `main` abgleichen und
+   bei Kollisionen umnummerieren; alle Referenzen im selben Commit
+   aktualisieren. Revidierte ADRs mit `_`-Präfix behalten ihre Nummer (siehe
+   [`session-close.md`](session-close.md)).
+3. `just check` ausführen.
+
 `just merge [branch]` ist aus jedem Checkout bedienbar:
 
 1. Es ermittelt den Worktree, in dem `main` ausgecheckt ist.
@@ -27,10 +37,8 @@ jedes initialisierte Projekt. Prüfe vor der Verwendung, welche Rezepte das
    lokalen `JOURNAL.md`-Inhalte enthält.
 4. Andernfalls bleibt der Worktree stehen; der Pfad wird genannt.
 5. Es pusht nie.
-6. Nach dem Merge die Eindeutigkeit der ADR- und AP-Nummern prüfen; der
-   spätere Branch nummeriert seine noch nicht veröffentlichten Einträge um.
-   Revidierte ADRs mit `_`-Präfix behalten ihre Nummer (siehe
-   [`session-close.md`](session-close.md)).
+6. Nach dem Merge nur die Eindeutigkeit der ADR- und AP-Nummern als Kontrolle
+   erneut prüfen.
 
 Ohne Argument sucht das Rezept einen eindeutigen Kandidaten: zuerst einen
 Branch in einem anderen Worktree, sonst den einzigen lokalen Branch, der
@@ -41,6 +49,7 @@ Bei Divergenz:
 
 ```shell
 git rebase main
+# ADR-/AP-Nummern gegen main abgleichen und ggf. umnummerieren
 just check
 just merge <branch>
 ```

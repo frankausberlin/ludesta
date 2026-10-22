@@ -8,7 +8,7 @@ Prüfe vor der Verwendung die tatsächlich vorhandenen Befehle.
 
 | Variante | Projekttyp | Quelle | Ausgabe |
 | --- | --- | --- | --- |
-| MkDocs | Bibliothek | `mkdocs.yml`, `docs/`, Docstrings | Statische MkDocs-Seite. |
+| MkDocs | Bibliothek | `mkdocs.yml`, `docs/` mit Diátaxis-Gerüst, Docstrings | Statische MkDocs-Seite. |
 | CLI-Referenz | App mit `--cli` | Typer-App in `src/<paket>/cli.py` | `docs/reference/cli.md`. |
 
 Eine Bibliothek nutzt MkDocs, eine CLI-App die generierte Referenz; beide
@@ -37,6 +37,11 @@ Ein veralteter Generatorstand lässt das Gate fehlschlagen.
 ## Bibliotheken
 
 - `mkdocs.yml` und `docs/` gehören zum Projekt.
+- `pyinit` legt das Diátaxis-Gerüst an: `docs/tutorials/`, `docs/how-to/`,
+  `docs/reference/` und `docs/explanation/`, jeweils mit einer Leitseite. Alle
+  vier Bereiche stehen in der Navigation.
+- Neue Inhalte in den passenden Bereich einsortieren; die Leitseiten erklären,
+  welche Form dort hingehört.
 - `mkdocstrings` liest die öffentliche API aus den Docstrings.
 - Öffentliche Funktionen und Klassen brauchen Google-Style-Docstrings.
 - `just docs-serve` startet eine lokale Vorschau mit Live-Reload.

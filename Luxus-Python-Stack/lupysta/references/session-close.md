@@ -88,7 +88,18 @@ Bedarf anlegen.
   2. Die alte auf `Status: superseded by ADR-MMMM` setzen.
   3. In beiden Dateien aufeinander verweisen: Die neue ADR verlinkt
      `_NNNN-...md`, die alte verlinkt `MMMM-...md`.
-  4. Die alte ADR-Datei umbenennen: `<filename>` wird zu `_<filename>`.
+  4. Vor dem Umbenennen eingehende Verweise auf den alten Namen ermitteln und
+     im selben Changeset anpassen. Beispiel für
+     `0003-wir-verwenden-zsh.md`:
+
+     ```shell
+     git grep -nE '(^|[^_])0003-wir-verwenden-zsh\.md' -- '*.md'
+     ```
+
+     Der Ausschluss `[^_]` verhindert Treffer auf den neuen `_`-Dateinamen.
+     `JOURNAL.md` ist lokal und historisch; dortige Einträge werden nicht
+     umgeschrieben.
+  5. Die alte ADR-Datei umbenennen: `<filename>` wird zu `_<filename>`.
      Beispiel: `0003-wir-verwenden-zsh.md` wird zu
      `_0003-wir-verwenden-zsh.md`.
 
@@ -109,8 +120,14 @@ Im Abschnitt `## Attention Points` in `AGENTS.md` ergänzen:
 - **Kontext**: ...
 ```
 
-- Die nächste freie Nummer verwenden; Nummern bleiben stabil, Lücken sind ok.
-- APs dürfen präzisiert oder entfernt werden, wenn sie nicht mehr gelten.
+- Die nächste freie Nummer ist die höchste in `AGENTS.md` verwendete
+  AP-Nummer plus eins; Tombstones zählen mit.
+- Wird ein AP nicht mehr gültig, den aktiven Text durch einen einzeiligen
+  Tombstone ersetzen:
+  `### AP-N: entfernt (YYYY-MM-DD)`
+  Die Nummer bleibt dauerhaft vergeben und wird nicht neu verwendet. Ein
+  Tombstone ist kein aktiver AP.
+- APs dürfen präzisiert werden; ihre Identität bleibt stabil.
 - APs nicht mit Skill-Inhalten oder ADR-Begründungen duplizieren.
 
 ## 6. JOURNAL fortschreiben
@@ -129,29 +146,38 @@ Am Ende von `JOURNAL.md` einen datierten Eintrag anhängen:
 
 ## 7. Konsistenz prüfen
 
-- Jede Datei in `docs/adr/` folgt dem Muster `_?NNNN-entscheidung.md`.
-- ADR-Nummern sind eindeutig; AP-Nummern sind eindeutig.
+Vor dem Merge:
+
+- Den eigenen Branch gegen den aktuellen `main`-Stand abgleichen (nach
+  `git fetch`, falls ein Remote existiert) und rebasen.
+- Noch nicht auf `main` gemergte ADRs und APs umnummerieren, wenn ihre Nummer
+  dort bereits vergeben ist; alle Referenzen im selben Commit aktualisieren.
+  Auf `main` gemergte Nummern bleiben unverändert, auch bei revidierten ADRs
+  mit `_`-Präfix.
+- Verweise auf `docs/adr/` müssen auf existierende Dateien zeigen; nach einer
+  Revision darf kein Verweis mehr den alten Namen (ohne `_`) nennen.
 - `just check` ist grün.
+- Jede Datei in `docs/adr/` folgt dem Muster `_?NNNN-entscheidung.md`.
 - ADRs und APs sind mit der Aufgabe committet; `JOURNAL.md` bleibt lokal.
 
-Nach einem Merge prüfen, ob zwei Branches dieselbe Nummer vergeben haben:
+Nach dem Merge die bisherige Duplikatprüfung als Nachkontrolle wiederholen:
 
 ```shell
 ls docs/adr 2>/dev/null | sed 's/^_//' | grep -E '^[0-9]{4}-' | cut -c1-4 | sort | uniq -d
 grep -oE '^### AP-[0-9]+' AGENTS.md | sort | uniq -d
 ```
 
-Das erste Kommando ignoriert das `_`-Präfix revidierter ADRs. Zusätzlich
+Das erste Kommando ignoriert das `_`-Präfix revidierter ADRs. Die AP-Prüfung
+erfasst auch Tombstones, weil ihre Überschrift mit `### AP-N` beginnt. Zusätzlich
 prüfen, dass keine Datei die Konvention verletzt (die Ausgabe muss leer sein):
 
 ```shell
 ls docs/adr 2>/dev/null | grep -Ev '^_?[0-9]{4}-[a-z0-9-]+\.md$'
 ```
 
-Der später gemergte Branch nummeriert seine noch nicht auf `main` gemergten
+Weicht der Branch von `main` ab, nummeriert er seine noch nicht gemergten
 ADRs und APs auf die nächsten freien Nummern um und aktualisiert alle
-Referenzen im selben Commit. Auf `main` gemergte Nummern bleiben unverändert,
-auch bei revidierten ADRs mit `_`-Präfix.
+Referenzen im selben Commit.
 
 ## 8. Bei Unsicherheit
 

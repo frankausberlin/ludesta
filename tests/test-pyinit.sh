@@ -166,6 +166,10 @@ expect_failure "--lib --cli is rejected" pyinit --lib --cli "$TMP_ROOT/bad-combo
 expect_failure "too many directories are rejected" pyinit "$TMP_ROOT/one" "$TMP_ROOT/two"
 expect_failure "invalid package name is rejected" pyinit "$TMP_ROOT/123bad"
 expect_failure "Python keyword is rejected" pyinit "$TMP_ROOT/class"
+expect_failure "uppercase keyword is rejected after normalization" \
+    pyinit "$TMP_ROOT/Class"
+expect_failure "uppercase import is rejected after normalization" \
+    pyinit "$TMP_ROOT/IMPORT"
 
 mkdir -p "$TMP_ROOT/file-target-parent"
 : >"$TMP_ROOT/file-target-parent/not-a-dir"
@@ -199,6 +203,25 @@ else
     fail "missing template aborts before writing (target was created)"
 fi
 
+if command -v zsh >/dev/null 2>&1; then
+    mkdir -p "$TMP_ROOT/zsh-data"
+    if XDG_DATA_HOME="$TMP_ROOT/zsh-data" \
+        zsh -c "source '$SCRIPT'; p10k() { :; }; prompt_my_jupyter; print ok" >"$LOG" 2>&1; then
+        pass "jupyter prompt survives an empty runtime directory"
+    else
+        fail "jupyter prompt survives an empty runtime directory"
+    fi
+
+    mkdir -p "$TMP_ROOT/zsh-data/jupyter/runtime"
+    : >"$TMP_ROOT/zsh-data/jupyter/runtime/jpserver-999999.json"
+    if XDG_DATA_HOME="$TMP_ROOT/zsh-data" \
+        zsh -c "source '$SCRIPT'; p10k() { :; }; prompt_my_jupyter; print ok" >"$LOG" 2>&1; then
+        pass "jupyter prompt survives a single runtime file family"
+    else
+        fail "jupyter prompt survives a single runtime file family"
+    fi
+fi
+
 if [[ $FAST_ONLY -eq 1 ]]; then
     echo "# Fast checks only"
     printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
@@ -222,6 +245,7 @@ if expect_success "pyinit creates an app" pyinit "$APP" --python 3.12; then
     assert_not_contains "app AGENTS.md has no feature list" "$APP/AGENTS.md" "Verwendet:"
     assert_not_contains "app AGENTS.md has no old managed block" "$APP/AGENTS.md" "AGENTS_MANAGED_BEGIN"
     assert_no_file "app has no SESSION.md" "$APP/SESSION.md"
+    assert_no_file "app without --cli has no docs scaffold" "$APP/docs/index.md"
     expect_success_in "app just check is green" "$APP" just check
     expect_success_in "app rate-design run works" "$APP" just rate-design run
     assert_file "app report.json exists" "$APP/.refactor/report.json"
@@ -280,8 +304,29 @@ fi
 LIB="$TMP_ROOT/lib"
 if expect_success "pyinit creates a library" pyinit "$LIB" --lib --python 3.12; then
     assert_contains "library is typed as library" "$LIB/AGENTS.md" "Projekttyp: Bibliothek"
+    assert_file "library has a tutorials section" "$LIB/docs/tutorials/index.md"
+    assert_file "library has a how-to section" "$LIB/docs/how-to/index.md"
+    assert_file "library has a reference section" "$LIB/docs/reference/index.md"
+    assert_file "library has an explanation section" "$LIB/docs/explanation/index.md"
+    assert_contains "library mkdocs nav includes the tutorials" \
+        "$LIB/mkdocs.yml" "tutorials/index.md"
+    assert_contains "library mkdocs nav includes the explanation section" \
+        "$LIB/mkdocs.yml" "explanation/index.md"
     expect_success_in "library just check is green" "$LIB" just check
     expect_success_in "library docs-check is green" "$LIB" just docs-check
+    git -C "$LIB" config user.name Test
+    git -C "$LIB" config user.email test@example.com
+    git -C "$LIB" add -A
+    git -C "$LIB" commit -q --no-verify -m init
+    expect_success_in "library bump succeeds" "$LIB" just bump patch
+    expect_success_in "library lockfile is current after bump" \
+        "$LIB" uv sync --locked --dev
+    expect_success_in "library just check is green after bump" "$LIB" just check
+    if git -C "$LIB" tag -l v0.1.1 | grep -q 'v0.1.1'; then
+        pass "library bump creates the v0.1.1 tag"
+    else
+        fail "library bump creates the v0.1.1 tag"
+    fi
 fi
 
 CLI="$TMP_ROOT/cli"
