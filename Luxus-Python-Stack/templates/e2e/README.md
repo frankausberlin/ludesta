@@ -32,11 +32,12 @@ scripts/test-e2e.sh
 
 - `Dockerfile` baut das Image aus `pyproject.toml`, `uv.lock`, `src/` und
   `tests/`. Die Abhängigkeiten werden vor dem Quellcode installiert.
-- `conftest.py` schlägt fehl, wenn die Suite ohne Opt-in, außerhalb des
-  Containers oder ohne `/.dockerenv` läuft. Skips werden im Container zu
-  Fehlern.
+- `conftest.py` bricht ab, bevor pytest die Testmodule importiert, wenn die
+  Suite ohne Opt-in, außerhalb des Containers oder ohne `/.dockerenv` läuft.
+  Skips – auch Collection-Skips – werden im Container zu Fehlern.
 - `scripts/test-e2e.sh` prüft zuerst die Testdateien, dann Docker, baut das
-  Image, startet den Container und sammelt die Artefakte ein.
+  Image mit `--file tests/e2e/Dockerfile`, startet den Container und sammelt
+  die Artefakte ein.
 - `scripts/test-e2e.sh` verwendet BuildKit (`--mount=type=cache`).
 
 ## Leerlauf-Semantik
@@ -46,13 +47,14 @@ scripts/test-e2e.sh
 | Keine `test_*.py`-Dateien | Hinweis, Exitcode 0, kein Docker. |
 | Dateien vorhanden, Docker fehlt | Laute Fehlermeldung, Exitcode 1. |
 | Dateien vorhanden, Test schlägt fehl | Exitcode 1 mit Log-Auszug. |
-| Test wird übersprungen | Fehler im Container, kein stiller grüner Lauf. |
+| Test oder Modul wird übersprungen | Fehler im Container, kein stiller grüner Lauf. |
 
 ## Erster Test
 
 1. Docker und BuildKit bereitstellen: `docker info`, `docker buildx version`.
 2. Eine Datei `tests/e2e/test_demo.py` mit einer normalen `test_`-Funktion
-   anlegen. Die autouse-Fixture aus `conftest.py` schützt den Lauf.
+   anlegen. Der Collection-Hook in `conftest.py` schützt den Lauf, bevor
+   Testmodule importiert werden.
 3. `just test-e2e` ausführen. Der Runner setzt `LUPYSTA_E2E=1` und
    `LUPYSTA_E2E_CONTAINER=1`, baut das Image und startet den Container.
 4. Fehler zuerst im Log unter `e2e-artifacts.*/run.log` suchen.

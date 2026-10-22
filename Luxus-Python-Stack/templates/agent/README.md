@@ -28,8 +28,9 @@ Template.
 
 - `tests/conftest.py` schließt `agent` aus dem normalen pytest-Lauf aus,
   solange `LUPYSTA_AGENT` nicht `1` ist.
-- `tests/agent/conftest.py` schlägt fehl, wenn die Suite ohne Opt-in gesammelt
-  wird. Bei einem opt-in-Lauf werden Skips zu Fehlern.
+- `tests/agent/conftest.py` bricht ab, bevor pytest die Testmodule importiert,
+  wenn die Suite ohne Opt-in gesammelt wird. Bei einem opt-in-Lauf werden
+  Skips – auch Collection-Skips – zu Fehlern.
 - `just test-agent` ruft `LUPYSTA_AGENT=1 uv run pytest tests/agent -v -s` auf.
 - Agent-Tests laufen nie in der CI.
 
@@ -40,7 +41,7 @@ Template.
 | Keine `test_*.py`-Dateien | Hinweis, Exitcode 0, kein `uv`, kein Provider. |
 | Dateien vorhanden, `uv` fehlt | Laute Fehlermeldung, Exitcode 1. |
 | Test schlägt fehl | Exitcode 1. |
-| Test wird übersprungen | Fehler im opt-in-Lauf, kein stiller grüner Lauf. |
+| Test oder Modul wird übersprungen | Fehler im opt-in-Lauf, kein stiller grüner Lauf. |
 
 ## Erster Test
 

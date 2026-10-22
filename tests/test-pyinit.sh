@@ -214,9 +214,12 @@ expect_success "agent runner has valid syntax" bash -n "$AGENT_RUNNER"
 mkdir -p "$TMP_ROOT/fake-bin"
 DOCKER_MARKER="$TMP_ROOT/docker-called"
 UV_MARKER="$TMP_ROOT/uv-called"
-cat >"$TMP_ROOT/fake-bin/docker" <<FAKE_DOCKER
+cat >"$TMP_ROOT/fake-bin/docker" <<'FAKE_DOCKER'
 #!/usr/bin/env bash
-printf 'called\n' >"$DOCKER_MARKER"
+printf '%s\n' "$*" >>"${DOCKER_MARKER:?DOCKER_MARKER is not set}"
+if [[ "${1:-}" == "info" ]]; then
+    exit 0
+fi
 exit 99
 FAKE_DOCKER
 cat >"$TMP_ROOT/fake-bin/uv" <<FAKE_UV
@@ -234,6 +237,18 @@ expect_success "e2e runner exits 0 without tests" \
     env PATH="$TMP_ROOT/fake-bin:$PATH" bash "$E2E_IDLE/scripts/test-e2e.sh"
 assert_contains "e2e runner prints the empty-suite hint" "$LOG" "No E2E tests configured"
 assert_no_file "e2e runner does not call docker when empty" "$DOCKER_MARKER"
+
+E2E_BUILD="$TMP_ROOT/e2e-build"
+mkdir -p "$E2E_BUILD/scripts" "$E2E_BUILD/tests/e2e"
+cp "$E2E_RUNNER" "$E2E_BUILD/scripts/test-e2e.sh"
+: >"$E2E_BUILD/tests/e2e/test_demo.py"
+: >"$E2E_BUILD/tests/e2e/Dockerfile"
+rm -f "$DOCKER_MARKER"
+expect_failure "e2e runner builds with the suite Dockerfile" \
+    env PATH="$TMP_ROOT/fake-bin:$PATH" DOCKER_MARKER="$DOCKER_MARKER" \
+    bash "$E2E_BUILD/scripts/test-e2e.sh"
+assert_contains "e2e runner passes its Dockerfile to docker build" \
+    "$DOCKER_MARKER" "--file tests/e2e/Dockerfile"
 
 AGENT_IDLE="$TMP_ROOT/agent-idle"
 mkdir -p "$AGENT_IDLE/scripts" "$AGENT_IDLE/tests/agent"
@@ -346,6 +361,54 @@ GATE_PROBE
     expect_success_in "agent gate probe does not affect just check" "$APP" just check
     rm -f "$APP/tests/agent/test_gate_probe.py"
 
+    cat >"$APP/tests/e2e/test_import_probe.py" <<'IMPORT_PROBE'
+"""Import probe: the module body writes a marker when it is imported."""
+
+from pathlib import Path
+
+Path("e2e-import-probe-ran").write_text("ran")
+IMPORT_PROBE
+    expect_failure_in "e2e direct pytest is rejected before imports" "$APP" \
+        env -u LUPYSTA_E2E -u LUPYSTA_E2E_CONTAINER uv run pytest tests/e2e
+    assert_contains "e2e direct pytest names the runner" "$LOG" "use just test-e2e"
+    assert_no_file "e2e direct pytest does not import test modules" \
+        "$APP/e2e-import-probe-ran"
+    rm -f "$APP/tests/e2e/test_import_probe.py" "$APP/e2e-import-probe-ran"
+
+    cat >"$APP/tests/agent/test_import_probe.py" <<'IMPORT_PROBE'
+"""Import probe: the module body writes a marker when it is imported."""
+
+from pathlib import Path
+
+Path("agent-import-probe-ran").write_text("ran")
+IMPORT_PROBE
+    expect_failure_in "agent direct pytest is rejected before imports" "$APP" \
+        env -u LUPYSTA_AGENT uv run pytest tests/agent
+    assert_contains "agent direct pytest names the runner" "$LOG" "use just test-agent"
+    assert_no_file "agent direct pytest does not import test modules" \
+        "$APP/agent-import-probe-ran"
+    rm -f "$APP/tests/agent/test_import_probe.py" "$APP/agent-import-probe-ran"
+
+    cat >"$APP/tests/agent/test_skip_probe.py" <<'SKIP_PROBE'
+"""Collection skip probe."""
+
+import pytest
+
+pytest.skip("the collection skip probe must fail the run", allow_module_level=True)
+SKIP_PROBE
+    cat >"$APP/tests/agent/test_pass_probe.py" <<'PASS_PROBE'
+"""Passing probe that must not hide the collection skip."""
+
+
+def test_pass_probe() -> None:
+    """Pass so the run would be green without the skip-to-failure rule."""
+    assert True
+PASS_PROBE
+    expect_failure_in "agent runner turns collection skips into failures" "$APP" just test-agent
+    assert_contains "agent runner reports the collection skip" "$LOG" \
+        "the collection skip probe must fail the run"
+    rm -f "$APP/tests/agent/test_skip_probe.py" "$APP/tests/agent/test_pass_probe.py"
+
     if docker info >/dev/null 2>&1; then
         cat >"$APP/tests/e2e/test_gate_probe.py" <<'GATE_PROBE'
 """Gate probe: must fail when the Docker runner executes it."""
@@ -356,10 +419,36 @@ def test_gate_probe() -> None:
     raise AssertionError("the Docker runner executed the probe")
 GATE_PROBE
         expect_failure_in "e2e runner executes real tests" "$APP" just test-e2e
+        assert_contains "e2e runner reports the probe failure" "$LOG" \
+            "the Docker runner executed the probe"
+        assert_contains "e2e runner records the probe failure in JUnit" \
+            "$APP"/e2e-artifacts.*/junit.xml "the Docker runner executed the probe"
         rm -f "$APP/tests/e2e/test_gate_probe.py"
+        rm -rf "$APP"/e2e-artifacts.*
+
+        cat >"$APP/tests/e2e/test_skip_probe.py" <<'SKIP_PROBE'
+"""Collection skip probe."""
+
+import pytest
+
+pytest.skip("the collection skip probe must fail the run", allow_module_level=True)
+SKIP_PROBE
+        cat >"$APP/tests/e2e/test_pass_probe.py" <<'PASS_PROBE'
+"""Passing probe that must not hide the collection skip."""
+
+
+def test_pass_probe() -> None:
+    """Pass so the run would be green without the skip-to-failure rule."""
+    assert True
+PASS_PROBE
+        expect_failure_in "e2e runner turns collection skips into failures" "$APP" just test-e2e
+        assert_contains "e2e runner reports the collection skip" "$LOG" \
+            "the collection skip probe must fail the run"
+        rm -f "$APP/tests/e2e/test_skip_probe.py" "$APP/tests/e2e/test_pass_probe.py"
         rm -rf "$APP"/e2e-artifacts.*
     else
         printf 'skip - e2e runner executes real tests (Docker not available)\n'
+        printf 'skip - e2e runner turns collection skips into failures (Docker not available)\n'
     fi
 
     expect_success_in "app rate-design run works" "$APP" just rate-design run

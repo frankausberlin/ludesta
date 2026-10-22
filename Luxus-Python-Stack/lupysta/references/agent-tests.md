@@ -25,7 +25,7 @@ tests/
 ├── conftest.py              # Verzeichnis-Gate für e2e und agent
 └── agent/
     ├── README.md
-    ├── conftest.py          # Opt-in-Guard, Fail-on-Skips
+    ├── conftest.py          # Guard vor dem Import, Fail-on-Skips
     └── test_*.py            # projektseitig ergänzt
 scripts/test-agent.sh
 ```
@@ -39,9 +39,10 @@ scripts/test-agent.sh
 
 Das Gate liegt in `tests/conftest.py` und schließt `agent` nur aus, wenn
 `LUPYSTA_AGENT` nicht auf `1` gesetzt ist. Einzelheiten stehen in
-[`e2e-tests.md`](e2e-tests.md). `tests/agent/conftest.py` schlägt fehl, wenn die
-Suite trotzdem ohne Opt-in gesammelt wird; im opt-in-Lauf werden Skips zu
-Fehlern.
+[`e2e-tests.md`](e2e-tests.md). `tests/agent/conftest.py` bricht über
+`pytest_collectstart` ab, bevor ein Testmodul importiert wird, wenn die Suite
+trotzdem ohne Opt-in gesammelt wird; im opt-in-Lauf werden Skips bei der
+Ausführung und beim Sammeln zu Fehlern.
 
 ## Provider-Preflight
 

@@ -25,7 +25,7 @@ tests/
 ├── conftest.py              # Verzeichnis-Gate für e2e und agent
 └── e2e/
     ├── README.md
-    ├── conftest.py          # Container-Guard, Fail-on-Skips
+    ├── conftest.py          # Guard vor dem Import, Fail-on-Skips
     ├── Dockerfile
     └── test_*.py            # projektsepezifisch
 scripts/test-e2e.sh
@@ -61,9 +61,11 @@ if os.environ.get("LUPYSTA_AGENT") != "1":
 
 ## Guard in der Suite
 
-`tests/e2e/conftest.py` schlägt fehl, wenn die Suite ohne Opt-in, ohne
-Container-Umgebung oder ohne `/.dockerenv` gesammelt wird. Ein Skip ist kein
-Ersatz: Im Container werden Skips zu Fehlern. So bleibt ein Bypass laut.
+`tests/e2e/conftest.py` bricht über `pytest_collectstart` ab, bevor pytest ein
+Testmodul importiert, wenn die Suite ohne Opt-in, ohne Container-Umgebung oder
+ohne `/.dockerenv` gesammelt wird. Der Abbruch ist ein echter Fehler, kein
+Skip. Ein Skip ist kein Ersatz: Im Container werden Skips bei der Ausführung
+und beim Sammeln zu Fehlern. So bleibt ein Bypass laut.
 
 ## Null-Test-Semantik
 
@@ -73,7 +75,8 @@ Ersatz: Im Container werden Skips zu Fehlern. So bleibt ein Bypass laut.
 | Dateien vorhanden, Docker fehlt | Laute Fehlermeldung, Exitcode 1. |
 | Dateien vorhanden, Collection fehlerhaft | Fehler, Exitcode ungleich 0. |
 | Dateien vorhanden, Ausführung fehlerhaft | Fehler, Exitcode ungleich 0. |
-| Test wird übersprungen | Fehler im Container. |
+| Test wird bei der Ausführung übersprungen | Fehler im Container. |
+| Modul wird beim Sammeln übersprungen | Fehler im Container. |
 
 ## Runner-Ablauf
 
@@ -81,7 +84,8 @@ Ersatz: Im Container werden Skips zu Fehlern. So bleibt ein Bypass laut.
 2. Docker-Preflight: `docker` vorhanden und `docker info` erfolgreich.
 3. `tests/e2e/Dockerfile` prüfen.
 4. Python-Version aus `.python-version` lesen und auf `X.Y` normalisieren.
-5. Image bauen; Abhängigkeiten werden vor dem Quellcode installiert.
+5. Image mit `--file tests/e2e/Dockerfile` bauen; Abhängigkeiten werden vor dem
+   Quellcode installiert.
 6. Container ohne Netzwerk starten, Tests ausführen, Artefakte einsammeln.
 7. Container und temporäre Daten auch im Fehlerfall aufräumen.
 

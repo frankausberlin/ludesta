@@ -25,8 +25,9 @@ Verwende für die Entwicklung immer den lupysta-Skill.
   ausführen; sie ist beratend und nie Teil der CI.
 - Beide Suiten melden bei leerer Suite einen Hinweis und Exit 0. Sobald
   `test_*.py`-Dateien existieren, sind Fehler echte Fehler.
-- Das Verzeichnis-Gate steht in `tests/conftest.py`; die Suite-Guards schlagen
-  fehl, wenn eine Suite ohne Opt-in gesammelt wird.
+- Das Verzeichnis-Gate steht in `tests/conftest.py`; die Suite-Guards brechen
+  ab, bevor Testmodule importiert werden, wenn eine Suite ohne Opt-in
+  gesammelt wird.
 
 ## ADRs
 

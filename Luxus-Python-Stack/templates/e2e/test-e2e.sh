@@ -56,7 +56,8 @@ cleanup() {
 trap cleanup EXIT
 
 echo "Building E2E image '$tag' (Python $python_version)..."
-docker build --build-arg "PYTHON_VERSION=$python_version" --tag "$tag" .
+docker build --file "$dockerfile" \
+    --build-arg "PYTHON_VERSION=$python_version" --tag "$tag" .
 
 container="$(docker create --network none \
     --env LUPYSTA_E2E=1 \

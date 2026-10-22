@@ -12,7 +12,8 @@ Schnelle Prüfungen ohne Netzwerk und ohne erzeugte Projekte:
 - Argument-Validierung: unbekannte Optionen, fehlende Werte, ungültige Python-Versionen (< 3.11), unzulässige Kombinationen (`--lib --cli`), zu viele Verzeichnisse, ungültige Paketnamen und Python-Keywords werden abgelehnt. Keywords werden nach der Normalisierung geprüft, sodass auch `Class` und `IMPORT` abgelehnt werden.
 - Zielpfad-Prüfung: Dateien, nicht-leere Verzeichnisse und ein fehlendes Template führen zu einem Abbruch, bevor etwas geschrieben wird.
 - Beide Template-Runner sind syntaktisch gültig.
-- Leerlauf-Semantik: `scripts/test-e2e.sh` und `scripts/test-agent.sh` beenden sich in einem Projekt ohne `test_*.py` mit Exit 0 und einem Hinweis. Ein Fake-`docker` bzw. Fake-`uv` im `PATH` schreibt eine Markerdatei und beendet sich mit 99; die Markerdatei darf nicht entstehen.
+- Leerlauf-Semantik: `scripts/test-e2e.sh` und `scripts/test-agent.sh` beenden sich in einem Projekt ohne `test_*.py` mit Exit 0 und einem Hinweis. Ein Fake-`docker` bzw. Fake-`uv` im `PATH` protokolliert Aufrufe und beendet sich mit 99; bei leerer Suite darf keine Markerdatei entstehen.
+- Build-Aufruf: In einem Projekt mit `test_*.py` und `tests/e2e/Dockerfile` beantwortet der Fake-`docker` nur `info` mit 0. Der Runner muss `build --file tests/e2e/Dockerfile` aufrufen; der Test prüft das Argument im Aufrufprotokoll, ohne Docker zu benötigen.
 - `pyinit --help` nennt `test-e2e` und `test-agent`.
 - ZSH-Prompt: Wenn `zsh` installiert ist, übersteht `prompt_my_jupyter` ein leeres Runtime-Verzeichnis und ein einzelnes Runtime-Dateimuster ohne `NOMATCH`-Abbruch.
 
@@ -22,7 +23,10 @@ Zusätzlich Integrationstests mit temporären Projekten (werden am Ende gelösch
 
 - **App** (`pyinit <dir> --python 3.12`): erzeugt `AGENTS.md` mit Projektprofil, Testing, ADR-Konventionen und Attention Points (Contract-Version 3); kein `SESSION.md`, keine alten Managed-Blocks. `just check`, `just rate-design run/save/compare` und `just clean` funktionieren; Baselines werden nicht überschrieben und von `clean` erhalten.
 - **Opt-in-Gerüste**: `tests/conftest.py`, `tests/e2e/` (README, conftest, Dockerfile), `tests/agent/` (README, conftest), `scripts/test-e2e.sh`, `scripts/test-agent.sh` und `.dockerignore` existieren. `Justfile`, `pyproject.toml` (Marker, `e2e`-Gruppe), `.gitignore`, `README.md`, `CONTRIBUTING.md` und `.github/workflows/e2e.yml` enthalten die neuen Einträge. Beide Runner laufen im leeren Gerüst mit Exit 0; Fake-`docker`/`uv` beweisen, dass nichts aufgerufen wird.
-- **Gate-Probe**: Eine `tests/e2e/test_gate_probe.py` bzw. `tests/agent/test_gate_probe.py` mit absichtlichem `AssertionError` verändert `just check` nicht; anschließend wird die Probe entfernt. Wenn Docker verfügbar ist, führt `just test-e2e` die E2E-Probe wirklich aus und muss fehlschlagen; sonst wird dieser Teil übersprungen.
+- **Gate-Probe**: Eine `tests/e2e/test_gate_probe.py` bzw. `tests/agent/test_gate_probe.py` mit absichtlichem `AssertionError` verändert `just check` nicht; anschließend wird die Probe entfernt.
+- **Import-Guard**: Ein temporäres Testmodul schreibt beim Import eine Markerdatei. Ein direktes `uv run pytest tests/e2e` bzw. `tests/agent` ohne Opt-in muss mit der Runner-Meldung (`use just test-e2e`/`use just test-agent`) fehlschlagen; die Markerdatei darf nicht entstehen. Das beweist, dass der Guard vor dem Modulimport greift.
+- **Collection-Skips**: Ein Modul mit `pytest.skip(..., allow_module_level=True)` und ein bestandener Test lassen den opt-in-Lauf fehlschlagen. Beim Agenten wird die Skip-Meldung im Log nachgewiesen; mit Docker gilt dasselbe für die E2E-Suite. Anschließend werden die Proben entfernt.
+- **E2E-Ausführung**: Wenn Docker verfügbar ist, führt `just test-e2e` die E2E-Probe wirklich aus und muss fehlschlagen. Der Log und der JUnit-Bericht unter `e2e-artifacts.*` müssen die Probemeldung enthalten; sonst wird dieser Teil übersprungen.
 - **Refactoring-Workflow**: `just refactor demo` legt Branch `refactor/demo` und Baseline an; `just merge` erkennt den Branch, wechselt zurück nach `main` und löscht den gemergten Branch. Worktrees mit Journal-Dateien bleiben geschützt.
 - **Bibliothek** (`--lib`): korrekter Projekttyp in `AGENTS.md`, vollständiges Diátaxis-Gerüst (`tutorials/`, `how-to/`, `reference/`, `explanation/`) inklusive MkDocs-Navigation, `just check` und `just docs-check` sind grün.
 - **CLI-App** (`--cli`): korrekter Projekttyp in `AGENTS.md`, generierte CLI-Referenz, `just check` und `just docs-check` sind grün. Apps ohne `--cli` erhalten kein Docs-Gerüst.
@@ -54,7 +58,7 @@ bash tests/scripts/check-links.sh         # relative Markdown-Links prüfen
 
 - `bash`, `git`, `python3` (für `check-links.sh`)
 - `uv` und `just` für die Integrationstests
-- Docker ist optional. Nur wenn `docker info` erfolgreich ist, prüft der volle Lauf zusätzlich, dass `just test-e2e` einen echten E2E-Test im Container ausführt; sonst wird dieser Teil übersprungen.
+- Docker ist optional. Nur wenn `docker info` erfolgreich ist, prüft der volle Lauf zusätzlich, dass `just test-e2e` echte Tests im Container ausführt, Fehlschläge samt Probemeldung in Log und JUnit-Bericht festhält und Collection-Skips als Fehler behandelt; sonst werden diese Teile übersprungen.
 - `zsh` ist optional und aktiviert zusätzlich den Jupyter-Prompt-Test
 - Netzwerkzugriff kann für das Auflösen der Abhängigkeiten mit `uv` nötig sein
 - `fresh-clone.sh` testet den **letzten Commit**; nicht committete Änderungen werden nicht geprüft.
