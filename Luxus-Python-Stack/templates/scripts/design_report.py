@@ -203,9 +203,25 @@ def _raw_metrics(data: object) -> dict[str, float]:
 
 
 def _vulture_findings() -> dict[str, object]:
-    """Return advisory vulture findings as text lines."""
+    """Return advisory vulture findings as text lines.
+
+    Tests are scanned as well so that production code used only by tests is not
+    reported as dead. Pytest fixtures and hooks are ignored because pytest
+    invokes them implicitly instead of referencing them by name.
+    """
     directories = _sources()
-    result = _run([*_tool_command("vulture"), *directories, "--min-confidence", "60"])
+    result = _run(
+        [
+            *_tool_command("vulture"),
+            *directories,
+            "--min-confidence",
+            "60",
+            "--ignore-decorators",
+            "@pytest*.fixture*",
+            "--ignore-names",
+            "pytest_*,pytestmark,collect_ignore,collect_ignore_glob",
+        ]
+    )
     if result.returncode not in (0, 3):
         detail = result.stderr.strip() or result.stdout.strip() or "no output"
         raise MeasurementError(f"vulture failed: {detail}")

@@ -169,6 +169,33 @@ act() { [ "$#" -ne 0 ] && echo $1 > ~/.startenv && mamba activate $1; }
 # Creates an environment in a folder if it doesn't already exist and places it under the management of direnv.
 alias allowuv='echo "layout uv" > .envrc && direnv allow'
 EOF
+
+# --- Global Jupyter fix for Google Colab ---
+# Disables the RTC server extensions globally (~/.jupyter) to prevent WebSocket
+# crashes with Colab. Survives environment wipe-and-recreate cycles.
+mkdir -p ~/.jupyter && cat << 'EOF' > ~/.jupyter/jupyter_server_config.json
+{
+  "ServerApp": {
+    "jpserver_extensions": {
+      "jupyter_server_documents": false,
+      "jupyter_server_ydoc": false
+    }
+  }
+}
+EOF
+
+# --- Disable JupyterLab Collaboration Room polling ---
+# The client polls /api/collaboration/room/JupyterLab:globalAwareness every ~3s.
+# Even with RTC extensions disabled, the JupyterLab client still fires these
+# requests, causing 404 warnings. The user settings below silence them.
+mkdir -p ~/.jupyter/lab/user-settings/\@jupyterlab/collaboration-extension/
+cat << 'EOF' > ~/.jupyter/lab/user-settings/\@jupyterlab/collaboration-extension/plugin.jupyterlab-settings
+{
+    "collaborative": false,
+    "enableDocs": false
+}
+EOF
+
 # reload shell to activate mamba
 exec zsh
 ```
