@@ -168,6 +168,12 @@ act() { [ "$#" -ne 0 ] && echo $1 > ~/.startenv && mamba activate $1; }
 
 # Creates an environment in a folder if it doesn't already exist and places it under the management of direnv.
 alias allowuv='echo "layout uv" > .envrc && direnv allow'
+
+# --- Jupyter LSP shims ---
+# jupyter_lsp starts language servers in the terminal's process group, so Ctrl-C
+# also hits them (basedpyright then dies with a KeyboardInterrupt traceback).
+# The shims ignore SIGINT; keep this directory early in PATH.
+export PATH="$HOME/.local/libexec/jupyter-lsp-shims:$PATH"
 EOF
 
 # --- Global Jupyter fix for Google Colab ---
@@ -195,6 +201,36 @@ cat << 'EOF' > ~/.jupyter/lab/user-settings/\@jupyterlab/collaboration-extension
     "enableDocs": false
 }
 EOF
+
+# --- Jupyter LSP fix: Ctrl-C must not kill the language server ---
+# jupyter_lsp starts basedpyright-langserver with a plain subprocess.Popen
+# (jupyter_lsp/session.py, init_process) and therefore no new session. The
+# language server stays in the terminal's foreground process group, so Ctrl-C
+# sends SIGINT to Jupyter AND to basedpyright. Jupyter asks "Shut down this
+# Jupyter server (y/[n])?", basedpyright's Python wrapper has no
+# KeyboardInterrupt handling and dies with a traceback in the middle of the
+# prompt ("No answer for 5s").
+#
+# The shim ignores SIGINT (SIG_IGN survives exec, so the node process inherits
+# it) and execs the real binary, resolved via PATH without the shim directory.
+# Works for uv-tool and conda basedpyright alike. ~/.zshrc puts the directory
+# first on PATH.
+mkdir -p ~/.local/libexec/jupyter-lsp-shims
+cat << 'EOF' > ~/.local/libexec/jupyter-lsp-shims/basedpyright-langserver
+#!/bin/sh
+trap '' INT
+
+self_dir=$(dirname "$0")
+search_path=$(printf '%s' "$PATH" | tr ':' '\n' | grep -vxF "$self_dir" | paste -sd:)
+
+real=$(PATH=$search_path command -v basedpyright-langserver) || {
+    echo "basedpyright-langserver shim: no real basedpyright-langserver on PATH" >&2
+    exit 127
+}
+
+exec "$real" "$@"
+EOF
+chmod +x ~/.local/libexec/jupyter-lsp-shims/basedpyright-langserver
 
 # reload shell to activate mamba
 exec zsh
@@ -327,42 +363,9 @@ direnv --version
 mamba --version | head -1
 zsh -ic 'mamba activate base && echo "mamba hook ok"'
 
+# Jupyter LSP shim must win over the real basedpyright-langserver
+zsh -ic 'command -v basedpyright-langserver'   # -> ~/.local/libexec/jupyter-lsp-shims/basedpyright-langserver
+
 code --version
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
