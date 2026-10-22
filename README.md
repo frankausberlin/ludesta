@@ -67,7 +67,7 @@ Die `AGENTS.md` enthält das Projektprofil, die **ADR**-Konventionen und die Att
 
 2. Repository klonen:
    ```shell
-   sudo apt install -y git
+   sudo apt update && sudo apt update -y && sudo apt install -y git
    mkdir -p ~/gits
    git clone https://github.com/frankausberlin/ludesta ~/gits/ludesta
    ```
