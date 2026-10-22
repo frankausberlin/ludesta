@@ -1,6 +1,6 @@
 # Luxus-Python-Stack — Dokumentation
 
-Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen und Regeln für eine effiziente, konfliktfreie Python-Entwicklung, sowie einer DataScience Umgbung (Jupyter, Mamba). Seine Fünf-Ebenen-Architektur trennt Zuständigkeiten in klar abgegrenzte Schichten. ZSH mit Antidote und dem Powerlevel10k-Prompt dient nicht nur der Optik, sondern verankert auch funktionale Erweiterungen.
+Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen und Regeln für eine effiziente, konfliktfreie Python-Entwicklung, sowie einer DataScience Umgebung (Jupyter, Mamba). Seine Fünf-Ebenen-Architektur trennt Zuständigkeiten in klar abgegrenzte Schichten. ZSH mit Antidote und dem Powerlevel10k-Prompt dient nicht nur der Optik, sondern verankert auch funktionale Erweiterungen.
 
 ## Aufbau des Stacks
 
@@ -84,8 +84,8 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 * Aktiv, solange kein `.venv` im aktuellen Verzeichnis existiert; direnv hat Vorrang.
 * **Start:** `act <envname>` aktiviert die Umgebung und speichert den Namen in `~/.startenv`.
 * **Wegwerfcharakter:** Die Regel lautet „keine Updates, löschen und neu anlegen“.
-* **Namensschema:** `ds12` bedeutet „Data Science mit Python 3.12“; `_ds12` ist die Variante mit normalem `ipywidgets >= 8.0`.
-* **ipywidgets-Dilemma:** Colab benötigt `ipywidgets < 8.0`, aktuelle Jupyter-Versionen benötigen `>= 8.0`. Deshalb existieren zwei Varianten je Python-Version.
+* **Namensschema:** `ds12` bedeutet „Data Science mit Python 3.12“.
+* **ipywidgets-Dilemma:** Colab benötigt `ipywidgets < 8.0`, aktuelle Jupyter-Versionen benötigen `>= 8.0`. Das Setup legt deshalb `dsXY` mit `ipywidgets==7.7.1` für Colab an; eine separate Umgebung mit `ipywidgets >= 8.0` wird bei Bedarf manuell erstellt.
 * In Mamba-Umgebungen wird `uv pip install` für Geschwindigkeit verwendet;  die Pakete stehen bewusst nicht unter Mambas Kontrolle.
 
 ### Ebene 2: Projekte
@@ -106,7 +106,7 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 src/<paketname>/
 tests/
 scripts/design_report.py
-docs/                       # optional (Lib, --cli oder ADRs)
+docs/                       # Projektdokumentation nach dem Quasi-Standard Diátaxis
 docs/adr/                   # Architekturentscheidungen (bei Bedarf)
 pyproject.toml
 uv.lock
@@ -118,7 +118,7 @@ JOURNAL.md                  # gitignored
 .github/workflows/ci.yml    # release.yml bei Bibliotheken
 ```
 
-* `AGENTS.md` enthält das Projektprofil, den ADR-Index und die Attention Points.
+* `AGENTS.md` enthält das Projektprofil, die ADR-Konventionen und die Attention Points.
 * Der Skill beschreibt die Arbeitsweisen; die Projektdateien bleiben die ausführbare Quelle.
 
 ### Ebene 3: CI/CD
@@ -136,13 +136,13 @@ Die vierte Ebene besteht aus vier Teilen:
 | Teil | Verantwortung |
 | --- | --- |
 | Installierter lupysta-Skill | Beschreibt alle möglichen Arbeitsweisen als Rezepte. |
-| Projekt-`AGENTS.md` | Enthält Projektprofil, ADR-Index und Attention Points; keine zweite Skill-Kopie. |
+| Projekt-`AGENTS.md` | Enthält Projektprofil, ADR-Konventionen und Attention Points; keine zweite Skill-Kopie. |
 | `JOURNAL.md` | Chronologische Historie und aktueller Stand; gitignored. |
-| `docs/adr/` | Unveränderliche Architekturentscheidungen; bei Bedarf angelegt. |
+| `docs/adr/` | Architekturentscheidungen; der Inhalt ist unveränderlich, Revisionen entstehen als neue ADR. |
 
 Ablauf:
 
-1. `AGENTS.md` lesen: Projektprofil, ADR-Index und Attention Points.
+1. `AGENTS.md` lesen: Projektprofil, ADR-Konventionen und Attention Points.
 2. Den letzten Eintrag in `JOURNAL.md` lesen, falls vorhanden.
 3. `docs/adr/` sichten, falls vorhanden.
 4. `uv sync` und `git status` ausführen.
@@ -187,12 +187,12 @@ Orientierung:
 | 12 | `.gitignore` | Python, Umgebungen, Caches, Docs-Ausgabe, `JOURNAL.md`, `ignore/`, `.refactor/`, `.kilo/`; `.vscode/` bleibt versionierbar. |
 | 13 | VS Code | `settings.json`, `launch.json`, `extensions.json`. |
 | 14 | direnv | `.envrc` mit Conda-Schutz, `watch_file uv.lock`, `layout uv`; kein automatisches `direnv allow`. |
-| 15 | Justfile | `test`, `lint`, `typecheck`, `check`, `fix`, `clean`, `audit`, `bump`, `rate-design`, `refactor`, `merge`; `check` ruft `docs-check` auf, wenn vorhanden. |
+| 15 | Justfile | `test`, `lint`, `typecheck`, `check`, `fix`, `clean`, `audit`, `bump`, `rate-design`, `refactor`, `merge`; `run` nur für Apps; `check` ruft `docs-check` auf, wenn vorhanden. |
 | 16 | GitHub Actions | `ci.yml` immer; `release.yml` nur für Bibliotheken. |
-| 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, ADR-Index, Attention Points, Herkunft. |
+| 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, ADR-Konventionen, Attention Points, Herkunft. |
 | 18 | Journal und Projektdokumente | `JOURNAL.md`, `README.md`, `.editorconfig`, `CONTRIBUTING.md`, `LICENSE`. |
 | 19 | pre-commit | Standard-Hooks plus lokale Ruff-Hooks; basedpyright läuft im Gate und in CI. |
-| 20 | Dokumentation | Lib: MkDocs; App mit `--cli`: generierte CLI-Referenz. Generierte Seiten nie von Hand ändern. |
+| 20 | Dokumentation | Lib: MkDocs; App mit `--cli`: generierte CLI-Referenz. Diátaxis: explanation/ how-to/, index.md, reference/, tutorials/; Architecture Decision Record: adr/ |
 | 21 | Git | `git init -q -b main`. |
 | 22 | Sync, Hooks, Gate | `uv sync`, `uv run pre-commit install`, ggf. `just docs`, dann `just check`; mit `--no-check` entfällt nur das Gate. |
 

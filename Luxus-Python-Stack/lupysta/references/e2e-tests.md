@@ -6,7 +6,7 @@ Dieses Rezept ist ein Überblick. Die vollständige Umsetzung ist eine spätere
 Stufe; im Kern erzeugt die Projektinitialisierung keine E2E-Suite. Lade dieses
 Rezept nur, wenn das Projekt `tests/e2e/` mit Testdateien enthält oder die
 Aufgabe ausdrücklich die Einrichtung einer E2E-Suite verlangt. Die Einrichtung
-selbst ist ein eigener Auftrag und steht in der Stack-Dokumentation.
+selbst ist ein eigener Auftrag und nicht Teil der Basisversion.
 
 ## Wann sinnvoll
 

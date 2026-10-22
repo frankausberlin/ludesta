@@ -212,7 +212,10 @@ APP="$TMP_ROOT/app"
 if expect_success "pyinit creates an app" pyinit "$APP" --python 3.12; then
     assert_file "app AGENTS.md exists" "$APP/AGENTS.md"
     assert_contains "app AGENTS.md has project profile" "$APP/AGENTS.md" "## Projektprofil"
-    assert_contains "app AGENTS.md has ADR index" "$APP/AGENTS.md" "## ADRs"
+    assert_contains "app AGENTS.md has ADR section" "$APP/AGENTS.md" "## ADRs"
+    assert_contains "app AGENTS.md names the ADR directory" "$APP/AGENTS.md" "docs/adr"
+    assert_contains "app AGENTS.md documents decision filenames" "$APP/AGENTS.md" "0001-wir-verwenden-zsh.md"
+    assert_not_contains "app AGENTS.md has no legacy ADR directory" "$APP/AGENTS.md" "docs/decisions"
     assert_contains "app AGENTS.md has attention points" "$APP/AGENTS.md" "## Attention Points"
     assert_contains "app AGENTS.md records the project type" "$APP/AGENTS.md" "Projekttyp: App"
     assert_contains "app AGENTS.md records the contract version" "$APP/AGENTS.md" 'contract_version: `2`'

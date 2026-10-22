@@ -28,8 +28,9 @@ jedes initialisierte Projekt. Prüfe vor der Verwendung, welche Rezepte das
 4. Andernfalls bleibt der Worktree stehen; der Pfad wird genannt.
 5. Es pusht nie.
 6. Nach dem Merge die Eindeutigkeit der ADR- und AP-Nummern prüfen; der
-   spätere Branch nummeriert seine noch nicht veröffentlichten Einträge um
-   (siehe [`session-close.md`](session-close.md)).
+   spätere Branch nummeriert seine noch nicht veröffentlichten Einträge um.
+   Revidierte ADRs mit `_`-Präfix behalten ihre Nummer (siehe
+   [`session-close.md`](session-close.md)).
 
 Ohne Argument sucht das Rezept einen eindeutigen Kandidaten: zuerst einen
 Branch in einem anderen Worktree, sonst den einzigen lokalen Branch, der

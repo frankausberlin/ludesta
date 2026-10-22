@@ -42,8 +42,9 @@ Begründung, der AP die Handhabung. Den ADR-Text nicht im AP duplizieren.
 
 ## 4. ADR anlegen
 
-Dateiname: `docs/adr/NNNN-kurz-titel.md` (vierstellige Nummer, Kleinbuchstaben,
-Bindestriche). `docs/adr/` bei Bedarf anlegen.
+Dateiname: `docs/adr/NNNN-entscheidung.md` (vierstellige Nummer, danach die
+Entscheidung als kleingeschriebene Wörter mit Bindestrichen). `docs/adr/` bei
+Bedarf anlegen.
 
 ```markdown
 # ADR-NNNN: Titel
@@ -68,31 +69,44 @@ Bindestriche). `docs/adr/` bei Bedarf anlegen.
 ...
 ```
 
-- Die nächste freie Nummer verwenden, beginnend mit `0001`.
-- Veröffentlichte ADRs niemals löschen oder umnummerieren. Sobald eine ADR
-  auf `main` gemergt ist, gilt ihre Nummer als vergeben.
-- Wird eine Entscheidung revidiert, eine neue ADR mit der nächsten Nummer
-  anlegen, die alte auf `Status: superseded by ADR-MMMM` setzen und in beiden
-  Dateien aufeinander verweisen.
-- Die ADR im ADR-Index in `AGENTS.md` verlinken:
+* Die nächste freie Nummer verwenden, beginnend mit `0001`.
+* Veröffentlichte ADRs niemals löschen oder umnummerieren. Sobald eine ADR auf
+  `main` gemergt ist, gilt ihre Nummer als vergeben – auch dann, wenn die
+  Entscheidung später revidiert wird.
+* Der Dateiname nennt die Entscheidung selbst, nicht nur das Thema:
+  * `0003-auswahl-der-shell.md` ist falsch; der Name sagt dem Agenten nichts,
+    er muss die Datei lesen.
+  * `0003-wir-verwenden-zsh.md` ist richtig; der Name ist die Entscheidung.
+* Ein `ADR`-Präfix im Dateinamen ist nicht nötig. Das Verzeichnis `docs/adr/`
+  benennt die Dokumentart; der Standard (MADR, adr-tools) verwendet
+  `NNNN-titel.md`.
+* `_`-Dateien zählen bei der Nummernvergabe mit. Werkzeuge, die nur nach
+  führenden Ziffern suchen (z. B. `adr-tools`), übersehen sie; die nächste
+  Nummer daher immer über alle Dateien in `docs/adr/` bestimmen.
+* Wird eine Entscheidung revidiert, passiert Folgendes:
+  1. Eine neue ADR mit der nächsten Nummer anlegen.
+  2. Die alte auf `Status: superseded by ADR-MMMM` setzen.
+  3. In beiden Dateien aufeinander verweisen: Die neue ADR verlinkt
+     `_NNNN-...md`, die alte verlinkt `MMMM-...md`.
+  4. Die alte ADR-Datei umbenennen: `<filename>` wird zu `_<filename>`.
+     Beispiel: `0003-wir-verwenden-zsh.md` wird zu
+     `_0003-wir-verwenden-zsh.md`.
 
-  ```markdown
-  | [ADR-NNNN](docs/adr/NNNN-kurz-titel.md) | Titel | accepted |
-  ```
+  Nach dem Umbenennen zeigt `ls -1 docs/adr` zuerst alle aktiven und danach
+  alle revidierten Entscheidungen. Das `_` ist eine lokale Konvention; der
+  Status im Dokument bleibt die inhaltliche Wahrheit.
 
 ## 5. Attention Point anlegen
 
 Im Abschnitt `## Attention Points` in `AGENTS.md` ergänzen:
 
 ```markdown
+### AP-N: Kurztitel
 
-AP-N: Kurztitel
----
-* **Situation**: ...
-* **Handhabung**: ...
-* **Involvierte ADRs**: ...
-* **Kontext**: ...
----
+- **Situation**: ...
+- **Handhabung**: ...
+- **Involvierte ADRs**: ...
+- **Kontext**: ...
 ```
 
 - Die nächste freie Nummer verwenden; Nummern bleiben stabil, Lücken sind ok.
@@ -108,14 +122,14 @@ Am Ende von `JOURNAL.md` einen datierten Eintrag anhängen:
 
 * **Stand**: ...
 * **Änderungen**: ...
-* **ADRs**: ADR-NNNN (neu) / keine
+* **ADRs**: ADR-0001 (neu) / keine
 * **Attention Points**: AP-N (neu) / keine
 * **Offen**: ...
 ```
 
 ## 7. Konsistenz prüfen
 
-- Alle im ADR-Index verlinkten Dateien existieren.
+- Jede Datei in `docs/adr/` folgt dem Muster `_?NNNN-entscheidung.md`.
 - ADR-Nummern sind eindeutig; AP-Nummern sind eindeutig.
 - `just check` ist grün.
 - ADRs und APs sind mit der Aufgabe committet; `JOURNAL.md` bleibt lokal.
@@ -123,13 +137,21 @@ Am Ende von `JOURNAL.md` einen datierten Eintrag anhängen:
 Nach einem Merge prüfen, ob zwei Branches dieselbe Nummer vergeben haben:
 
 ```shell
-ls docs/adr 2>/dev/null | grep -E '^[0-9]{4}-' | cut -c1-4 | sort | uniq -d
+ls docs/adr 2>/dev/null | sed 's/^_//' | grep -E '^[0-9]{4}-' | cut -c1-4 | sort | uniq -d
 grep -oE '^### AP-[0-9]+' AGENTS.md | sort | uniq -d
+```
+
+Das erste Kommando ignoriert das `_`-Präfix revidierter ADRs. Zusätzlich
+prüfen, dass keine Datei die Konvention verletzt (die Ausgabe muss leer sein):
+
+```shell
+ls docs/adr 2>/dev/null | grep -Ev '^_?[0-9]{4}-[a-z0-9-]+\.md$'
 ```
 
 Der später gemergte Branch nummeriert seine noch nicht auf `main` gemergten
 ADRs und APs auf die nächsten freien Nummern um und aktualisiert alle
-Referenzen im selben Commit. Auf `main` gemergte Nummern bleiben unverändert.
+Referenzen im selben Commit. Auf `main` gemergte Nummern bleiben unverändert,
+auch bei revidierten ADRs mit `_`-Präfix.
 
 ## 8. Bei Unsicherheit
 

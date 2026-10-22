@@ -6,8 +6,8 @@ Dieses Rezept ist ein Überblick. Die vollständige Umsetzung ist eine spätere
 Stufe nach einem Go/No-Go; im Kern erzeugt die Projektinitialisierung keine
 Agent-Suite. Lade dieses Rezept nur, wenn das Projekt `tests/agent/` mit
 Testdateien enthält oder die Aufgabe ausdrücklich die Einrichtung einer
-Agent-Suite verlangt. Die Einrichtung selbst ist ein eigener Auftrag und steht
-in der Stack-Dokumentation.
+Agent-Suite verlangt. Die Einrichtung selbst ist ein eigener Auftrag und nicht
+Teil der Basisversion.
 
 ## Wann sinnvoll
 

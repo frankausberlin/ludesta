@@ -17,11 +17,19 @@ Verwende für die Entwicklung immer den lupysta-Skill.
 
 ## ADRs
 
-Architekturentscheidungen liegen als Dateien in `docs/adr/`. Neue Einträge
-werden hier mit Nummer, Titel und Status verlinkt.
+Architekturentscheidungen liegen als Dateien in `docs/adr/`. Verschaffe dir mit
+`ls -1 docs/adr` einen Überblick, falls das Verzeichnis existiert.
 
-| ADR | Titel | Status |
-| --- | --- | --- |
+* Dateiname: `NNNN-entscheidung.md`, zum Beispiel `0001-wir-verwenden-zsh.md`.
+  Der Name nennt die Entscheidung, nicht nur das Thema.
+* Ein `ADR`-Präfix im Dateinamen ist nicht nötig; das Verzeichnis benennt die
+  Dokumentart.
+* Der Name reicht für den Überblick; lies eine aktive ADR, wenn ihre
+  Entscheidung die Aufgabe berührt.
+* Revidierte Entscheidungen tragen ein `_`-Präfix, zum Beispiel
+  `_0001-wir-verwenden-zsh.md`. Ihre Nummer bleibt vergeben.
+* Der Status steht im Dokument: `accepted`, `superseded by ADR-NNNN` oder
+  `deprecated`.
 
 ## Attention Points
 

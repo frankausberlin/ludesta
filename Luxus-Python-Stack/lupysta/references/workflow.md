@@ -4,7 +4,7 @@ Dieses Rezept beschreibt den Sitzungsablauf in einem initialisierten Projekt.
 
 ## Sitzungsstart
 
-1. `AGENTS.md` lesen: Projektprofil, ADR-Index und Attention Points.
+1. `AGENTS.md` lesen: Projektprofil, ADR-Konventionen und Attention Points.
 2. Den letzten Eintrag in `JOURNAL.md` lesen, falls vorhanden.
 3. `docs/adr/` sichten, falls vorhanden.
 4. `uv sync` ausführen, damit die Umgebung zum Lockfile passt.

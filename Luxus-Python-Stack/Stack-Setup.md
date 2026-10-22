@@ -32,7 +32,7 @@ chsh -s $(which zsh)
 
 ## ZSH with antidote and p10k
 ```shell
-# insert from luxus-python-stack
+# insert from LUDESTA
 echo 'setopt INTERACTIVE_COMMENTS' >> ~/.zshrc
 ```
 > ⚠️ **reopen zsh (necessary to be able to use comment characters '#')**
@@ -169,7 +169,7 @@ act() { [ "$#" -ne 0 ] && echo $1 > ~/.startenv && mamba activate $1; }
 # Creates an environment in a folder if it doesn't already exist and places it under the management of direnv.
 alias allowuv='echo "layout uv" > .envrc && direnv allow'
 EOF
-# reload shell to activte mamba
+# reload shell to activate mamba
 exec zsh
 ```
 
@@ -245,13 +245,13 @@ git config --global core.excludesfile ~/.gitignore_global
 #                     (re)create a data science environment with all the goodies and activate it
 # _________________________________________________________________________________________________________________________________
 py=3.12 && ENV_NAME="ds${py: -2}" && mamba deactivate && mamba remove -y -n $ENV_NAME --all 2>/dev/null # python 3.XY --> 'dsXY'
-mamba   create -y -n $ENV_NAME python=$py google-colab && mamba activate $ENV_NAME # testet with python 3.11/12/13
+mamba   create -y -n $ENV_NAME python=$py google-colab && mamba activate $ENV_NAME # tested with Python 3.11/12/13
 uv pip  install  -U jupyterlab jupyter_http_over_ws jupyter-ai jupyterlab-github xeus-python huggingface-hub ipywidgets==7.7.1
 jupyter labextension enable jupyter_http_over_ws && echo $ENV_NAME > ~/.startenv
 python  -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
 # _______________________________________use_'act'_instead_of_'mamba_activate'_____________________________________________________
 # mamba activate $(cat ~/.startenv) # insert in your shell rc file
-# act() { [ "$#" -ne 0 ] && echo $1 > .startenv && mamba activate $1; } # switch environment and remember
+# act() { [ "$#" -ne 0 ] && echo $1 > ~/.startenv && mamba activate $1; } # switch environment and remember
 ```
 
 Important notes on the Mamba level:
@@ -267,7 +267,7 @@ Important notes on the Mamba level:
 ```shell
 # load functions
 cat << 'EOF' >> ~/.zshrc
-# insert from luxus-python-stack
+# insert from LUDESTA
 source ~/gits/ludesta/Luxus-Python-Stack/scripts/luxuspythonstack.sh
 EOF
 

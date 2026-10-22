@@ -26,7 +26,7 @@ Attention Points), `JOURNAL.md` (Sitzungsgedächtnis) und `docs/adr/`
 
 ## Einstieg
 
-1. `AGENTS.md` lesen: Projektprofil, ADR-Index und Attention Points.
+1. `AGENTS.md` lesen: Projektprofil, ADR-Konventionen und Attention Points.
 2. Den letzten Eintrag in `JOURNAL.md` lesen, falls vorhanden.
 3. `docs/adr/` sichten, falls vorhanden; die Dateinamen genügen für den
    Überblick.
@@ -37,7 +37,7 @@ Attention Points), `JOURNAL.md` (Sitzungsgedächtnis) und `docs/adr/`
 ## Grundregeln
 
 - **`AGENTS.md` ist die Projektquelle.** Sie enthält die projektbezogenen
-  Regeln, den ADR-Index und die Attention Points.
+  Regeln, die ADR-Konventionen und die Attention Points.
 - **`just check` grün halten.** Vor und nach jeder Änderung gilt das
   Qualitätsgate des Projekts.
 - **Tests, Lint und Typen nicht abschwächen**, um Fehler zu verstecken.
@@ -72,8 +72,8 @@ Weicht der Projektzustand von `AGENTS.md` ab, melde die Abweichung, statt sie
 stillschweigend zu reparieren oder neu anzulegen.
 
 E2E- und Agent-Tests sind nicht Teil der Basisversion. Ihre Einrichtung ist
-ein eigener Auftrag und steht in der Stack-Dokumentation; der Skill beschreibt
-nur die Arbeit mit einer bereits vorhandenen Suite.
+ein eigener Auftrag; der Skill beschreibt nur die Arbeit mit einer bereits
+vorhandenen Suite.
 
 ## Tägliche Entwicklungsbefehle
 
@@ -81,7 +81,7 @@ nur die Arbeit mit einer bereits vorhandenen Suite.
 uv add <package>          # Laufzeitabhängigkeit
 uv add --dev <package>    # Abhängigkeit nur für die Entwicklung
 uv sync                   # Umgebung synchronisieren
-just run                  # Hauptskript ausführen
+just run                  # Hauptskript ausführen (nur Apps)
 just test                 # pytest mit Coverage
 just lint                 # ruff + basedpyright
 just typecheck            # nur Typprüfung
@@ -110,8 +110,9 @@ Versionen niemals manuell bearbeiten oder Tags erstellen. Immer `bump-my-version
 just bump patch           # 0.2.0 → 0.2.1
 just bump minor           # 0.2.1 → 0.3.0
 just bump major           # 0.3.0 → 1.0.0
-git push origin main --tags
 ```
+
+Agenten pushen nie; der Maintainer veröffentlicht mit `git push origin main --tags`.
 
 ## Refactoring
 

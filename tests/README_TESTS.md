@@ -16,7 +16,7 @@ Schnelle Prüfungen ohne Netzwerk und ohne erzeugte Projekte:
 
 Zusätzlich Integrationstests mit temporären Projekten (werden am Ende gelöscht):
 
-- **App** (`pyinit <dir> --python 3.12`): erzeugt `AGENTS.md` mit Projektprofil, ADR-Index und Attention Points; kein `SESSION.md`, keine alten Managed-Blocks. `just check`, `just rate-design run/save/compare` und `just clean` funktionieren; Baselines werden nicht überschrieben und von `clean` erhalten.
+- **App** (`pyinit <dir> --python 3.12`): erzeugt `AGENTS.md` mit Projektprofil, ADR-Konventionen und Attention Points; kein `SESSION.md`, keine alten Managed-Blocks. `just check`, `just rate-design run/save/compare` und `just clean` funktionieren; Baselines werden nicht überschrieben und von `clean` erhalten.
 - **Refactoring-Workflow**: `just refactor demo` legt Branch `refactor/demo` und Baseline an; `just merge` erkennt den Branch, wechselt zurück nach `main` und löscht den gemergten Branch. Worktrees mit Journal-Dateien bleiben geschützt.
 - **Bibliothek** (`--lib`) und **CLI-App** (`--cli`): korrekter Projekttyp in `AGENTS.md`, `just check` und `just docs-check` sind grün.
 - **`.git-only`-Ziel**: ein bereits initialisiertes Repo wird akzeptiert, `.git` bleibt erhalten und der Branch wird auf `main` gesetzt.
@@ -25,7 +25,7 @@ Die Skripte geben pro Prüfung `ok - ...` bzw. `not ok - ...` aus und am Ende ei
 
 ### `fresh-clone.sh`
 
-Kloned den letzten Commit in ein temporäres Verzeichnis und stellt sicher, dass ein frischer Clone ohne lokalen Zustand (z. B. `ignore/`) funktioniert. Danach laufen die Fast-Checks, ein Beispielprojekt wird angelegt und `just check` ausgeführt.
+Klont den letzten Commit in ein temporäres Verzeichnis und stellt sicher, dass ein frischer Clone ohne lokalen Zustand (z. B. `ignore/`) funktioniert. Danach laufen die Fast-Checks, ein Beispielprojekt wird angelegt und `just check` ausgeführt.
 
 ### `scripts/check-links.sh`
 
