@@ -30,15 +30,7 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 
 ## Installation
 
-1. Repository an einen stabilen Ort klonen:
-   ```shell
-   mkdir -p ~/gits
-   git clone https://github.com/frankausberlin/ludesta ~/gits/ludesta
-   ```
-2. Die [Setup-Anleitung](Stack-Setup.md) befolgen.
-3. Den Skill verlinken und das Script in der Shell einbinden; die [Setup-Anleitung](Stack-Setup.md) beschreibt beide Schritte.
-
-> **Hinweis:** Die Einrichtung in einer VM oder einer frischen Ubuntu-Installation wird empfohlen. Andere Distributionen sind nicht getestet. Für ein bereits genutztes System sollte ein erfahrener Agent die Setup-Anleitung begleiten.
+**Die [Setup-Anleitung](Stack-Setup.md) befolgen.**
 
 ## Überblick verwendete Werkzeuge
 
