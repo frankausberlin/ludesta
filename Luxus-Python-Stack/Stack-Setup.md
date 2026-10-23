@@ -355,7 +355,7 @@ ip -br addr
 
 # IN DER VM, nicht als root: erst ausführen, wenn der Login oben ohne Passwort klappt
 # 00- gewinnt gegen 50-cloud-init.conf, sshd nimmt den ersten Wert
-cat << 'EOF' | sudo tee /etc/ssh/sshd_config.d/00-ludesta.conf > /dev/null
+cat << EOF | sudo tee /etc/ssh/sshd_config.d/00-ludesta.conf > /dev/null
 PasswordAuthentication no
 KbdInteractiveAuthentication no
 PermitRootLogin no
@@ -365,7 +365,8 @@ Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
 EOF
 sudo sshd -t && sudo systemctl reload ssh
 
-# Effektive Werte: muss "no" zeigen, sonst Sitzung nicht schließen
+# Erste drei Werte: no; allowusers: dein VM-Benutzername
+# Danach SSH-Login in einem zweiten Terminal prüfen, bisherige Sitzung offen lassen.
 sudo sshd -T | grep -E '^(passwordauthentication|kbdinteractiveauthentication|permitrootlogin|allowusers) '
 
 # Firewall: eingehend dicht, SSH gedrosselt, ausgehend offen
