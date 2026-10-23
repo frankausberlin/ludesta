@@ -345,17 +345,17 @@ VM_IP="<vm-ip>"          # NAT: 127.0.0.1, beide ssh-Befehle zusätzlich mit -p 
 
 [ -f ~/.ssh/id_ed25519 ] || ssh-keygen -t ed25519
 ssh-copy-id -i ~/.ssh/id_ed25519.pub "${VM_USER}@${VM_IP}"
-ssh -o PasswordAuthentication=no "${VM_USER}@${VM_IP}" true   # muss ohne Passwort klappen
+ssh -o PreferredAuthentications=publickey "${VM_USER}@${VM_IP}" true
 ```
 
 ### Ausführen in der VM
 ```shell
 # ip ermitteln (wird im Host PC benötigt)
-ip -a
+ip -br addr
 
 # IN DER VM, nicht als root: erst ausführen, wenn der Login oben ohne Passwort klappt
 # 00- gewinnt gegen 50-cloud-init.conf, sshd nimmt den ersten Wert
-cat <<EOF | sudo tee /etc/ssh/sshd_config.d/00-ludesta.conf > /dev/null
+cat << 'EOF' | sudo tee /etc/ssh/sshd_config.d/00-ludesta.conf > /dev/null
 PasswordAuthentication no
 KbdInteractiveAuthentication no
 PermitRootLogin no
@@ -454,6 +454,5 @@ sudo ufw status verbose
 systemctl is-active ssh ssh.socket    # mindestens einer muss aktiv sein
 sudo ss -tlnp | grep ':22 '           # ssh listening
 sudo sshd -T | grep -Ei '^(passwordauthentication|permitrootlogin|allowusers|maxauthtries)'
-sudo fail2ban-client status sshd
 ls -la ~/.ssh/authorized_keys         # Server-Seite: Host-Key muss hier liegen
 ```
