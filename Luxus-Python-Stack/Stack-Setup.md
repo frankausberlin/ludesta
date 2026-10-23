@@ -4,7 +4,7 @@
 * Dazwischen gibt es Hinweise („⚠️“), die beachtet werden müssen.
 
 ## Basissystem
-> ⚠️ **Der Standard-Darkmode der bash zeigt Kommentare schlecht an, ich empfehle die Pallete 'VS Code dark'**
+> ⚠️ **Der Standard-Darkmode der bash zeigt Kommentare schlecht an, ich empfehle die Pallete 'VS Code' (dark)**
 
 ```shell
 # Ich bevorzuge nala
@@ -83,7 +83,7 @@ zstyle ':fzf-tab:*' fzf-command fzf
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color=always -- "$realpath"'
 EOF
 ```
-> ⚠️ **Terminal neu starten. Powerlevel10k führt beim ersten Start durch den Konfigurationsassistenten. (yy1n2122125222221n1y)**
+> ⚠️ **Terminal neu starten. Powerlevel10k führt beim ersten Start durch den Konfigurationsassistenten. (fav: yyy1n2122125222221n1y)**
 
 ## Installation: Brew, Just, Direnv, UV, Ruff, Bump-my-version, Basedpyright, Nbstripout
 
@@ -296,14 +296,17 @@ __pycache__/
 .DS_Store
 Thumbs.db
 EOF
+
+# setze globales gitignore, verwende main anstatt master, merge-verhalten
 git config --global core.excludesfile ~/.gitignore_global
+git config --global init.defaultBranch main
+git config --global pull.rebase true
+```
 
-# Git-Konfiguration
+* ⚠️ optional Daten eingeben, no-reply-email gibts hier: https://github.com/settings/emails
+```shell
 #git config --global user.name "Your Name"
-#git config --global user.email "noreply-email" # -> https://github.com/settings/emails
-#git config --global init.defaultBranch main
-#git config --global pull.rebase true
-
+#git config --global user.email "noreply-email" 
 # GitHub-Login („SSH“ wählen und den id_ed25519.pub-Schlüssel hochladen!)
 #gh auth login
 # Legt den Credential-Helper für HTTPS-Remotes fest
