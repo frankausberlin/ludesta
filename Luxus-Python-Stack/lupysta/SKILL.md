@@ -6,7 +6,7 @@ description: >
   Refactoring, Projektjournal, ADRs und Attention Points. E2E- und
   Agent-Tests werden als opt-in Gerüste erzeugt und sind nicht Teil von
   `just check`.
-version: 0.9.0
+version: 0.10.0
 platforms: [linux]
 metadata:
   tags: [python, uv, quality-gate, refactoring, adr]

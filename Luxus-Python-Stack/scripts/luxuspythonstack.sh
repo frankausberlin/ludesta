@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # _LUXUS_SCRIPT_DIR — absolute path to the directory containing this sourced script
 if [ -n "${BASH_SOURCE[0]:-}" ]; then
     _LUXUS_SOURCE="${BASH_SOURCE[0]}"
@@ -10,7 +11,7 @@ _LUXUS_REAL_SOURCE="$(readlink -f "$_LUXUS_SOURCE" 2>/dev/null || printf '%s\n' 
 _LUXUS_SCRIPT_DIR="$(cd "$(dirname "$_LUXUS_REAL_SOURCE")" && pwd)"
 unset _LUXUS_SOURCE _LUXUS_REAL_SOURCE
 
-_LUPYSTA_VERSION="0.9.0"
+_LUPYSTA_VERSION="0.10.0"
 _LUPYSTA_CONTRACT_VERSION="3"
 
 
@@ -70,6 +71,11 @@ Opt-in test scaffolds:
   without test_*.py files. They are not part of `just check`. Run them with:
     just test-e2e     # empty suite prints a hint and exits 0, no Docker call
     just test-agent   # empty suite prints a hint and exits 0, no provider call
+
+License:
+  pyinit writes an MIT LICENSE. The copyright holder is taken from
+  `git config user.name` (fallback: "Project Author"). Review the file before
+  you publish the project.
 PYINIT_HELP
                 return 0
                 ;;
@@ -187,13 +193,16 @@ PYINIT_HELP
     local _design_report="${_template_dir}/scripts/design_report.py"
     local _e2e_template_dir="${_template_dir}/e2e"
     local _agent_template_dir="${_template_dir}/agent"
+    local _workflow_template_dir="${_template_dir}/workflows"
     local _template
     for _template in "$_agents_template" "$_design_report" \
         "$_e2e_template_dir/README.md" "$_e2e_template_dir/conftest.py" \
         "$_e2e_template_dir/Dockerfile" "$_e2e_template_dir/dockerignore" \
         "$_e2e_template_dir/test-e2e.sh" \
         "$_agent_template_dir/README.md" "$_agent_template_dir/conftest.py" \
-        "$_agent_template_dir/test-agent.sh"; do
+        "$_agent_template_dir/test-agent.sh" \
+        "$_workflow_template_dir/ci.yml" "$_workflow_template_dir/e2e.yml" \
+        "$_workflow_template_dir/release.yml"; do
         if [[ ! -f "$_template" ]]; then
             echo "Error: required project template not found at '$_template'." >&2
             return 1
@@ -248,8 +257,12 @@ PYINIT_HELP
         if [[ "$_type" == "app" ]]; then
             sed -i "s|\"${PACKAGE_NAME}:main\"|\"${PACKAGE_NAME}.main:main\"|" pyproject.toml \
                 || _die "patching [project.scripts] failed"
+            grep -qF "\"${PACKAGE_NAME}.main:main\"" pyproject.toml \
+                || _die "patching [project.scripts] failed"
         fi
         sed -i 's/^version = "0\.1\.0"$/version = "0.1.0"  # project-version/' pyproject.toml \
+            || _die "patching version marker failed"
+        grep -qF 'version = "0.1.0"  # project-version' pyproject.toml \
             || _die "patching version marker failed"
 
         # ─── Step 4: package source files ─────────────────────────────────────
@@ -803,71 +816,14 @@ PYINIT_JUST_RUN
         fi
 
         # ─── Step 11: GitHub Actions ──────────────────────────────────────────
-        mkdir -p .github/workflows
-        cat > .github/workflows/ci.yml <<'PYINIT_CI'
-name: CI
-on: [push, pull_request]
-jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
-      - uses: extractions/setup-just@v2
-      - run: uv sync --locked --dev
-      - run: just check
-      - run: uv run pip-audit
-PYINIT_CI
-
-        cat > .github/workflows/e2e.yml <<'PYINIT_E2E_CI'
-name: E2E
-on:
-  push:
-  pull_request:
-  workflow_dispatch:
-jobs:
-  e2e:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: extractions/setup-just@v2
-      - run: just test-e2e
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: e2e-artifacts
-          path: |
-            e2e-artifacts.*/**
-            !e2e-artifacts.*/work/**
-          if-no-files-found: ignore
-PYINIT_E2E_CI
-
+        mkdir -p .github/workflows || _die "creating .github/workflows failed"
+        cp "$_workflow_template_dir/ci.yml" .github/workflows/ci.yml \
+            || _die "copying .github/workflows/ci.yml failed"
+        cp "$_workflow_template_dir/e2e.yml" .github/workflows/e2e.yml \
+            || _die "copying .github/workflows/e2e.yml failed"
         if [[ "$_type" == "lib" ]]; then
-            cat > .github/workflows/release.yml <<'PYINIT_RELEASE'
-name: Release
-on:
-  push:
-    tags: ["v*"]
-jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
-      - uses: extractions/setup-just@v2
-      - run: uv sync --locked --dev
-      - run: just check
-  publish:
-    runs-on: ubuntu-latest
-    needs: check
-    permissions:
-      id-token: write   # required for PyPI Trusted Publishing (OIDC)
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
-      - run: uv build
-      - run: uv publish   # configure a PyPI Trusted Publisher before first release
-PYINIT_RELEASE
+            cp "$_workflow_template_dir/release.yml" .github/workflows/release.yml \
+                || _die "copying .github/workflows/release.yml failed"
         fi
 
         # ─── Step 12: AGENTS.md from the project template ─────────────────────
@@ -1067,7 +1023,7 @@ PYINIT_LICENSE
         cat > .pre-commit-config.yaml <<'PYINIT_PRECOMMIT'
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -1345,6 +1301,7 @@ PYINIT_JUST_CLI_DOCS
             echo "  3. just docs         # build documentation"
         fi
         echo "  4. just check        # full quality gate"
+        echo "  5. LICENSE prüfen (MIT, Autor aus git config user.name)"
         echo ""
         echo "  Optional test suites:"
         echo "  just test-e2e      # Docker E2E suite locally (CI: automatic once tests exist)"

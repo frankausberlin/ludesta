@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install shellcheck
+        run: |
+          command -v shellcheck >/dev/null \
+            || { sudo apt-get update && sudo apt-get install -y shellcheck; }
+      - name: Bash syntax
+        run: |
+          bash -n Luxus-Python-Stack/scripts/luxuspythonstack.sh \
+            Luxus-Python-Stack/templates/agent/test-agent.sh \
+            Luxus-Python-Stack/templates/e2e/test-e2e.sh \
+            tests/test-pyinit.sh tests/fresh-clone.sh \
+            tests/scripts/check-links.sh tests/scripts/check-workflows.sh
+      - name: ShellCheck
+        run: |
+          shellcheck -S warning Luxus-Python-Stack/scripts/luxuspythonstack.sh \
+            Luxus-Python-Stack/templates/agent/test-agent.sh \
+            Luxus-Python-Stack/templates/e2e/test-e2e.sh \
+            tests/test-pyinit.sh tests/fresh-clone.sh \
+            tests/scripts/check-links.sh tests/scripts/check-workflows.sh
+      - name: Fast tests
+        run: bash tests/test-pyinit.sh --fast
+      - name: Link check
+        run: bash tests/scripts/check-links.sh
+      - name: Workflow lint
+        run: bash tests/scripts/check-workflows.sh
+
+  full:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+      - uses: extractions/setup-just@v4
+      - name: Install zsh and shellcheck
+        run: sudo apt-get update && sudo apt-get install -y zsh shellcheck
+      - name: Full test suite
+        run: bash tests/test-pyinit.sh
+      - name: Fresh clone
+        run: bash tests/fresh-clone.sh
+      - name: Workflow lint
+        run: bash tests/scripts/check-workflows.sh

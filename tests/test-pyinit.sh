@@ -159,6 +159,16 @@ assert_contains "help shows usage" "$LOG" "Usage: pyinit"
 assert_contains "help shows --no-check" "$LOG" "--no-check"
 assert_contains "help shows the opt-in e2e runner" "$LOG" "test-e2e"
 assert_contains "help shows the opt-in agent runner" "$LOG" "test-agent"
+assert_contains "help documents the MIT license" "$LOG" "MIT LICENSE"
+assert_contains "help names the license author fallback" "$LOG" "Project Author"
+
+SKILL_FILE="$REPO_ROOT/Luxus-Python-Stack/lupysta/SKILL.md"
+SKILL_VERSION="$(sed -n 's/^version: //p' "$SKILL_FILE" | head -1)"
+if [[ -n "$SKILL_VERSION" && "$SKILL_VERSION" == "$_LUPYSTA_VERSION" ]]; then
+    pass "_LUPYSTA_VERSION matches SKILL.md ($_LUPYSTA_VERSION)"
+else
+    fail "_LUPYSTA_VERSION matches SKILL.md (script: '${_LUPYSTA_VERSION:-}', skill: '${SKILL_VERSION:-}')"
+fi
 
 expect_failure "unknown option is rejected" pyinit --does-not-exist "$TMP_ROOT/unknown"
 expect_failure "--python without value is rejected" pyinit --python
@@ -376,6 +386,8 @@ echo "# Integration checks"
 
 APP="$TMP_ROOT/app"
 if expect_success "pyinit creates an app" pyinit "$APP" --python 3.12; then
+    assert_contains "app next steps mention the license" "$LOG" \
+        "LICENSE prüfen (MIT, Autor aus git config user.name)"
     assert_file "app AGENTS.md exists" "$APP/AGENTS.md"
     assert_contains "app AGENTS.md has project profile" "$APP/AGENTS.md" "## Projektprofil"
     assert_contains "app AGENTS.md has ADR section" "$APP/AGENTS.md" "## ADRs"
@@ -400,10 +412,37 @@ if expect_success "pyinit creates an app" pyinit "$APP" --python 3.12; then
     assert_file "app has the agent runner" "$APP/scripts/test-agent.sh"
     assert_file "app has a .dockerignore" "$APP/.dockerignore"
     assert_file "app has an e2e workflow" "$APP/.github/workflows/e2e.yml"
+    assert_file "app has a CI workflow" "$APP/.github/workflows/ci.yml"
+    assert_no_file "app has no release workflow" "$APP/.github/workflows/release.yml"
+    assert_contains "app LICENSE is MIT" "$APP/LICENSE" "MIT License"
+    assert_contains "app pre-commit uses the current hooks" \
+        "$APP/.pre-commit-config.yaml" "rev: v6.0.0"
+    assert_contains "app CI workflow runs on main" \
+        "$APP/.github/workflows/ci.yml" "branches: [main]"
+    assert_contains "app CI workflow requests read-only contents" \
+        "$APP/.github/workflows/ci.yml" "contents: read"
+    assert_contains "app CI workflow cancels stale runs" \
+        "$APP/.github/workflows/ci.yml" "cancel-in-progress: true"
+    assert_contains "app CI workflow uses checkout v7" \
+        "$APP/.github/workflows/ci.yml" "actions/checkout@v7"
+    assert_contains "app CI workflow uses setup-uv v10" \
+        "$APP/.github/workflows/ci.yml" "astral-sh/setup-uv@v10"
+    assert_contains "app CI workflow uses setup-just v4" \
+        "$APP/.github/workflows/ci.yml" "extractions/setup-just@v4"
+    assert_contains "app CI workflow runs the audit" \
+        "$APP/.github/workflows/ci.yml" "just audit"
+    assert_contains "app e2e workflow runs on main" \
+        "$APP/.github/workflows/e2e.yml" "branches: [main]"
+    assert_contains "app e2e workflow can be started manually" \
+        "$APP/.github/workflows/e2e.yml" "workflow_dispatch:"
+    assert_contains "app e2e workflow requests read-only contents" \
+        "$APP/.github/workflows/e2e.yml" "contents: read"
+    assert_contains "app e2e workflow cancels stale runs" \
+        "$APP/.github/workflows/e2e.yml" "cancel-in-progress: true"
     assert_contains "app e2e Dockerfile installs the built wheel" \
         "$APP/tests/e2e/Dockerfile" "--no-editable"
     assert_contains "app e2e workflow uploads artifacts" \
-        "$APP/.github/workflows/e2e.yml" "actions/upload-artifact@v4"
+        "$APP/.github/workflows/e2e.yml" "actions/upload-artifact@v7"
     assert_contains "app e2e workflow uploads artifacts after failures" \
         "$APP/.github/workflows/e2e.yml" "if: always()"
     assert_contains "app e2e workflow uploads the artifact directory" \
@@ -611,6 +650,24 @@ if expect_success "pyinit creates a library" pyinit "$LIB" --lib --python 3.12; 
     assert_file "library has the e2e Dockerfile" "$LIB/tests/e2e/Dockerfile"
     assert_file "library has the agent conftest" "$LIB/tests/agent/conftest.py"
     assert_file "library has an e2e workflow" "$LIB/.github/workflows/e2e.yml"
+    assert_file "library has a CI workflow" "$LIB/.github/workflows/ci.yml"
+    assert_file "library has a release workflow" "$LIB/.github/workflows/release.yml"
+    assert_contains "library release workflow runs on version tags" \
+        "$LIB/.github/workflows/release.yml" 'tags: ["v*"]'
+    assert_contains "library release workflow requests read-only contents" \
+        "$LIB/.github/workflows/release.yml" "contents: read"
+    assert_contains "library release workflow allows OIDC publishing" \
+        "$LIB/.github/workflows/release.yml" "id-token: write"
+    assert_contains "library release workflow uses the pypi environment" \
+        "$LIB/.github/workflows/release.yml" "environment: pypi"
+    assert_contains "library release workflow checks the tag against the version" \
+        "$LIB/.github/workflows/release.yml" "GITHUB_REF_NAME"
+    assert_contains "library release workflow reads the version from pyproject" \
+        "$LIB/.github/workflows/release.yml" "tomllib"
+    assert_contains "library release workflow uses checkout v7" \
+        "$LIB/.github/workflows/release.yml" "actions/checkout@v7"
+    assert_contains "library release workflow uses setup-uv v10" \
+        "$LIB/.github/workflows/release.yml" "astral-sh/setup-uv@v10"
     assert_file "library has a tutorials section" "$LIB/docs/tutorials/index.md"
     assert_file "library has a how-to section" "$LIB/docs/how-to/index.md"
     assert_file "library has a reference section" "$LIB/docs/reference/index.md"

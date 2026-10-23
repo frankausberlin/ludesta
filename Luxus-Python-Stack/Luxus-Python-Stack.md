@@ -11,6 +11,9 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 |**`lupysta/`**||Stack-Skill für die Arbeit im initialisierten Projekt (siehe unten)|
 |**`scripts/`**|*luxuspythonstack.sh*|Stack-Laufzeit mit `pyinit` und Shell-Funktionen|
 |**`templates/`**|*AGENTS.md*|Vorlage für die projektbezogene `AGENTS.md`|
+||*agent/*|Gerüst für die opt-in Agent-Tests|
+||*e2e/*|Gerüst für die opt-in Docker-E2E-Tests|
+||*workflows/*|GitHub-Actions-Workflows (`ci.yml`, `e2e.yml`, `release.yml`)|
 ||*scripts/design_report.py*|Vorlage für den Design-Report im Projekt|
 	  	     
      
@@ -19,9 +22,9 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 |Folder|File|Inhalt|
 |-|-|-|
 |**`lupysta/`**|*SKILL.md*|Skill-Übersicht und Rezeptindex|
-|**`lupysta/references`**|*agent-tests.md*|Agent-Tests (vorgesehen, nicht Teil der Basisversion)|
+|**`lupysta/references`**|*agent-tests.md*|Agent-Tests (Gerüst von `pyinit`; Tests projektspezifisch; nicht Teil von `just check`)|
 ||*documentation.md*|Dokumentationsrezepte für `just docs*`|
-||*e2e-tests.md*|E2E-Tests (vorgesehen, nicht Teil der Basisversion)|
+||*e2e-tests.md*|E2E-Tests (Gerüst von `pyinit`; Tests projektspezifisch; nicht Teil von `just check`)|
 ||*git-release.md*|Worktree, Merge, Versionierung und Release|
 ||*quality-gate.md*|Qualitätsgate und Fehlersuche|
 ||*refactoring-recipes.md*|Konkrete Refactoring-Rezepte|
@@ -43,7 +46,7 @@ direnv allow
 
 # Du siehst nun im p10k-prompt rechts ein gelbes dreieck, das bedeutet, dass dieser folder automatisch das python-environment wechselt von ds12 zu dem projektenvironment
 
-# jetzt jetzt zurück ins home und das ds12 ist wieder aktiv (unser default-environment)
+# jetzt zurück ins home und das ds12 ist wieder aktiv (unser default-environment)
 cd ~
 
 # dann starten wir ein jupyter (sein arbeitsfolder ist standardmäßig ~/labor)
@@ -247,7 +250,7 @@ Orientierung:
 | 15 | Justfile | `test`, `test-e2e`, `test-agent`, `lint`, `typecheck`, `check`, `fix`, `clean`, `audit`, `bump`, `rate-design`, `refactor`, `merge`; `run` nur für Apps; `check` ruft `docs-check` auf, wenn vorhanden. |
 | 16 | GitHub Actions | `ci.yml` immer; `release.yml` nur für Bibliotheken; `e2e.yml` für die Docker-Suite (automatisch ab vorhandenen Tests). |
 | 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, Testing, ADR-Konventionen, Attention Points, Herkunft (Contract-Version 3). |
-| 18 | Journal und Projektdokumente | `JOURNAL.md`, `README.md` und `CONTRIBUTING.md` mit `just test-e2e`/`just test-agent`, `.editorconfig`, `LICENSE`. |
+| 18 | Journal und Projektdokumente | `JOURNAL.md`, `README.md` und `CONTRIBUTING.md` mit `just test-e2e`/`just test-agent`, `.editorconfig`, `LICENSE` (MIT, Autor aus `git config user.name`, Fallback `Project Author`; vor Veröffentlichung prüfen). |
 | 19 | pre-commit | Standard-Hooks plus lokale Ruff-Hooks; basedpyright läuft im Gate und in CI. |
 | 20 | Dokumentation | Lib: `mkdocs.yml`, `docs/index.md`, `docs/api.md`, Diátaxis-Gerüst (`tutorials/`, `how-to/`, `reference/`, `explanation/`), `just docs*`; App mit `--cli`: `scripts/gen_cli_docs.py`, `docs/reference/cli.md`, `just docs*`; sonst kein Docs-Gerüst. |
 | 21 | Git | `git init -q -b main`. |
@@ -255,7 +258,9 @@ Orientierung:
 
 ## Unterstützte Umgebung
 
-Ubuntu 26.04 ist die Referenzplattform. 
+Ubuntu 26.04 ist die einzige Referenzplattform. Die Skripte und die generierten
+Projekte nutzen GNU-Werkzeuge (`sed -i`, `readlink -f`, `realpath`); macOS wird
+nicht unterstützt und nicht portiert.
 
 ## Uninstall
 

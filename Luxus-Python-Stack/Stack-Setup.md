@@ -89,17 +89,11 @@ EOF
 ```
 > ⚠️ **Terminal neu starten. Powerlevel10k führt beim ersten Start durch den Konfigurationsassistenten. (fav: yyy1n2122125222221n1y)**
 
-## Installation: Brew, Just, Direnv, UV, Ruff, Bump-my-version, Basedpyright, Nbstripout
+## Installation: Just, Direnv, UV, Ruff, Bump-my-version, Basedpyright, Nbstripout
 
 ```shell
-# Homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-> ⚠️ **Den Anweisungen folgen (Befehlsblock kopieren/einfügen und ausführen)**
-
-```shell
-# wir brauchen brew für just und direnv
-brew install just direnv
+# just und direnv aus der Paketquelle
+sudo nala install -y just direnv
 
 # UV (der blitzschnelle, in Rust geschriebene Manager)
 curl -LsSf https://astral.sh/uv/install.sh | sh

@@ -31,8 +31,11 @@ Luxus-Stack
 │   ├── Funktionen zur Systemintegration (z.b. zsh-prompt)
 │   └── Hilfsfunktionen, Einrichtungsunterstützung, Aliase
 ├── Stack-Templates - Vorlagen für das generierte Projektgerüst
-│   ├── Vorlage AGENTS.md - wird vom Init verwendet
-│   └── scripts/design_report.py - 
+│   ├── AGENTS.md - wird vom Init verwendet
+│   ├── agent/ - Gerüst für die opt-in Agent-Tests
+│   ├── e2e/ - Gerüst für die opt-in Docker-E2E-Tests
+│   ├── workflows/ - GitHub-Actions-Workflows (ci, e2e, release)
+│   └── scripts/ - Hilfsfunktionen Projekt-Content (z.b. design_report.py) 
 ```
 
 * Das Init ist hochgradig stackabhängig. Lediglich Grundanforderungen sind daran gestellt:
