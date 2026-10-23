@@ -4,6 +4,8 @@
 * Dazwischen gibt es Hinweise („⚠️“), die beachtet werden müssen.
 
 ## Basissystem
+> ⚠️ **Der Standard-Darkmode der bash zeigt Kommentare schlecht an, ich empfehle die Pallete 'VS Code dark'**
+
 ```shell
 # Ich bevorzuge nala
 sudo apt update && sudo apt install -y nala
