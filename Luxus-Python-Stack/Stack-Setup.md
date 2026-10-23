@@ -32,7 +32,6 @@ chsh -s $(which zsh)
 
 ## ZSH mit antidote und p10k
 ```shell
-# aus LUDESTA einfügen
 echo 'setopt INTERACTIVE_COMMENTS' >> ~/.zshrc
 ```
 > ⚠️ **zsh neu öffnen (notwendig, um das Kommentarzeichen '#' verwenden zu können)**
@@ -82,7 +81,7 @@ zstyle ':fzf-tab:*' fzf-command fzf
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color=always -- "$realpath"'
 EOF
 ```
-> ⚠️ **Terminal neu starten. Powerlevel10k führt beim ersten Start durch den Konfigurationsassistenten.**
+> ⚠️ **Terminal neu starten. Powerlevel10k führt beim ersten Start durch den Konfigurationsassistenten. (yy1n2122125222221n1y)**
 
 ## Installation: Brew, Just, Direnv, UV, Ruff, Bump-my-version, Basedpyright, Nbstripout
 
