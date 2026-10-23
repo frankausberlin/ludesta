@@ -250,6 +250,68 @@ expect_failure "e2e runner builds with the suite Dockerfile" \
 assert_contains "e2e runner passes its Dockerfile to docker build" \
     "$DOCKER_MARKER" "--file tests/e2e/Dockerfile"
 
+E2E_NESTED="$TMP_ROOT/e2e-nested"
+mkdir -p "$E2E_NESTED/scripts" "$E2E_NESTED/tests/e2e/cli"
+cp "$E2E_RUNNER" "$E2E_NESTED/scripts/test-e2e.sh"
+cat >"$E2E_NESTED/tests/e2e/cli/test_nested.py" <<'NESTED_PROBE'
+"""Import probe: the module body writes a marker when it is imported."""
+
+from pathlib import Path
+
+Path("e2e-nested-import-ran").write_text("ran")
+NESTED_PROBE
+: >"$E2E_NESTED/tests/e2e/Dockerfile"
+rm -f "$DOCKER_MARKER"
+expect_failure "e2e runner finds nested tests" \
+    env PATH="$TMP_ROOT/fake-bin:$PATH" DOCKER_MARKER="$DOCKER_MARKER" \
+    bash "$E2E_NESTED/scripts/test-e2e.sh"
+assert_contains "e2e runner builds for nested tests" \
+    "$DOCKER_MARKER" "--file tests/e2e/Dockerfile"
+assert_no_file "e2e nested preflight does not import test modules" \
+    "$E2E_NESTED/e2e-nested-import-ran"
+
+FIND_FAIL_BIN="$TMP_ROOT/fake-bin-find-fail"
+mkdir -p "$FIND_FAIL_BIN"
+cat >"$FIND_FAIL_BIN/find" <<'FAKE_FIND'
+#!/usr/bin/env bash
+printf 'simulated search failure\n' >&2
+exit 2
+FAKE_FIND
+chmod +x "$FIND_FAIL_BIN/find"
+
+E2E_FIND_FAIL="$TMP_ROOT/e2e-find-fail"
+mkdir -p "$E2E_FIND_FAIL/scripts" "$E2E_FIND_FAIL/tests/e2e"
+cp "$E2E_RUNNER" "$E2E_FIND_FAIL/scripts/test-e2e.sh"
+expect_failure "e2e runner fails when the test search fails" \
+    env PATH="$FIND_FAIL_BIN:$PATH" bash "$E2E_FIND_FAIL/scripts/test-e2e.sh"
+assert_contains "e2e runner reports the search failure" "$LOG" \
+    "searching 'tests/e2e' for test files failed"
+
+COPY_FAIL_BIN="$TMP_ROOT/fake-bin-copy-fail"
+mkdir -p "$COPY_FAIL_BIN"
+cat >"$COPY_FAIL_BIN/docker" <<'FAKE_DOCKER_COPY'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"${DOCKER_MARKER:?DOCKER_MARKER is not set}"
+case "${1:-}" in
+    info|build|create|start|rm) exit 0 ;;
+    cp) printf 'simulated copy failure\n' >&2; exit 1 ;;
+esac
+exit 0
+FAKE_DOCKER_COPY
+chmod +x "$COPY_FAIL_BIN/docker"
+
+E2E_COPY="$TMP_ROOT/e2e-copy-fail"
+mkdir -p "$E2E_COPY/scripts" "$E2E_COPY/tests/e2e"
+cp "$E2E_RUNNER" "$E2E_COPY/scripts/test-e2e.sh"
+: >"$E2E_COPY/tests/e2e/test_demo.py"
+: >"$E2E_COPY/tests/e2e/Dockerfile"
+rm -f "$DOCKER_MARKER"
+expect_failure "e2e runner fails when artifact copy fails" \
+    env PATH="$COPY_FAIL_BIN:$PATH" DOCKER_MARKER="$DOCKER_MARKER" \
+    bash "$E2E_COPY/scripts/test-e2e.sh"
+assert_contains "e2e runner reports the artifact copy failure" "$LOG" \
+    "copying E2E artifacts"
+
 AGENT_IDLE="$TMP_ROOT/agent-idle"
 mkdir -p "$AGENT_IDLE/scripts" "$AGENT_IDLE/tests/agent"
 cp "$AGENT_RUNNER" "$AGENT_IDLE/scripts/test-agent.sh"
@@ -258,6 +320,31 @@ expect_success "agent runner exits 0 without tests" \
     env PATH="$TMP_ROOT/fake-bin:$PATH" bash "$AGENT_IDLE/scripts/test-agent.sh"
 assert_contains "agent runner prints the empty-suite hint" "$LOG" "No agent tests configured"
 assert_no_file "agent runner does not call uv when empty" "$UV_MARKER"
+
+AGENT_NESTED="$TMP_ROOT/agent-nested"
+mkdir -p "$AGENT_NESTED/scripts" "$AGENT_NESTED/tests/agent/providers"
+cp "$AGENT_RUNNER" "$AGENT_NESTED/scripts/test-agent.sh"
+cat >"$AGENT_NESTED/tests/agent/providers/test_nested.py" <<'NESTED_PROBE'
+"""Import probe: the module body writes a marker when it is imported."""
+
+from pathlib import Path
+
+Path("agent-nested-import-ran").write_text("ran")
+NESTED_PROBE
+rm -f "$UV_MARKER"
+expect_failure "agent runner finds nested tests" \
+    env PATH="$TMP_ROOT/fake-bin:$PATH" bash "$AGENT_NESTED/scripts/test-agent.sh"
+assert_file "agent runner calls uv for nested tests" "$UV_MARKER"
+assert_no_file "agent nested preflight does not import test modules" \
+    "$AGENT_NESTED/agent-nested-import-ran"
+
+AGENT_FIND_FAIL="$TMP_ROOT/agent-find-fail"
+mkdir -p "$AGENT_FIND_FAIL/scripts" "$AGENT_FIND_FAIL/tests/agent"
+cp "$AGENT_RUNNER" "$AGENT_FIND_FAIL/scripts/test-agent.sh"
+expect_failure "agent runner fails when the test search fails" \
+    env PATH="$FIND_FAIL_BIN:$PATH" bash "$AGENT_FIND_FAIL/scripts/test-agent.sh"
+assert_contains "agent runner reports the search failure" "$LOG" \
+    "searching 'tests/agent' for test files failed"
 
 if command -v zsh >/dev/null 2>&1; then
     mkdir -p "$TMP_ROOT/zsh-data"
@@ -313,6 +400,16 @@ if expect_success "pyinit creates an app" pyinit "$APP" --python 3.12; then
     assert_file "app has the agent runner" "$APP/scripts/test-agent.sh"
     assert_file "app has a .dockerignore" "$APP/.dockerignore"
     assert_file "app has an e2e workflow" "$APP/.github/workflows/e2e.yml"
+    assert_contains "app e2e Dockerfile installs the built wheel" \
+        "$APP/tests/e2e/Dockerfile" "--no-editable"
+    assert_contains "app e2e workflow uploads artifacts" \
+        "$APP/.github/workflows/e2e.yml" "actions/upload-artifact@v4"
+    assert_contains "app e2e workflow uploads artifacts after failures" \
+        "$APP/.github/workflows/e2e.yml" "if: always()"
+    assert_contains "app e2e workflow uploads the artifact directory" \
+        "$APP/.github/workflows/e2e.yml" "e2e-artifacts.*/**"
+    assert_contains "app e2e workflow excludes pytest temp data" \
+        "$APP/.github/workflows/e2e.yml" "!e2e-artifacts.*/work/**"
     assert_contains "app Justfile runs the e2e suite" "$APP/Justfile" "test-e2e:"
     assert_contains "app Justfile runs the agent suite" "$APP/Justfile" "test-agent:"
     assert_contains "app pyproject registers the e2e marker" "$APP/pyproject.toml" '"e2e: opt-in Docker suite'

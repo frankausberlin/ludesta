@@ -1,7 +1,8 @@
 # Agent-Tests
 
 Status: Das Skelett wird von `pyinit` erzeugt; der Harness ist
-projektspezifisch.
+projektspezifisch. Opt-in bedeutet: nicht Teil von `just check`, nur manuell
+über `just test-agent` und nie in der CI.
 
 `pyinit` legt für App, Bibliothek und CLI-App ein Gerüst unter `tests/agent/`
 an. Es enthält bewusst keine `test_*.py`-Dateien, keinen Provider-Adapter und
@@ -26,12 +27,16 @@ tests/
 └── agent/
     ├── README.md
     ├── conftest.py          # Guard vor dem Import, Fail-on-Skips
-    └── test_*.py            # projektseitig ergänzt
+    ├── test_*.py            # projektseitig ergänzt
+    └── providers/
+        └── test_*.py        # verschachtelt ebenfalls erlaubt
 scripts/test-agent.sh
 ```
 
 - `just test-agent` ruft `scripts/test-agent.sh` auf.
-- Der Runner prüft **zuerst** auf `test_*.py`-Dateien.
+- Der Runner sucht **zuerst** rekursiv nach `test_*.py` unter `tests/agent/`,
+  ohne Testmodule zu importieren. Suchfehler sind laut; ein fehlendes
+  Verzeichnis gilt als leere Suite.
 - Bei leerer Suite: klare Meldung und Exitcode 0, ohne `uv` und ohne Provider.
 - Erst danach folgt der Lauf mit `LUPYSTA_AGENT=1`.
 
@@ -91,7 +96,8 @@ Ein Live-Lauf wird manuell dokumentiert und ist kein Release-Gate.
 ## Erster Test
 
 1. Harness und Provider-Preflight implementieren.
-2. Ein Szenario unter `tests/agent/test_*.py` ergänzen.
+2. Ein Szenario unter `tests/agent/test_*.py` – auch verschachtelt möglich –
+   ergänzen.
 3. `just test-agent` ausführen.
 4. Kosten, Laufzeit und Ergebnis dokumentieren.
 

@@ -20,11 +20,14 @@ Verwende für die Entwicklung immer den lupysta-Skill.
 - `just test` und `just check` führen die Unit-/Smoke-Tests aus. Die opt-in
   Suiten laufen dort nie.
 - `tests/e2e/` ist die Docker-Suite. Nur mit `just test-e2e` ausführen, nie mit
-  einem direkten `pytest` und nie auf dem Host.
+  einem direkten `pytest` und nie auf dem Host. Der CI-Workflow führt sie bei
+  Push und Pull Request automatisch aus, sobald Testdateien vorhanden sind.
 - `tests/agent/` ist die opt-in Provider-Suite. Nur mit `just test-agent`
   ausführen; sie ist beratend und nie Teil der CI.
-- Beide Suiten melden bei leerer Suite einen Hinweis und Exit 0. Sobald
-  `test_*.py`-Dateien existieren, sind Fehler echte Fehler.
+- Beide Runner suchen rekursiv nach `test_*.py`, ohne Testmodule zu
+  importieren. Suchfehler brechen laut ab; ein fehlendes Suite-Verzeichnis gilt
+  als leere Suite. Bei leerer Suite gibt es einen Hinweis und Exit 0. Sobald
+  Testdateien existieren, sind Fehler echte Fehler.
 - Das Verzeichnis-Gate steht in `tests/conftest.py`; die Suite-Guards brechen
   ab, bevor Testmodule importiert werden, wenn eine Suite ohne Opt-in
   gesammelt wird.

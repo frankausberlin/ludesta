@@ -51,7 +51,7 @@ jl
 
 # dann öffne ein zweites terminal-fenster 
 # Hier nochmal die Situation: 
-# 1. du hast ein standard-python-environment ds12 das normalerweise in der bash aktiv ist
+# 1. du hast ein standard-python-environment ds12 das normalerweise in der shell aktiv ist
 # 2. du hast einen Jupyer-Server am laufen auf http://127.0.0.1:8888/lab
 # 3. du hast ein Python-Projekt mit aktiviertem Environment in ~/gits/myproject (ersetzt ds12)
 
@@ -62,7 +62,7 @@ cd ~/labor
 cd ~/gits/myproject
 
 # und wenn wir schon mal hier sind, starten wir doch direkt mal code mit flüchtigem openrouter-key (der alias macht ein READ für das OR-Token, einfach Copy/Paste einfügen)
-ocode
+ocode .
 
 # dannach öffne die kilo-extension in code und prüfe ob der skill vorhanden ist
 
@@ -159,12 +159,14 @@ JOURNAL.md                  # gitignored
 .dockerignore
 .pre-commit-config.yaml
 .github/workflows/ci.yml    # release.yml bei Bibliotheken
-.github/workflows/e2e.yml   # opt-in Docker-Suite
+.github/workflows/e2e.yml   # Docker-Suite; CI automatisch ab vorhandenen Tests
 ```
 
 Testkonzept: Unit- und Smoke-Tests unter `tests/` sind das automatische Gate.
-`tests/e2e/` und `tests/agent/` sind opt-in Gerüste; echte Tests bleiben
-projektspezifisch. `just check` sammelt sie nicht.
+`tests/e2e/` ist lokal nur über `just test-e2e` erreichbar und nicht Teil von
+`just check`; der CI-Workflow führt die Suite automatisch aus, sobald
+Testdateien existieren. `tests/agent/` ist rein manuell und nie Teil der CI.
+Echte Tests bleiben projektspezifisch.
 
 Bibliotheken erhalten von `pyinit` ein Diátaxis-Gerüst: `docs/tutorials/`,
 `docs/how-to/`, `docs/reference/` und `docs/explanation/` mit je einer
@@ -243,7 +245,7 @@ Orientierung:
 | 13 | VS Code | `settings.json`, `launch.json`, `extensions.json`. |
 | 14 | direnv | `.envrc` mit Conda-Schutz, `watch_file uv.lock`, `layout uv`; kein automatisches `direnv allow`. |
 | 15 | Justfile | `test`, `test-e2e`, `test-agent`, `lint`, `typecheck`, `check`, `fix`, `clean`, `audit`, `bump`, `rate-design`, `refactor`, `merge`; `run` nur für Apps; `check` ruft `docs-check` auf, wenn vorhanden. |
-| 16 | GitHub Actions | `ci.yml` immer; `release.yml` nur für Bibliotheken; `e2e.yml` für die opt-in Docker-Suite. |
+| 16 | GitHub Actions | `ci.yml` immer; `release.yml` nur für Bibliotheken; `e2e.yml` für die Docker-Suite (automatisch ab vorhandenen Tests). |
 | 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, Testing, ADR-Konventionen, Attention Points, Herkunft (Contract-Version 3). |
 | 18 | Journal und Projektdokumente | `JOURNAL.md`, `README.md` und `CONTRIBUTING.md` mit `just test-e2e`/`just test-agent`, `.editorconfig`, `LICENSE`. |
 | 19 | pre-commit | Standard-Hooks plus lokale Ruff-Hooks; basedpyright läuft im Gate und in CI. |

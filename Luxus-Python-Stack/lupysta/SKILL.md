@@ -81,8 +81,10 @@ die tatsächlich vorhandenen Befehle im `Justfile` und die Projektdateien.
 Weicht der Projektzustand von `AGENTS.md` ab, melde die Abweichung, statt sie
 stillschweigend zu reparieren oder neu anzulegen.
 
-E2E- und Agent-Tests sind opt-in und nicht Teil von `just check`. `pyinit`
-erzeugt die Gerüste; echte Tests und der Agent-Harness bleiben
+E2E- und Agent-Tests sind nicht Teil von `just check`. E2E ist lokal nur über
+`just test-e2e` aufrufbar und läuft in CI automatisch, sobald Testdateien
+existieren; Agent-Tests laufen nur manuell über `just test-agent` und nie in
+der CI. `pyinit` erzeugt die Gerüste; echte Tests und der Agent-Harness bleiben
 projektspezifisch. Lade die Rezepte, wenn das Projekt Testdateien in
 `tests/e2e/` oder `tests/agent/` enthält oder die Aufgabe sie berührt.
 
@@ -94,8 +96,8 @@ uv add --dev <package>    # Abhängigkeit nur für die Entwicklung
 uv sync                   # Umgebung synchronisieren
 just run                  # Hauptskript ausführen (nur Apps)
 just test                 # pytest mit Coverage
-just test-e2e             # opt-in Docker-E2E-Suite (Leerlauf: Hinweis + Exit 0)
-just test-agent           # opt-in Provider-Suite (Leerlauf: Hinweis + Exit 0)
+just test-e2e             # Docker-E2E-Suite lokal (CI: automatisch ab vorhandenen Tests)
+just test-agent           # Provider-Suite manuell (Leerlauf: Hinweis + Exit 0)
 just lint                 # ruff + basedpyright
 just typecheck            # nur Typprüfung
 just check                # vollständiges Qualitätsgate (Lint + Typecheck + Docs + Tests)

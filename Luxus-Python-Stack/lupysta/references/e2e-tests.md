@@ -1,6 +1,9 @@
 # E2E-Tests
 
-Status: wird von `pyinit` erzeugt; die Suite ist opt-in.
+Status: wird von `pyinit` erzeugt; die Suite ist opt-in im Sinne von „nicht
+Teil von `just check`“. Lokal läuft sie nur über `just test-e2e`; in CI startet
+der Workflow bei Push und Pull Request automatisch und wird mit der ersten
+Testdatei aktiv. Einen zusätzlichen Freigabeschritt pro Lauf gibt es nicht.
 
 `pyinit` legt für App, Bibliothek und CLI-App ein Docker-Gerüst unter
 `tests/e2e/` an. Es enthält bewusst keine `test_*.py`-Dateien. Echte
@@ -27,12 +30,16 @@ tests/
     ├── README.md
     ├── conftest.py          # Guard vor dem Import, Fail-on-Skips
     ├── Dockerfile
-    └── test_*.py            # projektsepezifisch
+    ├── test_*.py            # projektsepezifisch
+    └── cli/
+        └── test_*.py        # verschachtelt ebenfalls erlaubt
 scripts/test-e2e.sh
 ```
 
 - `just test-e2e` ruft `scripts/test-e2e.sh` auf.
-- Der Runner prüft **zuerst** auf `test_*.py`-Dateien.
+- Der Runner sucht **zuerst** rekursiv nach `test_*.py` unter `tests/e2e/`,
+  ohne Testmodule zu importieren. Suchfehler sind laut; ein fehlendes
+  Verzeichnis gilt als leere Suite.
 - Bei leerer Suite: klare Meldung und Exitcode 0, ohne Docker und ohne `uv`.
 - Erst danach folgt der Docker-Preflight.
 
@@ -71,7 +78,8 @@ und beim Sammeln zu Fehlern. So bleibt ein Bypass laut.
 
 | Zustand | Verhalten |
 | --- | --- |
-| Keine `test_*.py`-Dateien | Meldung, Exitcode 0, kein Docker. |
+| Keine `test_*.py`-Dateien (auch verschachtelt) | Meldung, Exitcode 0, kein Docker. |
+| Suite-Verzeichnis nicht durchsuchbar | Laute Fehlermeldung, Exitcode 1. |
 | Dateien vorhanden, Docker fehlt | Laute Fehlermeldung, Exitcode 1. |
 | Dateien vorhanden, Collection fehlerhaft | Fehler, Exitcode ungleich 0. |
 | Dateien vorhanden, Ausführung fehlerhaft | Fehler, Exitcode ungleich 0. |
@@ -80,13 +88,15 @@ und beim Sammeln zu Fehlern. So bleibt ein Bypass laut.
 
 ## Runner-Ablauf
 
-1. Testdateien prüfen; leere Suite erfolgreich melden.
+1. Testdateien rekursiv prüfen; leere Suite erfolgreich melden.
 2. Docker-Preflight: `docker` vorhanden und `docker info` erfolgreich.
 3. `tests/e2e/Dockerfile` prüfen.
 4. Python-Version aus `.python-version` lesen und auf `X.Y` normalisieren.
 5. Image mit `--file tests/e2e/Dockerfile` bauen; Abhängigkeiten werden vor dem
-   Quellcode installiert.
+   Quellcode installiert. Das Projekt wird mit `--no-editable` als Wheel aus
+   dem kopierten Quellbaum installiert, damit die Suite die Paketierung prüft.
 6. Container ohne Netzwerk starten, Tests ausführen, Artefakte einsammeln.
+   Schlägt `docker cp` fehl, meldet der Runner das als Fehler.
 7. Container und temporäre Daten auch im Fehlerfall aufräumen.
 
 Kein Sharding, kein Attach-Modus und keine vorgefertigten Szenarien: Das Gerüst
@@ -95,7 +105,9 @@ ist bewusst minimal.
 ## Erster Test
 
 1. Docker und BuildKit bereitstellen (`docker info`, `docker buildx version`).
-2. `tests/e2e/test_demo.py` mit einer normalen `test_`-Funktion anlegen.
+2. `tests/e2e/test_demo.py` – oder verschachtelt, etwa
+   `tests/e2e/cli/test_export.py` – mit einer normalen `test_`-Funktion
+   anlegen.
 3. `just test-e2e` ausführen.
 4. Log und JUnit-Bericht unter `e2e-artifacts.*` auswerten.
 
@@ -113,9 +125,18 @@ ist bewusst minimal.
 
 ## CI
 
-`pyinit` erzeugt `.github/workflows/e2e.yml`. Der Job führt `just test-e2e`
-aus. Solange die Suite leer ist, endet er in Sekunden ohne Docker-Build.
-Sobald echte Tests existieren, steigen Build-Zeit und Netzwerkbedarf.
+`pyinit` erzeugt `.github/workflows/e2e.yml`. Der Job läuft bei jedem Push,
+Pull Request und manuell (`workflow_dispatch`) und führt `just test-e2e` aus.
+Solange die Suite leer ist, endet er in Sekunden ohne Docker-Build. Sobald
+echte Tests existieren, laufen Docker-Build und Suite automatisch; ein
+separater Freigabeschritt pro Lauf ist nicht vorgesehen.
+
+Der Workflow lädt Logs und JUnit-Bericht aus `e2e-artifacts.*/` mit
+`actions/upload-artifact` und `if: always()` hoch, also auch bei
+fehlgeschlagenen Tests. Pytest-Tempdaten unter `work/` werden dabei
+ausgeschlossen. Damit bleiben vollständiger Lauf-Log und JUnit-Bericht nach dem
+CI-Lauf erhalten. Eine leere Suite erzeugt keine Artefakte; der Upload
+überspringt sie dann.
 
 ## Grenzen
 

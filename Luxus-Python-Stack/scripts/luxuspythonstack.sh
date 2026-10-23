@@ -576,11 +576,11 @@ set shell := ["bash", "-uc"]
 test:
     uv run pytest --cov=src --cov-report=term-missing
 
-# Run the opt-in Docker E2E suite (prints a hint until tests exist)
+# Run the Docker E2E suite locally (CI runs it automatically once tests exist)
 test-e2e:
     bash scripts/test-e2e.sh
 
-# Run the opt-in provider suite (prints a hint until tests exist)
+# Run the provider suite manually (never part of CI; prints a hint until tests exist)
 test-agent:
     bash scripts/test-agent.sh
 
@@ -832,6 +832,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: extractions/setup-just@v2
       - run: just test-e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-artifacts
+          path: |
+            e2e-artifacts.*/**
+            !e2e-artifacts.*/work/**
+          if-no-files-found: ignore
 PYINIT_E2E_CI
 
         if [[ "$_type" == "lib" ]]; then
@@ -924,12 +932,13 @@ just rate-design compare <name>  # compare the current run with a baseline
 just refactor                    # prepare a refactoring session
 just merge       # fast-forward main to a branch from any checkout (no push)
 just check       # full quality gate (unit/smoke tests only)
-just test-e2e    # opt-in Docker E2E suite (hint + exit 0 until tests exist)
-just test-agent  # opt-in provider suite (hint + exit 0 until tests exist)
+just test-e2e    # Docker E2E suite locally (hint + exit 0 until tests exist)
+just test-agent  # provider suite manually (hint + exit 0 until tests exist)
 \`\`\`
 
-\`just check\` runs unit and smoke tests only. The E2E and agent suites are
-opt-in and never part of the gate.
+\`just check\` runs unit and smoke tests only. The E2E suite is not part of the
+gate: run it locally with \`just test-e2e\`; CI runs it automatically once test
+files exist. Agent tests are manual-only and never run in CI.
 
 ${_readme_docs}## Release
 
@@ -1000,13 +1009,14 @@ just rate-design save <name>     # save an immutable baseline
 just rate-design compare <name>  # compare the current run with a baseline
 just refactor                    # prepare a refactoring session
 ${_docs_gate}just check        # ${_check_desc}
-just test-e2e     # opt-in Docker E2E suite (not part of just check)
-just test-agent   # opt-in provider suite (not part of just check)
+just test-e2e     # Docker E2E suite locally (not part of just check)
+just test-agent   # provider suite manually (not part of just check)
 just fix          # auto-fix formatting and lint issues
 \`\`\`
 
-\`just check\` runs unit and smoke tests only. E2E and agent suites are
-opt-in; an empty suite prints a hint and exits 0.
+\`just check\` runs unit and smoke tests only. The E2E suite is not part of the
+gate and runs in CI automatically once tests exist; agent tests are manual-only
+and never run in CI. An empty suite prints a hint and exits 0.
 
 ## Conventions
 
@@ -1336,9 +1346,9 @@ PYINIT_JUST_CLI_DOCS
         fi
         echo "  4. just check        # full quality gate"
         echo ""
-        echo "  Opt-in tests:"
-        echo "  just test-e2e      # Docker E2E suite (hint + exit 0 until tests exist)"
-        echo "  just test-agent    # provider suite (hint + exit 0 until tests exist)"
+        echo "  Optional test suites:"
+        echo "  just test-e2e      # Docker E2E suite locally (CI: automatic once tests exist)"
+        echo "  just test-agent    # provider suite manually (never in CI)"
         echo ""
         echo "  To release:"
         echo "  just bump patch"

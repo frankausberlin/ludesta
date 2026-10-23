@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 COPY src/ src/
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev --group e2e
+    uv sync --locked --no-dev --group e2e --no-editable
 
 COPY tests/ tests/
 ENV PATH="/app/.venv/bin:$PATH"

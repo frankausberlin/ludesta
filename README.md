@@ -75,7 +75,7 @@ Das [Stack-Dokument](Luxus-Python-Stack/Luxus-Python-Stack.md) befindet sich im 
 * Alles wird zusammengehalten von einem **5-stufigen Konzept** mit klaren Zuständigkeiten, um immer den Überblick über *dein* Python zu haben.
 * Du hast eine komplette **CI/CD** basierend auf **Github Actions** und **Bump-my-version**.
 * Die Sicherung der **Codequalität** wird durch die Verwendung moderner Tools erreicht: **Ruff, Basedpyright, Pytest, Coverage**.
-* Ein echter **Stabilitätsbooster** ist das **dreistufige Testkonzept**: automatische **Unittests** als Gate; **e2e-tests** und **e2e-agent-tests** werden als Gerüste standardmäßig erzeugt, bleiben aber projektspezifisch und opt-in.
+* Ein echter **Stabilitätsbooster** ist das **dreistufige Testkonzept**: automatische **Unittests** als Gate; **e2e-tests** und **e2e-agent-tests** werden als Gerüste standardmäßig erzeugt und bleiben projektspezifisch. Die E2E-Suite läuft lokal nur über `just test-e2e` und in CI automatisch, sobald Tests vorhanden sind; Agent-Tests laufen nur manuell.
 * **Projektdokumentation** mit MkDocs und **Diátaxis-Gerüst** (Bibliothek) oder generierter CLI-Referenz; **ADRs** (Architectural Decision Records).
 * Bewertung der **Codestruktur** mit **just rate-design** dient dem Skill mit seinem **Refactoring-Rezept** Vorschläge zur Codeverbesserung zu machen und **diese dann umzusetzen**.
 * Auch **Agenten** bekommen Unterstützung mit **AGENTS.md** und **JOURNAL.md** und ihrem **Agenten-Skill**.

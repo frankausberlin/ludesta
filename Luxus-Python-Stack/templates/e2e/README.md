@@ -1,8 +1,13 @@
 # E2E-Tests (Docker)
 
-Dieses Verzeichnis ist das Gerüst für die opt-in Docker-Suite. Es enthält
-bewusst noch keine `test_*.py`-Dateien. `just test-e2e` meldet in diesem
-Zustand einen Hinweis und beendet sich mit Exitcode 0, ohne Docker aufzurufen.
+Dieses Verzeichnis ist das Gerüst für die Docker-Suite. Opt-in bedeutet hier:
+Die Suite ist nicht Teil von `just check` und wird lokal nur über
+`just test-e2e` gestartet; einen zusätzlichen Freigabeschritt pro Lauf gibt es
+nicht. Der Workflow `.github/workflows/e2e.yml` läuft bei jedem Push und Pull
+Request und führt automatisch Docker-Build und Suite aus, sobald Testdateien
+vorhanden sind. Solange keine `test_*.py`-Datei existiert, meldet
+`just test-e2e` einen Hinweis und beendet sich mit Exitcode 0, ohne Docker
+aufzurufen.
 
 ## Zweck
 
@@ -26,25 +31,32 @@ tests/e2e/
 ├── README.md
 ├── conftest.py
 ├── Dockerfile
-└── test_*.py        # fügst du hinzu
+├── test_*.py        # fügst du hinzu
+└── cli/
+    └── test_*.py    # verschachtelt ebenfalls erlaubt
 scripts/test-e2e.sh
 ```
 
 - `Dockerfile` baut das Image aus `pyproject.toml`, `uv.lock`, `src/` und
-  `tests/`. Die Abhängigkeiten werden vor dem Quellcode installiert.
+  `tests/`. Die Abhängigkeiten werden vor dem Quellcode installiert. Das
+  Projekt selbst wird mit `--no-editable` als Wheel installiert; die Suite
+  prüft damit die Paketierung statt nur den kopierten Quellbaum.
 - `conftest.py` bricht ab, bevor pytest die Testmodule importiert, wenn die
   Suite ohne Opt-in, außerhalb des Containers oder ohne `/.dockerenv` läuft.
   Skips – auch Collection-Skips – werden im Container zu Fehlern.
-- `scripts/test-e2e.sh` prüft zuerst die Testdateien, dann Docker, baut das
-  Image mit `--file tests/e2e/Dockerfile`, startet den Container und sammelt
-  die Artefakte ein.
+- `scripts/test-e2e.sh` sucht rekursiv nach `test_*.py` unter `tests/e2e/`,
+  ohne Testmodule zu importieren. Suchfehler brechen laut ab; ein fehlendes
+  Verzeichnis gilt als leere Suite. Erst danach prüft er Docker, baut das Image
+  mit `--file tests/e2e/Dockerfile`, startet den Container und sammelt die
+  Artefakte ein.
 - `scripts/test-e2e.sh` verwendet BuildKit (`--mount=type=cache`).
 
 ## Leerlauf-Semantik
 
 | Zustand | Verhalten |
 | --- | --- |
-| Keine `test_*.py`-Dateien | Hinweis, Exitcode 0, kein Docker. |
+| Keine `test_*.py`-Dateien (auch verschachtelt) | Hinweis, Exitcode 0, kein Docker. |
+| Suite-Verzeichnis nicht durchsuchbar | Laute Fehlermeldung, Exitcode 1. |
 | Dateien vorhanden, Docker fehlt | Laute Fehlermeldung, Exitcode 1. |
 | Dateien vorhanden, Test schlägt fehl | Exitcode 1 mit Log-Auszug. |
 | Test oder Modul wird übersprungen | Fehler im Container, kein stiller grüner Lauf. |
@@ -52,7 +64,8 @@ scripts/test-e2e.sh
 ## Erster Test
 
 1. Docker und BuildKit bereitstellen: `docker info`, `docker buildx version`.
-2. Eine Datei `tests/e2e/test_demo.py` mit einer normalen `test_`-Funktion
+2. Eine Datei `tests/e2e/test_demo.py` – oder verschachtelt, etwa
+   `tests/e2e/cli/test_export.py` – mit einer normalen `test_`-Funktion
    anlegen. Der Collection-Hook in `conftest.py` schützt den Lauf, bevor
    Testmodule importiert werden.
 3. `just test-e2e` ausführen. Der Runner setzt `LUPYSTA_E2E=1` und
@@ -65,7 +78,12 @@ scripts/test-e2e.sh
   Daten.
 - Unprivilegierter Nutzer `e2e` (uid 10001), Arbeitsverzeichnis `/app`.
 - JUnit-Bericht und Logs landen unter `/artifacts` und werden nach
-  `e2e-artifacts.*` kopiert; der Pfad wird am Ende ausgegeben.
+  `e2e-artifacts.*` kopiert; der Pfad wird am Ende ausgegeben. Schlägt das
+  Kopieren fehl, meldet der Runner das als Fehler, statt es zu verschlucken.
+- Der CI-Workflow lädt Logs und JUnit-Bericht aus `e2e-artifacts.*/` mit
+  `if: always()` hoch, also auch bei fehlgeschlagenen Tests. Pytest-Tempdaten
+  unter `work/` sind ausgeschlossen; bei leerer Suite gibt es nichts
+  hochzuladen.
 - `just clean` entfernt diese Artefakte.
 
 ## Grenzen

@@ -4,12 +4,18 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-shopt -s nullglob
-tests=(tests/agent/test_*.py)
-if [[ ${#tests[@]} -eq 0 ]]; then
+tests_dir="tests/agent"
+hits=""
+if [[ -d "$tests_dir" ]]; then
+    if ! hits="$(find "$tests_dir" -type f -name 'test_*.py')"; then
+        echo "Error: searching '$tests_dir' for test files failed." >&2
+        exit 1
+    fi
+fi
+if [[ -z "$hits" ]]; then
     cat >&2 <<'MSG'
 No agent tests configured yet.
-Add tests/agent/test_*.py and run `just test-agent` again.
+Add test_*.py files under tests/agent/ and run `just test-agent` again.
 See tests/agent/README.md for the expected structure.
 MSG
     exit 0

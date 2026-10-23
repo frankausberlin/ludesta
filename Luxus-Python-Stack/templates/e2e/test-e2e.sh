@@ -4,12 +4,18 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-shopt -s nullglob
-tests=(tests/e2e/test_*.py)
-if [[ ${#tests[@]} -eq 0 ]]; then
+tests_dir="tests/e2e"
+hits=""
+if [[ -d "$tests_dir" ]]; then
+    if ! hits="$(find "$tests_dir" -type f -name 'test_*.py')"; then
+        echo "Error: searching '$tests_dir' for test files failed." >&2
+        exit 1
+    fi
+fi
+if [[ -z "$hits" ]]; then
     cat >&2 <<'MSG'
 No E2E tests configured yet.
-Add tests/e2e/test_*.py and run `just test-e2e` again.
+Add test_*.py files under tests/e2e/ and run `just test-e2e` again.
 See tests/e2e/README.md for the expected structure.
 MSG
     exit 0
@@ -67,7 +73,11 @@ container="$(docker create --network none \
 status=0
 docker start --attach "$container" >"$artifacts/run.log" 2>&1 || status=$?
 
-docker cp "$container:/artifacts/." "$artifacts/" >/dev/null 2>&1 || true
+copy_status=0
+if ! copy_error="$(docker cp "$container:/artifacts/." "$artifacts/" 2>&1)"; then
+    copy_status=1
+    printf 'Error: copying E2E artifacts from the container failed:\n%s\n' "$copy_error" >&2
+fi
 docker rm -f "$container" >/dev/null 2>&1 || true
 container=""
 
@@ -75,6 +85,11 @@ if [[ $status -ne 0 ]]; then
     echo "E2E tests failed (exit $status). Last log lines:" >&2
     tail -n 40 "$artifacts/run.log" >&2 || true
     echo "Artifacts: $artifacts" >&2
+    exit 1
+fi
+
+if [[ $copy_status -ne 0 ]]; then
+    echo "E2E tests passed, but copying the artifacts failed. Artifacts: $artifacts" >&2
     exit 1
 fi
 
