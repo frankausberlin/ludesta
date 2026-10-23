@@ -255,7 +255,10 @@ code --install-extension kilocode.kilo-code
 code --install-extension ms-python.python
 
 # alias startet code und fragt vorher openrouter-key ab, kilo erkennt den dann
+cat << 'EOF' >> ~/.bashrc
 alias ocode='read -sp "API-Key eingeben: " OPENROUTER_API_KEY && echo && export OPENROUTER_API_KEY && code'
+EOF
+exec zsh
 ```
 
 ## GitHub:
