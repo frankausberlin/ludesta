@@ -11,8 +11,8 @@
 sudo apt update && sudo apt install -y nala
 sudo nala update && sudo nala upgrade
 
-# gits Folder anlegen und Repository klonen
-sudo nala install -y git && mkdir -p ~/gits
+# gits Folder und labor Folder (für jupyter) anlegen und Repository klonen
+sudo nala install -y git && mkdir -p ~/gits ~/labor
 git clone https://github.com/frankausberlin/ludesta ~/gits/ludesta
 
 # Systemgrundlagen / CLI-Tools & Produktivität / Build-Grundlagen & Entwicklerbibliotheken
@@ -333,25 +333,6 @@ python  -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
 # act() { [ "$#" -ne 0 ] && echo $1 > ~/.startenv && mamba activate $1; } # Umgebung wechseln und merken
 ```
 
-
-## Luxus-Python-Stack: pyinit, jupyter-launcher (jl), myprompt_my_jupyter (p10k)
-```shell
-# Funktionen laden
-cat << 'EOF' >> ~/.zshrc
-# aus LUDESTA einfügen
-source ~/gits/ludesta/Luxus-Python-Stack/scripts/luxuspythonstack.sh
-EOF
-
-# das Jupyter-Prompt-Element in .p10k.zsh einfügen
-sed -i '/^[[:space:]]*anaconda/a \    my_jupyter              # benutzerdefiniertes Jupyter-Segment (siehe prompt_my_jupyter-Funktion in luxuspythonstack.sh)' ~/.p10k.zsh
-
-# Skill zugänglich machen
-mkdir -p ~/.agents/skills/
-ln -s ~/gits/ludesta/Luxus-Python-Stack/lupysta ~/.agents/skills/lupysta
-
-exec zsh
-```
-
 ## Docker (optional, für E2E)
 
 > ⚠️ **Dieser Block ist dafür gedacht, wenn du den Stack in einer VM ohne Docker installierst.**.
@@ -383,6 +364,26 @@ newgrp docker
 ```shell
 docker run --rm hello-world
 ```
+
+
+## Luxus-Python-Stack: pyinit, jupyter-launcher (jl), myprompt_my_jupyter (p10k)
+```shell
+# Funktionen laden
+cat << 'EOF' >> ~/.zshrc
+# aus LUDESTA einfügen
+source ~/gits/ludesta/Luxus-Python-Stack/scripts/luxuspythonstack.sh
+EOF
+
+# das Jupyter-Prompt-Element in .p10k.zsh einfügen
+sed -i '/^[[:space:]]*anaconda/a \    my_jupyter              # benutzerdefiniertes Jupyter-Segment (siehe prompt_my_jupyter-Funktion in luxuspythonstack.sh)' ~/.p10k.zsh
+
+# Skill zugänglich machen
+mkdir -p ~/.agents/skills/
+ln -s ~/gits/ludesta/Luxus-Python-Stack/lupysta ~/.agents/skills/lupysta
+
+exec zsh
+```
+
 
 ## Überprüfung
 

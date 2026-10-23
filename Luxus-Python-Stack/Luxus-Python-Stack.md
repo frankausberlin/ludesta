@@ -32,6 +32,44 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 
 **Die [Setup-Anleitung](Stack-Setup.md) befolgen.**
 
+Kleiner Test
+```shell
+# zuerst ein kleine python-projekt anlegen
+mkdir ~/gits/myproject && cd ~/gits/myproject
+
+# projekt initialisieren und environment automatik aktivieren
+pyinit
+direnv allow
+
+# Du siehst nun im p10k-prompt rechts ein gelbes dreieck, das bedeutet, dass dieser folder automatisch das python-environment wechselt von ds12 zu dem projektenvironment
+
+# jetzt jetzt zurück ins home und das ds12 ist wieder aktiv (unser default-environment)
+cd ~
+
+# dann starten wir ein jupyter (sein arbeitsfolder ist standardmäßig ~/labor)
+jl
+
+# dann öffne ein zweites terminal-fenster 
+# Hier nochmal die Situation: 
+# 1. du hast ein standard-python-environment ds12 das normalerweise in der bash aktiv ist
+# 2. du hast einen Jupyer-Server am laufen auf http://127.0.0.1:8888/lab
+# 3. du hast ein Python-Projekt mit aktiviertem Environment in ~/gits/myproject (ersetzt ds12)
+
+# jetzt wechsel in den labor Folder und achte auf den p10k-prompt, er zeigt an, das ein jupyter läuft und diesen folder als arbeitsverzeichnis verwendet.
+cd ~/labor
+
+# und jetzt nochmal den wechsel in den projekt-folder und der prompt ändert sich wieder
+cd ~/gits/my-project
+
+# und wenn wir schon mal hier sind, starten wir doch direkt mal code mit flüchtigem openrouter-key (der alias macht ein READ für das OR-Token, einfach Copy/Paste einfügen)
+ocode
+
+# dannach öffne die kilo-extension in code und prüfe ob der skill vorhanden ist
+
+
+```
+
+
 ## Überblick verwendete Werkzeuge
 
 | Werkzeug | Zweck |
