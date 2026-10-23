@@ -260,11 +260,12 @@ sudo nala update && sudo nala install -y code
 cat << 'EOF' >> ~/.bashrc
 alias ocode='read -sp "API-Key eingeben: " OPENROUTER_API_KEY && echo && export OPENROUTER_API_KEY && code'
 EOF
-exec zsh
 
 # Kilo-Code-Erweiterung & Python
 code --install-extension kilocode.kilo-code
 code --install-extension ms-python.python
+exec zsh
+
 ```
 
 ## GitHub:
