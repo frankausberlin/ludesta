@@ -1,13 +1,11 @@
 # LUDESTA - Luxus Development Stack
 
-<table><tr><td align=right><img src="https://lh3.googleusercontent.com/d/1qn2q-d_y_NP3lxD8gzCh7vnRi_qImnvd" width=1000><font size=-2><br>for agents, for humans, for the whole damned world<a href=https://suno.com/playlist/dea7acde-5886-407a-8193-db889a2af569>...</a></td></tr></table>
+<table><tr><td align=right><img src="https://lh3.googleusercontent.com/d/1qn2q-d_y_NP3lxD8gzCh7vnRi_qImnvd" width=1000><font size=-2><br><a href=https://suno.com/playlist/dea7acde-5886-407a-8193-db889a2af569>&nbsp;</a></td></tr></table>
 
 
+*Das Hogwarts für Coding Agents*
 
-
-Wiederverwendbare Agent-Skills für einen komfortablen, konsistenten Entwicklungsworkflow.
-
-Das *luxuriös* steht für die Verwendung komfortabler Mechanismen und Werkzeuge im Entwicklungsprozess. Die Idee ist, einem Agenten (Skill + Harness) eine umfangreiche, komfortable Projektstruktur vorzugeben und ihn anzuleiten, diese effektiv einzusetzen. Automatismen in der CI/CD erhöhen die Stabilität der agentischen Arbeit.
+Das *luxuriös* steht für die Verwendung komfortabler Mechanismen und Werkzeuge im Entwicklungsprozess. Die Idee ist, einem Agenten (Skill + Harness + llm) eine umfangreiche, komfortable Projektstruktur vorzugeben und ihn anzuleiten, diese effektiv einzusetzen. Automatismen in der CI/CD erhöhen die Stabilität der agentischen Arbeit.
 
 > **⚠️ Im Moment gibt es nur den Luxus-Python-Stack**
 

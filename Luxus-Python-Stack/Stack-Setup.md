@@ -345,17 +345,87 @@ exec zsh
 ```
 
 
-## Docker (optional, für E2E)
+## Docker (optional, for E2E)
 
-Docker ist keine Voraussetzung für `pyinit` oder `just check`. Es wird nur für
-die opt-in E2E-Suite benötigt. Ohne Docker läuft `just test-e2e` im leeren
-Gerüst weiterhin mit Hinweis und Exit 0.
+Docker is not needed for `pyinit`, `just check` or an empty E2E suite. Without
+Docker, `just test-e2e` reports the empty suite and exits 0. Docker is only
+required once real `tests/e2e/test_*.py` files exist. Install it **inside the
+VM**, not as a remote daemon on the host.
+
+* Use a full VM (KVM, Proxmox VM, VMware, VirtualBox) with systemd, not an LXC container.
+* 4 GB RAM and at least 25 GB free disk space are realistic for images, layers and the build cache.
+* The build needs network access (ghcr.io, PyPI, Docker Hub).
+* Take a VM snapshot before installing.
+
+```shell
+# Skip the whole block if `docker --version` and `docker info` already work.
+sudo nala install -y ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+  -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# official Docker APT repository (codename from /etc/os-release, not hardcoded)
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+  | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo nala update
+sudo nala install -y \
+  docker-ce docker-ce-cli containerd.io docker-buildx-plugin
+
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"
+```
+> ⚠️ **Do not additionally install the Ubuntu `docker.io` package, the Snap package or a rootless setup. They conflict with `docker-ce` from the official repository.**
+
+> ⚠️ **`usermod` does not affect the current shell. Log out and reconnect via SSH (or use `newgrp docker`); `exec zsh` is not enough.**
 
 ```shell
 docker --version
-docker buildx version
-docker info
+docker buildx version                      # BuildKit is required by the E2E Dockerfile
+docker info --format '{{.ServerVersion}}'  # must print the server version, not only the client
+docker run --rm hello-world                # optional, needs network
 ```
+
+Troubleshooting:
+
+- `permission denied ... /var/run/docker.sock`: group not active, check `id -nG | grep docker` and re-login.
+- `Cannot connect to the Docker daemon`: `sudo systemctl status docker` and `sudo journalctl -u docker`.
+- `buildx: command not found`: `sudo nala install -y docker-buildx-plugin`.
+- Build cannot pull `ghcr.io/astral-sh/uv:...`: check network/proxy, pull manually with `docker pull ...`.
+- No space left: `docker system df`, then `docker system prune -f`.
+- LXC/container instead of a VM: nested Docker needs extra host configuration; use a full VM.
+
+### CUDA and embeddings
+
+The NVIDIA Container Toolkit on the host does not reach into the VM: it is a
+Docker runtime hook in the same operating system as the Docker daemon, and
+containers in the VM see the VM kernel. CUDA inside the VM would require GPU
+passthrough (VFIO/vGPU) plus driver and toolkit installation **inside the VM**.
+The E2E suite does not need this and stays CPU-only, `--network none` and
+CI-capable.
+
+For local codebase embeddings, run the model on the host and let the VM use only
+the HTTP interface:
+
+* Ollama with `nomic-embed-text` or `mxbai-embed-large`, or a TEI host container with `--gpus all`.
+* Bind the host service to the VM bridge address, not `0.0.0.0`, and restrict it via firewall to the VM subnet. Ollama has no authentication.
+* Example host addresses: libvirt `192.168.122.1`, VirtualBox NAT `10.0.2.2`, VMware NAT the `.1` in its subnet. Adjust to your network.
+
+```jsonc
+{
+  "indexing": {
+    "enabled": true,
+    "provider": "ollama",
+    "model": "nomic-embed-text",
+    "vectorStore": "lancedb",
+    "ollama": { "baseUrl": "http://192.168.122.1:11434" }
+  }
+}
+```
+
+Do not add `--gpus` to `tests/e2e/Dockerfile` or `scripts/test-e2e.sh`: GitHub
+Actions has no GPU and the default run must stay reproducible.
 
 ## Verify
 
@@ -379,5 +449,14 @@ zsh -ic 'mamba activate base && echo "mamba hook ok"'
 zsh -ic 'command -v basedpyright-langserver'   # -> ~/.local/libexec/jupyter-lsp-shims/basedpyright-langserver
 
 code --version
+
+# Docker is optional (only needed for real E2E tests)
+if command -v docker >/dev/null 2>&1; then
+  docker --version
+  docker buildx version
+  docker info --format '{{.ServerVersion}}'
+else
+  echo "docker not installed (E2E suite unavailable)"
+fi
 ```
 

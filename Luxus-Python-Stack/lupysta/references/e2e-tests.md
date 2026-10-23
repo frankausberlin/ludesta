@@ -99,6 +99,10 @@ ist bewusst minimal.
 3. `just test-e2e` ausführen.
 4. Log und JUnit-Bericht unter `e2e-artifacts.*` auswerten.
 
+> Docker muss in derselben VM/Umgebung wie das Projekt laufen. Ein Remote-
+> Daemon auf dem Host und GPU-Passthrough sind für die Suite nicht vorgesehen;
+> der Standardlauf ist CPU-only.
+
 ## Isolation
 
 - Wegwerf-Container ohne Host-Mounts für veränderbare Daten.
