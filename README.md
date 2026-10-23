@@ -1,6 +1,6 @@
 # LUDESTA - Luxus Development Stack
 
-<table><tr><td align=right><img src="https://lh3.googleusercontent.com/d/1qn2q-d_y_NP3lxD8gzCh7vnRi_qImnvd" width=1000><font size=-2><br><a href=https://suno.com/playlist/dea7acde-5886-407a-8193-db889a2af569>&nbsp;</a></td></tr></table>
+<table><tr><td align=right><img src="https://lh3.googleusercontent.com/d/1qn2q-d_y_NP3lxD8gzCh7vnRi_qImnvd" width=1000><font size=-2><br><a href=https://suno.com/album/db368c0a-9a4d-484e-9ea6-6725b85b135a>&nbsp;</a></td></tr></table>
 
 
 *Das Hogwarts für Coding Agents*

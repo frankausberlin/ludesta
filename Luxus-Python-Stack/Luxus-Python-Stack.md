@@ -80,15 +80,19 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 ### Ebene 1: Mamba / Jupyter
 
 * Gedacht für Data Science und Experimente.
-* Werkzeuge: Jupyter Lab, Scikit-Learn, JAX, Numba und weitere Pakete aus dem Setup.
-* Aktivierung beim Shellstart außerhalb eines Verzeichnisses mit `.envrc`; in
-  einem Projekt mit `.envrc` überspringt das Startskript die Mamba-Aktivierung,
-  direnv übernimmt nach `direnv allow`.
+* Aktivierung beim Shellstart außerhalb eines Verzeichnisses mit `.envrc`; in einem Projekt mit `.envrc` überspringt das Startskript die Mamba-Aktivierung, direnv übernimmt nach `direnv allow`.
 * **Start:** `act <envname>` aktiviert die Umgebung und speichert den Namen in `~/.startenv`.
 * **Wegwerfcharakter:** Die Regel lautet „keine Updates, löschen und neu anlegen“.
 * **Namensschema:** `ds12` bedeutet „Data Science mit Python 3.12“.
 * **ipywidgets-Dilemma:** Colab benötigt `ipywidgets < 8.0`, aktuelle Jupyter-Versionen benötigen `>= 8.0`. Das Setup legt deshalb `dsXY` mit `ipywidgets==7.7.1` für Colab an; eine separate Umgebung mit `ipywidgets >= 8.0` wird bei Bedarf manuell erstellt.
 * In Mamba-Umgebungen wird `uv pip install` für Geschwindigkeit verwendet;  die Pakete stehen bewusst nicht unter Mambas Kontrolle.
+
+  > Anmerkung<br>
+  > Es wird im Allgemeinen nicht empfohlen, „uv“ in einer Mamba-Umgebung zu verwenden, da auf diese Weise installierte Pakete nicht unter der Kontrolle von Mamba stehen. Dies kann zu Konflikten beim Aktualisieren führen.<br>
+  > Ich nutze die Data-Science-Umgebung auf eine Weise, die dieses Problem irrelevant macht. Ich installiere ständig neue Bibliotheken, lösche alte und experimentiere. Genauso häufig (manchmal zweimal am Tag) lösche ich die Umgebung vollständig und installiere sie neu.<br>
+  > Deshalb verwende ich „uv“; es ist so unglaublich schnell.
+
+
 
 ### Ebene 2: Projekte
 
