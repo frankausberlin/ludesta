@@ -337,118 +337,51 @@ python  -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
 
 * ⚠️ **Die Network & Security Einstellungen sind optional. Ich biete hier lediglich eine Variante an.**
 
-### VM-Netzwerk
-
-* ⚠️ **SSH vom Host in die VM funktioniert nur, wenn die VM inbound erreichbar ist: bridged, libvirt-Default-NAT (`virbr0`), VMware-NAT oder Hyper-V Default Switch. Bei VirtualBox-NAT und QEMU-User-Networking braucht es ein Portforwarding; dann verbindet man sich vom Host mit `127.0.0.1` und dem forwardeten Port.**
-
-### Basis-Verbindung
-
+### Ausführen auf dem Host PC
 ```shell
-# In der VM: primäre IPv4 über die Default-Route ermitteln (hostname -I ist nicht eindeutig)
-VM_IP=$(ip -4 route get 1.1.1.1 | awk '{for(i=1;i<=NF;i++) if($i=="src"){print $(i+1); exit}}')
-echo "ssh-copy-id ${USER}@${VM_IP}"
-
-# Bei NAT mit Portforwarding stattdessen auf dem Host:
-# ssh-copy-id -p 2222 "${USER}@127.0.0.1"
-```
-
-* ⚠️ **Führe den erzeugten Befehl auf dem Rechner aus, auf dem die VM mit ludesta läuft, nicht in der VM.**
-
-```shell
-# Auf dem Host: Key anlegen, falls noch keiner existiert
-[ -f ~/.ssh/id_ed25519 ] || ssh-keygen -t ed25519
-
-# VM-Benutzer und IP aus dem oben erzeugten Befehl übernehmen
+# AUF DEM HOST: VM_USER/VM_IP einsetzen, dann ausführen
 VM_USER="<vm-user>"
-VM_IP="<vm-ip>"
+VM_IP="<vm-ip>"          # NAT: 127.0.0.1, beide ssh-Befehle zusätzlich mit -p <host-port>
+
+[ -f ~/.ssh/id_ed25519 ] || ssh-keygen -t ed25519
 ssh-copy-id -i ~/.ssh/id_ed25519.pub "${VM_USER}@${VM_IP}"
-
-# Erst wenn dieser Test ohne Passwort funktioniert, ist das Hardening sicher
-ssh -o PreferredAuthentications=publickey -o PasswordAuthentication=no "${VM_USER}@${VM_IP}" true
+ssh -o PasswordAuthentication=no "${VM_USER}@${VM_IP}" true   # muss ohne Passwort klappen
 ```
 
-### SSH Hardening
-
-* ⚠️ **Das Hardening erst ausführen, nachdem der Key-Login vom Host ohne Passwort funktioniert. Die aktuelle Sitzung bleibt beim Reload erhalten; bei Problemen hilft nur die VM-Konsole.**
-
+### Ausführen in der VM
 ```shell
-# 99-... sortiert nach 50-cloud-init.conf, sonst gewinnt cloud-init mit PasswordAuthentication yes
-cat <<EOF | sudo tee /etc/ssh/sshd_config.d/99-custom-hardening.conf > /dev/null
-PubkeyAuthentication yes
-KbdInteractiveAuthentication no
+# ip ermitteln (wird im Host PC benötigt)
+ip -a
+
+# IN DER VM, nicht als root: erst ausführen, wenn der Login oben ohne Passwort klappt
+# 00- gewinnt gegen 50-cloud-init.conf, sshd nimmt den ersten Wert
+cat <<EOF | sudo tee /etc/ssh/sshd_config.d/00-ludesta.conf > /dev/null
 PasswordAuthentication no
+KbdInteractiveAuthentication no
 PermitRootLogin no
-AllowUsers ${SUDO_USER:-$USER}
 PermitEmptyPasswords no
-MaxAuthTries 6
-ClientAliveInterval 300
-ClientAliveCountMax 2
-X11Forwarding no
-KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org
+AllowUsers ${SUDO_USER:-$USER}
 Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
-MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
 EOF
+sudo sshd -t && sudo systemctl reload ssh
 
-# `KbdInteractiveAuthentication` benötigt OpenSSH >= 8.7 (Ubuntu >= 22.04). 
-# Auf älteren Images schlägt `sshd -t` fehl; die Datei wird dann automatisch wieder entfernt, 
-# damit sshd beim nächsten Start nicht blockiert.
+# Effektive Werte: muss "no" zeigen, sonst Sitzung nicht schließen
+sudo sshd -T | grep -E '^(passwordauthentication|kbdinteractiveauthentication|permitrootlogin|allowusers) '
 
-# Validate config before reloading; bei Fehlern die neue Datei wieder entfernen
-if sudo sshd -t; then
-  sudo systemctl reload-or-restart ssh
-  sudo sshd -T | grep -Ei '^(passwordauthentication|permitrootlogin|allowusers|maxauthtries)'
-else
-  echo "Ungültige sshd-Konfiguration - 99-custom-hardening.conf wird entfernt"
-  sudo rm -f /etc/ssh/sshd_config.d/99-custom-hardening.conf
-fi
-```
-
-### Firewall (UFW)
-
-* ⚠️ **`ufw limit ssh` gilt für Port 22/tcp. Läuft sshd auf einem anderen Port, diesen Port stattdessen freigeben.**
-
-```shell
-command -v ufw >/dev/null || sudo nala install -y ufw
+# Firewall: eingehend dicht, SSH gedrosselt, ausgehend offen
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
-sudo ufw limit ssh       # SSH with brute-force protection
+sudo ufw limit ssh
 sudo ufw --force enable
-sudo ufw status verbose
-```
 
-### fail2ban
-
-```shell
-# Host-IP für ignoreip (bei SSH-Session automatisch gesetzt; sonst leer)
-HOST_IP="${SSH_CLIENT%% *}"
-
-# write /etc/fail2ban/jail.local
-cat <<EOF | sudo tee /etc/fail2ban/jail.local > /dev/null
-[sshd]
-enabled = true
-backend = systemd
-port = ssh
-filter = sshd
-maxretry = 5
-bantime = 3600
-findtime = 3600
-banaction = ufw
-ignoreip = 127.0.0.1/8 ::1 ${HOST_IP}
-EOF
-
-# Konfiguration prüfen, dann neu starten
-sudo fail2ban-client -t && sudo systemctl restart fail2ban
-sudo fail2ban-client status sshd
-
-# comfort link
-mkdir -p ~/.shlib
-ln -sf /etc/fail2ban/jail.local ~/.shlib/jail.local
+# Docker: keine Ports veröffentlichen; wenn unvermeidbar, nur an Loopback binden
+# docker run -p 127.0.0.1:8080:80 ...
 ```
 
 ## Docker (für E2E)
 
 > ⚠️ **Dieser Block ist dafür gedacht, wenn du den Stack in einer VM ohne Docker installierst.**.
-> ⚠️ **Den Docker-Installationsblock überspringen, wenn `docker --version` und `docker info` bereits funktionieren. Der UFW-Patch weiter unten bleibt davon unabhängig.**
+> ⚠️ **Den Docker-Installationsblock überspringen, wenn `docker --version` und `docker info` bereits funktionieren.**
 
 ```shell
 # Offiziellen GPG-Schlüssel:
@@ -475,25 +408,6 @@ newgrp docker
 
 ```shell
 docker run --rm hello-world
-```
-
-## Docker UFW patch
-
-* ⚠️ **Nur bei aktivierter Firewall ausführen. Dieser Abschnitt gilt auch dann, wenn Docker bereits installiert ist und der Docker-Installationsblock oben übersprungen wurde.**
-
-```shell
-# Gepinnte Version statt master: Commit und Prüfsumme schützen vor ungeprüftem Root-Code
-UFW_DOCKER_COMMIT="020a8699f95592561f254d8d4ad1bb40d401dfc7"
-UFW_DOCKER_SHA256="643e56b080567c567b4aa28650196849b2a2da5dd0473fd3e5216b0886035ab0"
-
-# LC_ALL=C: ufw-docker erkennt sonst auf deutsch lokalisierten Systemen den Status "aktiv" nicht
-sudo wget -O /usr/local/bin/ufw-docker \
-  "https://raw.githubusercontent.com/chaifeng/ufw-docker/${UFW_DOCKER_COMMIT}/ufw-docker" \
-  && echo "${UFW_DOCKER_SHA256}  /usr/local/bin/ufw-docker" | sudo sha256sum -c - \
-  && sudo chmod +x /usr/local/bin/ufw-docker \
-  && sudo env LC_ALL=C ufw-docker install \
-  && sudo systemctl restart ufw \
-  && sudo ufw-docker status
 ```
 
 ## Luxus-Python-Stack: pyinit, jupyter-launcher (jl), myprompt_my_jupyter (p10k)
@@ -537,7 +451,6 @@ docker buildx version                      # BuildKit wird vom E2E-Dockerfile be
 docker info --format '{{.ServerVersion}}'  # muss die Serverversion ausgeben, nicht nur die des Clients
 # Network & Security (optional)
 sudo ufw status verbose
-sudo ufw-docker status                # nur bei aktivem UFW-Patch
 systemctl is-active ssh ssh.socket    # mindestens einer muss aktiv sein
 sudo ss -tlnp | grep ':22 '           # ssh listening
 sudo sshd -T | grep -Ei '^(passwordauthentication|permitrootlogin|allowusers|maxauthtries)'
