@@ -1,19 +1,19 @@
-# Setup instructions for the Luxus Python Stack
+# Einrichtungsanweisungen für den Luxus-Python-Stack
 
-* The code blocks can be inserted into the shell via copy/paste. 
-* In between there are instructions ('⚠️') that must be observed.
+* Die Codeblöcke können per Kopieren/Einfügen in die Shell eingefügt werden. 
+* Dazwischen gibt es Hinweise („⚠️“), die beachtet werden müssen.
 
-## Base System
+## Basissystem
 ```shell
-# I prefer nala
+# Ich bevorzuge nala
 sudo apt update && sudo apt install -y nala
 sudo nala update && sudo nala upgrade
 
-# Core System Essentials / CLI Tools & Productivity / Build Essentials & Dev Libraries
+# Systemgrundlagen / CLI-Tools & Produktivität / Build-Grundlagen & Entwicklerbibliotheken
 sudo nala install -y \
   ca-certificates curl wget gnupg gpg software-properties-common \
   openssh-server fail2ban unattended-upgrades util-linux-extra net-tools \
-  snapd 7zip xz-utils aria2 sqlite3 \
+  util-linux-extra snapd 7zip xz-utils aria2 sqlite3 \
   zsh git gh tmux btop htop iotop nvtop fastfetch tree hwinfo s-tui \
   ripgrep fzf zoxide jq tealdeer shellcheck shfmt apt-transport-https \
   build-essential cmake make pkg-config libssl-dev zlib1g-dev libbz2-dev \
@@ -21,24 +21,24 @@ sudo nala install -y \
   libxml2-dev libxmlsec1-dev tk-dev libyaml-dev libfuse2t64 \
   python3 pipx
 
-# enable ssh
+# SSH aktivieren
 sudo systemctl enable --now ssh
-# use the ip ('ip a') to connect ('ssh <user>@<ip>') ssh to this machine
+# IP mit 'ip a' ermitteln und per 'ssh <user>@<ip>' mit dieser Maschine verbinden
 
-# switch to zsh
+# zu zsh wechseln
 chsh -s $(which zsh) 
 ```
-> ⚠️ **do re-login and select option 2: Recommended settings**
+> ⚠️ **Neu anmelden und Option 2: Recommended settings wählen**
 
-## ZSH with antidote and p10k
+## ZSH mit antidote und p10k
 ```shell
-# insert from LUDESTA
+# aus LUDESTA einfügen
 echo 'setopt INTERACTIVE_COMMENTS' >> ~/.zshrc
 ```
-> ⚠️ **reopen zsh (necessary to be able to use comment characters '#')**
+> ⚠️ **zsh neu öffnen (notwendig, um das Kommentarzeichen '#' verwenden zu können)**
 
 ```shell
-# Fonts (MesloLGS NF)
+# Schriftarten (MesloLGS NF)
 mkdir -p ~/.local/share/fonts && cd ~/.local/share/fonts
 wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf
 wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf
@@ -49,7 +49,7 @@ fc-cache -fv && cd ~
 # Antidote
 git clone --depth=1 https://github.com/mattmc3/antidote.git ~/.antidote
 
-# Plugin Selection (p10k)
+# Plugin-Auswahl (p10k)
 cat << 'EOF' > ~/.zsh_plugins.txt
 romkatv/powerlevel10k
 zsh-users/zsh-completions
@@ -60,7 +60,7 @@ zsh-users/zsh-history-substring-search
 hlissner/zsh-autopair
 EOF
 
-# Integration into zsh
+# Integration in zsh
 cat << 'EOF' >> ~/.zshrc
 # --- Antidote & Plugins ---
 source ~/.antidote/antidote.zsh
@@ -69,84 +69,84 @@ antidote load
 # --- Completions & Init ---
 autoload -Uz compinit && compinit
 
-# Wake up CLI tools from the setup
+# CLI-Tools aus dem Setup aktivieren
 eval "$(zoxide init zsh)"
 
-# --- Keybindings & Tweaks ---
-# Keybindings for history substring search
+# --- Tastenbelegung & Feinschliff ---
+# Tastenbelegung für die History-Substring-Suche
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
-# fzf-tab configuration (makes Tab autocompletion nice)
+# fzf-tab-Konfiguration (macht die Tab-Autovervollständigung komfortabel)
 zstyle ':fzf-tab:*' fzf-command fzf
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color=always -- "$realpath"'
 EOF
 ```
-> ⚠️ **Restart terminal. Powerlevel10k will guide through the configuration wizard on first startup.**
+> ⚠️ **Terminal neu starten. Powerlevel10k führt beim ersten Start durch den Konfigurationsassistenten.**
 
-## Install: Brew, Just, Direnv, UV, Ruff, Bump-my-version, Basedpyright, Nbstripout
+## Installation: Brew, Just, Direnv, UV, Ruff, Bump-my-version, Basedpyright, Nbstripout
 
 ```shell
 # Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
-> ⚠️ **follow the instructions (copy/paste the command block and execute)**
+> ⚠️ **Den Anweisungen folgen (Befehlsblock kopieren/einfügen und ausführen)**
 
 ```shell
-# we need brew for just and direnv
+# wir brauchen brew für just und direnv
 brew install just direnv
 
-# UV (The lightning-fast Rust-based manager)
+# UV (der blitzschnelle, in Rust geschriebene Manager)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source "$HOME/.local/bin/env"
 
-# Base equipment
+# Grundausstattung
 uv tool install ruff && uv tool install bump-my-version && uv tool install basedpyright && uv tool install nbstripout
 
-# Create the direnv layout for uv.
+# Das direnv-Layout für uv erstellen.
 mkdir -p ~/.config/direnv && cat << 'EOF' > ~/.config/direnv/direnvrc
 layout_uv() {
-    # If no environment exists yet, uv creates one in a flash.
+    # Falls noch keine Umgebung existiert, erstellt uv in Windeseile eine.
     [ ! -d ".venv" ] && uv venv
-    # Tell direnv where the bin directory is located.
+    # direnv mitteilen, wo sich das bin-Verzeichnis befindet.
     export VIRTUAL_ENV="$(pwd)/.venv" && PATH_add "$VIRTUAL_ENV/bin"
-    # UV also knows this.
+    # UV kennt das ebenfalls.
     export UV_PROJECT_ENVIRONMENT="$VIRTUAL_ENV"
 }
 EOF
 
-# Enable direnv in zsh
+# direnv in zsh aktivieren
 grep -q 'direnv hook zsh' ~/.zshrc || echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
-exec zsh # resource zsh
+exec zsh # zsh neu laden
 ```
 
 ## mamba
 ```shell
-# download install script
+# Installationsskript herunterladen
 cd ~/Downloads  && curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
 
-# Batch mode (-b): Installs silently without interactive queries to ~/miniforge3
+# Batch-Modus (-b): Installiert still ohne interaktive Abfragen nach ~/miniforge3
 bash Miniforge3-$(uname)-$(uname -m).sh -b -p "$HOME/miniforge3"
 
-# Register UV safety net (instead of `conda init zsh` we write the setup directly into ~/.zshrc)
+# UV-Sicherheitsnetz registrieren (statt `conda init zsh` schreiben wir das Setup direkt in ~/.zshrc)
 cat << 'EOF' >> ~/.zshrc
 # --- UV ---
-# Strictly use own/managed Python versions (Protects System-Python!)
+# Ausschließlich eigene/verwaltete Python-Versionen verwenden (schützt das System-Python!)
 export UV_PYTHON_PREFERENCE=only-managed
 
 # --- direnv ---
-# Suppress direnv log output to avoid p10k instant-prompt interference
+# direnv-Logausgabe unterdrücken, um Störungen des p10k-Instant-Prompt zu vermeiden
 export DIRENV_LOG_FORMAT=""
 
-# --- Mamba Initialization ---
-# Mamba 2.0+ requires this variable before initialization
+# --- Mamba-Initialisierung ---
+# Mamba 2.0+ benötigt diese Variable vor der Initialisierung
 export MAMBA_ROOT_PREFIX="$HOME/miniforge3"
-# Here we explicitly load the 'mamba' hook, not 'conda'
+# Hier laden wir explizit den 'mamba'-Hook, nicht 'conda'
 __mamba_setup="$("$HOME/miniforge3/bin/mamba" 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__mamba_setup"
 else
-    # Miniforge also conveniently creates a mamba.sh
+    # Miniforge erstellt praktischerweise auch eine mamba.sh
     if [ -f "$HOME/miniforge3/etc/profile.d/mamba.sh" ]; then
         . "$HOME/miniforge3/etc/profile.d/mamba.sh"
     else
@@ -155,30 +155,31 @@ else
 fi
 unset __mamba_setup
 
-# --- Default Environment Activation ---
-# Only activate a Mamba env if no project-level .envrc is present in the CWD.
-# In project directories direnv supersedes Mamba anyway — skipping the activation
-# keeps shell startup fast.
+# --- Standard-Umgebungsaktivierung ---
+# Eine Mamba-Umgebung nur aktivieren, wenn im aktuellen Verzeichnis keine
+# projektspezifische .envrc vorhanden ist. In Projektverzeichnissen hat direnv
+# ohnehin Vorrang vor Mamba — das Überspringen der Aktivierung hält den
+# Shell-Start schnell.
 if [ ! -f "$PWD/.envrc" ]; then
     mamba activate $([[ -f ~/.startenv ]] && echo "$(< ~/.startenv)" || echo base)
 fi
 
-# startenv function
+# startenv-Funktion
 act() { [ "$#" -ne 0 ] && echo $1 > ~/.startenv && mamba activate $1; }
 
-# Creates an environment in a folder if it doesn't already exist and places it under the management of direnv.
+# Erstellt eine Umgebung in einem Ordner, falls sie noch nicht existiert, und stellt sie unter die Verwaltung von direnv.
 alias allowuv='echo "layout uv" > .envrc && direnv allow'
 
-# --- Jupyter LSP shims ---
-# jupyter_lsp starts language servers in the terminal's process group, so Ctrl-C
-# also hits them (basedpyright then dies with a KeyboardInterrupt traceback).
-# The shims ignore SIGINT; keep this directory early in PATH.
+# --- Jupyter-LSP-Shims ---
+# jupyter_lsp startet Language-Server in der Prozessgruppe des Terminals, sodass
+# Strg-C auch sie trifft (basedpyright stirbt dann mit einem KeyboardInterrupt-Traceback).
+# Die Shims ignorieren SIGINT; dieses Verzeichnis muss früh im PATH stehen.
 export PATH="$HOME/.local/libexec/jupyter-lsp-shims:$PATH"
 EOF
 
-# --- Global Jupyter fix for Google Colab ---
-# Disables the RTC server extensions globally (~/.jupyter) to prevent WebSocket
-# crashes with Colab. Survives environment wipe-and-recreate cycles.
+# --- Globaler Jupyter-Fix für Google Colab ---
+# Deaktiviert die RTC-Server-Erweiterungen global (~/.jupyter), um WebSocket-
+# Abstürze mit Colab zu verhindern. Übersteht das Löschen und Neuerstellen von Umgebungen.
 mkdir -p ~/.jupyter && cat << 'EOF' > ~/.jupyter/jupyter_server_config.json
 {
   "ServerApp": {
@@ -190,10 +191,11 @@ mkdir -p ~/.jupyter && cat << 'EOF' > ~/.jupyter/jupyter_server_config.json
 }
 EOF
 
-# --- Disable JupyterLab Collaboration Room polling ---
-# The client polls /api/collaboration/room/JupyterLab:globalAwareness every ~3s.
-# Even with RTC extensions disabled, the JupyterLab client still fires these
-# requests, causing 404 warnings. The user settings below silence them.
+# --- JupyterLab-Polling des Collaboration Room deaktivieren ---
+# Der Client fragt etwa alle 3 s /api/collaboration/room/JupyterLab:globalAwareness ab.
+# Selbst mit deaktivierten RTC-Erweiterungen sendet der JupyterLab-Client diese
+# Anfragen weiter und verursacht 404-Warnungen. Die folgenden Benutzereinstellungen
+# unterdrücken sie.
 mkdir -p ~/.jupyter/lab/user-settings/\@jupyterlab/collaboration-extension/
 cat << 'EOF' > ~/.jupyter/lab/user-settings/\@jupyterlab/collaboration-extension/plugin.jupyterlab-settings
 {
@@ -202,19 +204,19 @@ cat << 'EOF' > ~/.jupyter/lab/user-settings/\@jupyterlab/collaboration-extension
 }
 EOF
 
-# --- Jupyter LSP fix: Ctrl-C must not kill the language server ---
-# jupyter_lsp starts basedpyright-langserver with a plain subprocess.Popen
-# (jupyter_lsp/session.py, init_process) and therefore no new session. The
-# language server stays in the terminal's foreground process group, so Ctrl-C
-# sends SIGINT to Jupyter AND to basedpyright. Jupyter asks "Shut down this
-# Jupyter server (y/[n])?", basedpyright's Python wrapper has no
-# KeyboardInterrupt handling and dies with a traceback in the middle of the
-# prompt ("No answer for 5s").
+# --- Jupyter-LSP-Fix: Strg-C darf den Language-Server nicht beenden ---
+# jupyter_lsp startet basedpyright-langserver mit einem einfachen subprocess.Popen
+# (jupyter_lsp/session.py, init_process) und damit ohne neue Session. Der
+# Language-Server bleibt in der Vordergrund-Prozessgruppe des Terminals, sodass
+# Strg-C SIGINT an Jupyter UND an basedpyright sendet. Jupyter fragt
+# "Shut down this Jupyter server (y/[n])?", während der Python-Wrapper von
+# basedpyright keine KeyboardInterrupt-Behandlung hat und mitten in der
+# Abfrage mit einem Traceback stirbt ("No answer for 5s").
 #
-# The shim ignores SIGINT (SIG_IGN survives exec, so the node process inherits
-# it) and execs the real binary, resolved via PATH without the shim directory.
-# Works for uv-tool and conda basedpyright alike. ~/.zshrc puts the directory
-# first on PATH.
+# Der Shim ignoriert SIGINT (SIG_IGN überlebt exec, sodass der node-Prozess es
+# erbt) und startet die echte Binärdatei per exec, aufgelöst über den PATH ohne
+# das Shim-Verzeichnis. Funktioniert sowohl für basedpyright aus uv-Tools als
+# auch aus conda. ~/.zshrc stellt das Verzeichnis an den Anfang des PATH.
 mkdir -p ~/.local/libexec/jupyter-lsp-shims
 cat << 'EOF' > ~/.local/libexec/jupyter-lsp-shims/basedpyright-langserver
 #!/bin/sh
@@ -232,44 +234,47 @@ exec "$real" "$@"
 EOF
 chmod +x ~/.local/libexec/jupyter-lsp-shims/basedpyright-langserver
 
-# reload shell to activate mamba
+# Shell neu laden, um mamba zu aktivieren
 exec zsh
 ```
 
 ## VSCode
 ```shell
-# 1. Download and set up Microsoft GPG key
+# 1. Microsoft-GPG-Schlüssel herunterladen und einrichten
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
 sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
 
-# 2. Add package source to package manager
+# 2. Paketquelle zum Paketmanager hinzufügen
 echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
 rm -f packages.microsoft.gpg
 
-# 3. Update package list and install VS Code
+# 3. Paketliste aktualisieren und VS Code installieren
 sudo nala update && sudo nala install -y code
 
-# 4. Kilo Code Extension & Python
+# 4. Kilo-Code-Erweiterung & Python
 code --install-extension kilocode.kilo-code
 code --install-extension ms-python.python
+
+# alias startet code und fragt vorher openrouter-key ab, kilo erkennt den dann
+alias ocode='read -sp "API-Key eingeben: " OPENROUTER_API_KEY && echo && export OPENROUTER_API_KEY && code'
 ```
 
-## Github:
+## GitHub:
 ```shell
-# Create global .gitignore
+# Globale .gitignore erstellen
 cat > ~/.gitignore_global << 'EOF'
-# Agent folders
+# Agent-Ordner
 .opencode/
 .kilocode/
 .cursor/
 .kilo/
 
-# Environment files
+# Umgebungsdateien
 .env
 .env.*
 !.env.example
 
-# Virtual environments
+# Virtuelle Umgebungen
 .venv/
 venv/
 
@@ -283,180 +288,110 @@ __pycache__/
 *.swp
 *~
 
-# OS
+# Betriebssystem
 .DS_Store
 Thumbs.db
 EOF
 git config --global core.excludesfile ~/.gitignore_global
 
-# Git config
+# Git-Konfiguration
 #git config --global user.name "Your Name"
 #git config --global user.email "noreply-email" # -> https://github.com/settings/emails
 #git config --global init.defaultBranch main
 #git config --global pull.rebase true
 
-# GitHub Login (Choose "SSH" and upload your id_ed25519.pub key!)
+# GitHub-Login („SSH“ wählen und den id_ed25519.pub-Schlüssel hochladen!)
 #gh auth login
-# Sets the credential helper for HTTPS remotes
+# Legt den Credential-Helper für HTTPS-Remotes fest
 #gh auth setup-git
 ```
 
-## Data Science Mamba Environment
-* ⚠️ Using ipywidgets 7.7.1 for colab runtime compatibility.
-* ⚠️ To suppress saving notebook output in github use `nbstripout --install` in the repository folder.
+## Data-Science-Mamba-Umgebung
+* ⚠️ Für Kompatibilität mit der Colab-Runtime wird ipywidgets 7.7.1 verwendet.
+* ⚠️ Um das Speichern von Notebook-Ausgaben in GitHub zu unterdrücken, im Repository-Ordner `nbstripout --install` ausführen.
 ```shell
-#                     (re)create a data science environment with all the goodies and activate it
+#                     (Neu-)Erstellen einer Data-Science-Umgebung mit allem Drum und Dran und aktivieren
 # _________________________________________________________________________________________________________________________________
-py=3.12 && ENV_NAME="ds${py: -2}" && mamba deactivate && mamba remove -y -n $ENV_NAME --all 2>/dev/null # python 3.XY --> 'dsXY'
-mamba   create -y -n $ENV_NAME python=$py google-colab && mamba activate $ENV_NAME # tested with Python 3.11/12/13
+py=3.12 && ENV_NAME="ds${py: -2}" && mamba deactivate && mamba remove -y -n $ENV_NAME --all 2>/dev/null # Python 3.XY --> 'dsXY'
+mamba   create -y -n $ENV_NAME python=$py google-colab && mamba activate $ENV_NAME # getestet mit Python 3.11/12/13
 uv pip  install  -U jupyterlab jupyter_http_over_ws jupyter-ai jupyterlab-github xeus-python huggingface-hub ipywidgets==7.7.1
 jupyter labextension enable jupyter_http_over_ws && echo $ENV_NAME > ~/.startenv
 python  -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
-# _______________________________________use_'act'_instead_of_'mamba_activate'_____________________________________________________
-# mamba activate $(cat ~/.startenv) # insert in your shell rc file
-# act() { [ "$#" -ne 0 ] && echo $1 > ~/.startenv && mamba activate $1; } # switch environment and remember
+# _______________________________________'act'_statt_'mamba_activate'_verwenden_____________________________________________________
+# mamba activate $(cat ~/.startenv) # in die Shell-rc-Datei einfügen
+# act() { [ "$#" -ne 0 ] && echo $1 > ~/.startenv && mamba activate $1; } # Umgebung wechseln und merken
 ```
 
-Important notes on the Mamba level:
 
-- It doesn't necessarily have to be data science. Any domain is possible — this just happens to be mine.
-- It's generally not recommended to use `uv` in a Mamba environment, as packages installed this way are not under Mamba's control. This can lead to conflicts when updating.
-- I use the data science environment in a way that makes this problem irrelevant. I'm constantly installing new libraries, deleting old ones, and experimenting. Just as frequently (sometimes twice a day), I completely wipe the environment and reinstall it.
-- That's why I use `uv`; it's so incredibly fast.
-- **The rule is: no updates, just delete and recreate.** Only in this way can the dependency conflicts eliminated.
-
-
-## Luxus Python Stack: pyinit, jupyter-launcher (jl), myprompt_my_jupyter (p10k)
+## Luxus-Python-Stack: pyinit, jupyter-launcher (jl), myprompt_my_jupyter (p10k)
 ```shell
-# load functions
+# Funktionen laden
 cat << 'EOF' >> ~/.zshrc
-# insert from LUDESTA
+# aus LUDESTA einfügen
 source ~/gits/ludesta/Luxus-Python-Stack/scripts/luxuspythonstack.sh
 EOF
 
-# insert the jupyter-prompt-element in .p10k.zsh
-sed -i '/^[[:space:]]*anaconda/a \    my_jupyter              # custom jupyter segment (see prompt_my_jupyter function in luxuspythonstack.sh)' ~/.p10k.zsh
+# das Jupyter-Prompt-Element in .p10k.zsh einfügen
+sed -i '/^[[:space:]]*anaconda/a \    my_jupyter              # benutzerdefiniertes Jupyter-Segment (siehe prompt_my_jupyter-Funktion in luxuspythonstack.sh)' ~/.p10k.zsh
 
-# make skill accessable
+# Skill zugänglich machen
 mkdir -p ~/.agents/skills/
 ln -s ~/gits/ludesta/Luxus-Python-Stack/lupysta ~/.agents/skills/lupysta
 
 exec zsh
 ```
 
+## Docker (optional, für E2E)
 
-## Docker (optional, for E2E)
-
-Docker is not needed for `pyinit`, `just check` or an empty E2E suite. Without
-Docker, `just test-e2e` reports the empty suite and exits 0. Docker is only
-required once real `tests/e2e/test_*.py` files exist. Install it **inside the
-VM**, not as a remote daemon on the host.
-
-* Use a full VM (KVM, Proxmox VM, VMware, VirtualBox) with systemd, not an LXC container.
-* 4 GB RAM and at least 25 GB free disk space are realistic for images, layers and the build cache.
-* The build needs network access (ghcr.io, PyPI, Docker Hub).
-* Take a VM snapshot before installing.
+> ⚠️ **Dieser Block ist dafür gedacht, wenn du den Stack in einer VM ohne Docker installierst.**.
+> ⚠️ **Den gesamten Block überspringen, wenn `docker --version` und `docker info` bereits funktionieren**.
 
 ```shell
-# Skip the whole block if `docker --version` and `docker info` already work.
-sudo nala install -y ca-certificates curl
+# Offiziellen GPG-Schlüssel:
 sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-  -o /etc/apt/keyrings/docker.asc
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-# official Docker APT repository (codename from /etc/os-release, not hardcoded)
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
-  | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+# Füge repository hinzu
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
 
-sudo nala update
-sudo nala install -y \
-  docker-ce docker-ce-cli containerd.io docker-buildx-plugin
-
-sudo systemctl enable --now docker
-sudo usermod -aG docker "$USER"
+# install docker / user in group 
+sudo nala update && sudo nala install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker $USER
+newgrp docker
 ```
-> ⚠️ **Do not additionally install the Ubuntu `docker.io` package, the Snap package or a rootless setup. They conflict with `docker-ce` from the official repository.**
-
-> ⚠️ **`usermod` does not affect the current shell. Log out and reconnect via SSH (or use `newgrp docker`); `exec zsh` is not enough.**
+> ⚠️ **Optional: run docker's hello-world**.
 
 ```shell
-docker --version
-docker buildx version                      # BuildKit is required by the E2E Dockerfile
-docker info --format '{{.ServerVersion}}'  # must print the server version, not only the client
-docker run --rm hello-world                # optional, needs network
+docker run --rm hello-world
 ```
 
-Troubleshooting:
-
-- `permission denied ... /var/run/docker.sock`: group not active, check `id -nG | grep docker` and re-login.
-- `Cannot connect to the Docker daemon`: `sudo systemctl status docker` and `sudo journalctl -u docker`.
-- `buildx: command not found`: `sudo nala install -y docker-buildx-plugin`.
-- Build cannot pull `ghcr.io/astral-sh/uv:...`: check network/proxy, pull manually with `docker pull ...`.
-- No space left: `docker system df`, then `docker system prune -f`.
-- LXC/container instead of a VM: nested Docker needs extra host configuration; use a full VM.
-
-### CUDA and embeddings
-
-The NVIDIA Container Toolkit on the host does not reach into the VM: it is a
-Docker runtime hook in the same operating system as the Docker daemon, and
-containers in the VM see the VM kernel. CUDA inside the VM would require GPU
-passthrough (VFIO/vGPU) plus driver and toolkit installation **inside the VM**.
-The E2E suite does not need this and stays CPU-only, `--network none` and
-CI-capable.
-
-For local codebase embeddings, run the model on the host and let the VM use only
-the HTTP interface:
-
-* Ollama with `nomic-embed-text` or `mxbai-embed-large`, or a TEI host container with `--gpus all`.
-* Bind the host service to the VM bridge address, not `0.0.0.0`, and restrict it via firewall to the VM subnet. Ollama has no authentication.
-* Example host addresses: libvirt `192.168.122.1`, VirtualBox NAT `10.0.2.2`, VMware NAT the `.1` in its subnet. Adjust to your network.
-
-```jsonc
-{
-  "indexing": {
-    "enabled": true,
-    "provider": "ollama",
-    "model": "nomic-embed-text",
-    "vectorStore": "lancedb",
-    "ollama": { "baseUrl": "http://192.168.122.1:11434" }
-  }
-}
-```
-
-Do not add `--gpus` to `tests/e2e/Dockerfile` or `scripts/test-e2e.sh`: GitHub
-Actions has no GPU and the default run must stay reproducible.
-
-## Verify
+## Überprüfung
 
 ```shell
 nala --version | head -1
 for c in just direnv gcc; do command -v "$c" >/dev/null && echo "ok $c" || echo "MISSING $c"; done
-
 [ -d ~/.antidote ] && echo "antidote present"
 [ -f ~/.zsh_plugins.txt ] && echo ".zsh_plugins.txt present"
 [ -f ~/.p10k.zsh ] && echo "p10k configured"
 zsh -ic 'echo $ZSH_VERSION'
-
 python3 --version
 uv --version
 for t in ruff bump-my-version basedpyright nbstripout; do command -v "$t" >/dev/null && echo "ok $t" || echo "MISSING $t"; done
 direnv --version
 mamba --version | head -1
 zsh -ic 'mamba activate base && echo "mamba hook ok"'
-
-# Jupyter LSP shim must win over the real basedpyright-langserver
+# Der Jupyter-LSP-Shim muss Vorrang vor dem echten basedpyright-langserver haben
 zsh -ic 'command -v basedpyright-langserver'   # -> ~/.local/libexec/jupyter-lsp-shims/basedpyright-langserver
-
 code --version
-
-# Docker is optional (only needed for real E2E tests)
-if command -v docker >/dev/null 2>&1; then
-  docker --version
-  docker buildx version
-  docker info --format '{{.ServerVersion}}'
-else
-  echo "docker not installed (E2E suite unavailable)"
-fi
+docker --version
+docker buildx version                      # BuildKit wird vom E2E-Dockerfile benötigt
+docker info --format '{{.ServerVersion}}'  # muss die Serverversion ausgeben, nicht nur die des Clients
 ```
-
