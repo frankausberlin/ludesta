@@ -245,26 +245,26 @@ exec zsh
 
 ## VSCode
 ```shell
-# 1. Microsoft-GPG-Schlüssel herunterladen und einrichten
+# Microsoft-GPG-Schlüssel herunterladen und einrichten
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
 sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
 
-# 2. Paketquelle zum Paketmanager hinzufügen
+# Paketquelle zum Paketmanager hinzufügen
 echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
 rm -f packages.microsoft.gpg
 
-# 3. Paketliste aktualisieren und VS Code installieren
+# Paketliste aktualisieren und VS Code installieren
 sudo nala update && sudo nala install -y code
-
-# 4. Kilo-Code-Erweiterung & Python
-code --install-extension kilocode.kilo-code
-code --install-extension ms-python.python
 
 # alias startet code und fragt vorher openrouter-key ab, kilo erkennt den dann
 cat << 'EOF' >> ~/.bashrc
 alias ocode='read -sp "API-Key eingeben: " OPENROUTER_API_KEY && echo && export OPENROUTER_API_KEY && code'
 EOF
 exec zsh
+
+# Kilo-Code-Erweiterung & Python
+code --install-extension kilocode.kilo-code
+code --install-extension ms-python.python
 ```
 
 ## GitHub:
