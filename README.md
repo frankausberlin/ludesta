@@ -60,16 +60,11 @@ Die `AGENTS.md` enthält das Projektprofil, die **ADR**-Konventionen und die Att
 
 ## Installation
 
-1. ⚠️ Empfohlen: VM aufsetzen 
+1. ⚠️ Dringend Empfohlen: VM aufsetzen 
    > Probiere es erstmal in einer VM aus bevor du einen Agenten anweißt es in dein System einzubauen oder du das selbst machst.
 
-2. Repository klonen:
-   ```shell
-   sudo apt update && sudo apt update -y && sudo apt install -y git
-   mkdir -p ~/gits
-   git clone https://github.com/frankausberlin/ludesta ~/gits/ludesta
-   ```
-3. Die [Setup-Anleitung](Luxus-Python-Stack/Stack-Setup.md) befolgen.
+2. In der VM eine bash öffnen und die [Setup-Anleitung](Luxus-Python-Stack/Stack-Setup.md) befolgen.
+
 
 ## Die Luxus Stacks
 

@@ -11,12 +11,16 @@
 sudo apt update && sudo apt install -y nala
 sudo nala update && sudo nala upgrade
 
+# gits Folder anlegen und Repository klonen
+sudo nala install -y git && mkdir -p ~/gits
+git clone https://github.com/frankausberlin/ludesta ~/gits/ludesta
+
 # Systemgrundlagen / CLI-Tools & Produktivität / Build-Grundlagen & Entwicklerbibliotheken
 sudo nala install -y \
   ca-certificates curl wget gnupg gpg software-properties-common \
   openssh-server fail2ban unattended-upgrades util-linux-extra net-tools \
   util-linux-extra snapd 7zip xz-utils aria2 sqlite3 \
-  zsh git gh tmux btop htop iotop nvtop fastfetch tree hwinfo s-tui \
+  zsh gh tmux btop htop iotop nvtop fastfetch tree hwinfo s-tui \
   ripgrep fzf zoxide jq tealdeer shellcheck shfmt apt-transport-https \
   build-essential cmake make pkg-config libssl-dev zlib1g-dev libbz2-dev \
   libreadline-dev libsqlite3-dev libncurses-dev libffi-dev liblzma-dev \
