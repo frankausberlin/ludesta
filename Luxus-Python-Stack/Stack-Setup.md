@@ -257,7 +257,7 @@ rm -f packages.microsoft.gpg
 sudo nala update && sudo nala install -y code
 
 # alias startet code und fragt vorher openrouter-key ab, kilo erkennt den dann
-cat << 'EOF' >> ~/.bashrc
+cat << 'EOF' >> ~/.zshrc
 alias ocode='read -sp "API-Key eingeben: " OPENROUTER_API_KEY && echo && export OPENROUTER_API_KEY && code'
 EOF
 
