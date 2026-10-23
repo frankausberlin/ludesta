@@ -59,7 +59,7 @@ jl
 cd ~/labor
 
 # und jetzt nochmal den wechsel in den projekt-folder und der prompt ändert sich wieder
-cd ~/gits/my-project
+cd ~/gits/myproject
 
 # und wenn wir schon mal hier sind, starten wir doch direkt mal code mit flüchtigem openrouter-key (der alias macht ein READ für das OR-Token, einfach Copy/Paste einfügen)
 ocode

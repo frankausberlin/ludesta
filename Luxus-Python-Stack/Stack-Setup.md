@@ -258,14 +258,13 @@ sudo nala update && sudo nala install -y code
 
 # alias startet code und fragt vorher openrouter-key ab, kilo erkennt den dann
 cat << 'EOF' >> ~/.zshrc
-alias ocode='read -sp "API-Key eingeben: " OPENROUTER_API_KEY && echo && export OPENROUTER_API_KEY && code'
+alias ocode='read -s "OPENROUTER_API_KEY?API-Key eingeben: " && echo && export OPENROUTER_API_KEY && code'
 EOF
 
 # Kilo-Code-Erweiterung & Python
 code --install-extension kilocode.kilo-code
 code --install-extension ms-python.python
 exec zsh
-
 ```
 
 ## GitHub:
