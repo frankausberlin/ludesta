@@ -4,7 +4,7 @@
 * Dazwischen gibt es Hinweise („⚠️“), die beachtet werden müssen.
 
 ## Basissystem
-> ⚠️ **Der Standard-Darkmode der bash zeigt Kommentare schlecht an, ich empfehle die Pallete 'VS Code' (dark)**
+>* ⚠️ **Der Standard-Darkmode der bash zeigt Kommentare schlecht an, ich empfehle die Pallete 'VS Code' (dark)**
 
 ```shell
 # Ich bevorzuge nala
@@ -34,13 +34,13 @@ sudo systemctl enable --now ssh
 # zu zsh wechseln
 sudo chsh -s $(which zsh) $USER
 ```
-> ⚠️ **Neu anmelden und Option 2: Recommended settings wählen**
+>* ⚠️ **Neu anmelden und Option 2: Recommended settings wählen**
 
 ## ZSH mit antidote und p10k
 ```shell
 echo 'setopt INTERACTIVE_COMMENTS' >> ~/.zshrc
 ```
-> ⚠️ **zsh neu öffnen (notwendig, um das Kommentarzeichen '#' verwenden zu können)**
+>* ⚠️ **zsh neu öffnen (notwendig, um das Kommentarzeichen '#' verwenden zu können)**
 
 ```shell
 # Schriftarten (MesloLGS NF)
@@ -87,7 +87,7 @@ zstyle ':fzf-tab:*' fzf-command fzf
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color=always -- "$realpath"'
 EOF
 ```
-> ⚠️ **Terminal neu starten. Powerlevel10k führt beim ersten Start durch den Konfigurationsassistenten. (fav: yyy1n2122125222221n1y)**
+>* ⚠️ **Terminal neu starten. Powerlevel10k führt beim ersten Start durch den Konfigurationsassistenten. (fav: yyy1n2122125222221n1y)**
 
 ## Installation: Just, Direnv, UV, Ruff, Bump-my-version, Basedpyright, Nbstripout
 
@@ -301,7 +301,7 @@ git config --global init.defaultBranch main
 git config --global pull.rebase true
 ```
 
-* ⚠️ optional Daten eingeben, no-reply-email gibts hier: https://github.com/settings/emails
+>* ⚠️ **optional Daten eingeben, no-reply-email gibts hier: https://github.com/settings/emails**
 ```shell
 #git config --global user.name "Your Name"
 #git config --global user.email "noreply-email" 
@@ -312,8 +312,8 @@ git config --global pull.rebase true
 ```
 
 ## Data-Science-Mamba-Umgebung
-* ⚠️ Für Kompatibilität mit der Colab-Runtime wird ipywidgets 7.7.1 verwendet.
-* ⚠️ Um das Speichern von Notebook-Ausgaben in GitHub zu unterdrücken, im Repository-Ordner `nbstripout --install` ausführen.
+>* ⚠️ **Für Kompatibilität mit der Colab-Runtime wird ipywidgets 7.7.1 verwendet.**
+>* ⚠️ **Um das Speichern von Notebook-Ausgaben in GitHub zu unterdrücken, im Repository-Ordner `nbstripout --install` ausführen.**
 ```shell
 #                     (Neu-)Erstellen einer Data-Science-Umgebung mit allem Drum und Dran und aktivieren
 # _________________________________________________________________________________________________________________________________
@@ -329,7 +329,7 @@ python  -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
 
 ## Network & Security
 
-* ⚠️ **Die Network & Security Einstellungen sind optional. Ich biete hier lediglich eine Variante an.**
+>* ⚠️ **Die Network & Security Einstellungen sind optional. Ich biete hier lediglich eine Variante an.**
 
 ### Ausführen auf dem Host PC
 ```shell
@@ -344,9 +344,11 @@ ssh -o PreferredAuthentications=publickey "${VM_USER}@${VM_IP}" true
 
 ### Ausführen in der VM
 ```shell
-# ip ermitteln (wird im Host PC benötigt)
-ip -br addr
+# copy-paste-freundliche ausgabe von user und ip
+printf 'VM_USER="%s"\nVM_IP="%s"\n' "$USER" "$(hostname -I | awk '{print $1}')"
+```
 
+```shell
 # IN DER VM, nicht als root: erst ausführen, wenn der Login oben ohne Passwort klappt
 # 00- gewinnt gegen 50-cloud-init.conf, sshd nimmt den ersten Wert
 cat << EOF | sudo tee /etc/ssh/sshd_config.d/00-ludesta.conf > /dev/null
@@ -375,8 +377,8 @@ sudo ufw --force enable
 
 ## Docker (für E2E)
 
-> ⚠️ **Dieser Block ist dafür gedacht, wenn du den Stack in einer VM ohne Docker installierst.**.
-> ⚠️ **Den Docker-Installationsblock überspringen, wenn `docker --version` und `docker info` bereits funktionieren.**
+>* ⚠️ **Dieser Block ist dafür gedacht, wenn du den Stack in einer VM ohne Docker installierst.**
+>* ⚠️ **Den Docker-Installationsblock überspringen, wenn `docker --version` und `docker info` bereits funktionieren.**
 
 ```shell
 # Offiziellen GPG-Schlüssel:
