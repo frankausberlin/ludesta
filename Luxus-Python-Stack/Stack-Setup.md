@@ -9,9 +9,8 @@
 ```shell
 # UV (der blitzschnelle, in Rust geschriebene Manager)
 curl -LsSf https://astral.sh/uv/install.sh | sh
+# UV für die aktuelle Shell laden; ~/.local/bin wird bereits im Basis-Setup in den PATH aufgenommen
 source "$HOME/.local/bin/env"
-# PATH dauerhaft für interaktive zsh-Sitzungen; ~/.profile wird von zsh beim Login nicht gelesen
-grep -q 'local/bin/env' ~/.zshrc || echo '[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"' >> ~/.zshrc
 
 # Grundausstattung
 uv tool install ruff && uv tool install bump-my-version && uv tool install basedpyright && uv tool install nbstripout
@@ -189,7 +188,7 @@ exec zsh
 
 ## Überprüfung
 
-> Die allgemeinen Prüfungen stehen in der [Basis-Überprüfung](../Setup.md#überprüfung).
+>* ⚠️ **Die allgemeinen Prüfungen stehen in der [Basis-Überprüfung](../Setup.md#überprüfung).**
 
 ```shell
 mkdir -p ~/.local/bin
@@ -201,10 +200,16 @@ fail=0
 ok() { echo "ok $*"; }
 missing() { echo "MISSING $*"; fail=1; }
 
+base_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+zsh_clean() {
+    env -u ZDOTDIR -u VIRTUAL_ENV -u UV_PYTHON_PREFERENCE -u MAMBA_ROOT_PREFIX \
+        PATH="$base_path" zsh -ic "$1"
+}
+
 # ── UV / Python-Werkzeuge ────────────────────────────────────────────────────
-# Nicht die Setup-Shell prüfen: sie hat ~/.local/bin nur geerbt. Nach einem
-# Neustart muss der PATH aus ~/.zshrc kommen.
-zsh -ic 'r=0; for t in uv ruff basedpyright bump-my-version nbstripout; do if command -v "$t" >/dev/null; then echo "ok $t"; else echo "MISSING $t"; r=1; fi; done; exit $r' || fail=1
+# Nicht die Setup-Shell prüfen: sie hat ~/.local/bin nur geerbt. Der Test startet
+# zsh mit einem kontrollierten PATH, damit nur ~/.zshrc zählt.
+zsh_clean 'r=0; for t in uv ruff basedpyright bump-my-version nbstripout; do if command -v "$t" >/dev/null; then echo "ok $t"; else echo "MISSING $t"; r=1; fi; done; exit $r' || fail=1
 uv --version || fail=1
 uv tool list || fail=1                                # Versionen der globalen uv-Tools
 
@@ -213,15 +218,29 @@ grep -q 'layout_uv' ~/.config/direnv/direnvrc 2>/dev/null && ok layout_uv || mis
 grep -q 'my_jupyter' ~/.p10k.zsh 2>/dev/null && ok "p10k segment" || missing "p10k segment"
 grep -q 'luxuspythonstack.sh' ~/.zshrc && ok "stack functions" || missing "stack functions"
 [ -f ~/.agents/skills/lupysta/SKILL.md ] && ok "lupysta skill" || missing "lupysta skill"
-zsh -ic 'command -v pyinit >/dev/null' && ok pyinit || missing pyinit
-zsh -ic 'command -v jupyter-launcher >/dev/null' && ok jupyter-launcher || missing jupyter-launcher
-zsh -ic 'alias jl' >/dev/null 2>&1 && ok "alias jl" || missing "alias jl"
-zsh -ic 'if [ -n "$UV_PYTHON_PREFERENCE" ]; then echo "ok UV_PYTHON_PREFERENCE=$UV_PYTHON_PREFERENCE"; else echo "MISSING UV_PYTHON_PREFERENCE"; exit 1; fi' || fail=1
-zsh -ic 'if [ -n "$MAMBA_ROOT_PREFIX" ]; then echo "ok MAMBA_ROOT_PREFIX=$MAMBA_ROOT_PREFIX"; else echo "MISSING MAMBA_ROOT_PREFIX"; exit 1; fi' || fail=1
+[ -x ~/.local/bin/test-lupysta ] && ok "test-lupysta" || missing "test-lupysta"
+zsh_clean 'command -v test-lupysta >/dev/null' && ok "$HOME/.local/bin im PATH" || missing "$HOME/.local/bin im PATH"
+zsh_clean 'command -v pyinit >/dev/null' && ok pyinit || missing pyinit
+zsh_clean 'command -v jupyter-launcher >/dev/null' && ok jupyter-launcher || missing jupyter-launcher
+zsh_clean 'alias jl' >/dev/null 2>&1 && ok "alias jl" || missing "alias jl"
+zsh_clean '
+if [ "$UV_PYTHON_PREFERENCE" = "only-managed" ]; then
+    echo "ok UV_PYTHON_PREFERENCE=$UV_PYTHON_PREFERENCE"
+else
+    echo "MISSING UV_PYTHON_PREFERENCE (erwartet: only-managed, ist: ${UV_PYTHON_PREFERENCE:-nicht gesetzt})"
+    exit 1
+fi' || fail=1
+zsh_clean '
+if [ -n "$MAMBA_ROOT_PREFIX" ]; then
+    echo "ok MAMBA_ROOT_PREFIX=$MAMBA_ROOT_PREFIX"
+else
+    echo "MISSING MAMBA_ROOT_PREFIX"
+    exit 1
+fi' || fail=1
 
 # ── Mamba / Data Science ─────────────────────────────────────────────────────
 mamba --version | head -1 || fail=1
-zsh -ic 'mamba activate base' && ok "mamba hook" || missing "mamba hook"
+zsh_clean 'mamba activate base' && ok "mamba hook" || missing "mamba hook"
 env_name="$(cat ~/.startenv 2>/dev/null || echo base)"
 echo "startenv: $env_name"
 mamba env list | grep -qE "^[[:space:]]*${env_name}[[:space:]]" && ok "env $env_name" || missing "env $env_name"
@@ -231,7 +250,7 @@ mamba run -n "$env_name" python -c 'import importlib.util as u; raise SystemExit
 
 # Der Jupyter-LSP-Shim muss Vorrang vor dem echten basedpyright-langserver haben
 shim="$HOME/.local/libexec/jupyter-lsp-shims/basedpyright-langserver"
-resolved="$(zsh -ic 'command -v basedpyright-langserver')"
+resolved="$(zsh_clean 'command -v basedpyright-langserver')"
 [ "$resolved" = "$shim" ] && ok "basedpyright-langserver shim" || missing "basedpyright-langserver shim (got: ${resolved:-nothing})"
 
 # ── VS Code: Python-Stack ────────────────────────────────────────────────────
@@ -243,7 +262,8 @@ done
 
 exit "$fail"
 EOF
+
+# Das Skript wird nur erzeugt. Ausführen mit `test-lupysta` oder `~/.local/bin/test-lupysta`
 chmod +x ~/.local/bin/test-lupysta
 ```
 
-> Das Skript wird nur erzeugt. Ausführen mit `~/.local/bin/test-lupysta` bzw. `test-lupysta`, sobald `~/.local/bin` im PATH liegt. Es ergänzt die allgemeine Prüfung.

@@ -12,8 +12,8 @@
 sudo apt update && sudo apt install -y nala
 sudo nala update && sudo nala upgrade -y
 
-# gits Folder und labor Folder (für jupyter) anlegen und Repository klonen
-sudo nala install -y git && mkdir -p ~/gits ~/labor
+# gits- und labor-Folder (für jupyter) sowie ~/.local/bin anlegen und Repository klonen
+sudo nala install -y git && mkdir -p ~/gits ~/labor ~/.local/bin
 git clone https://github.com/frankausberlin/ludesta ~/gits/ludesta
 
 # Systemgrundlagen / CLI-Tools & Produktivität / Build-Grundlagen & Entwicklerbibliotheken
@@ -80,6 +80,9 @@ autoload -Uz compinit && compinit
 
 # CLI-Tools aus dem Setup aktivieren
 eval "$(zoxide init zsh)"
+
+# --- Lokale Binaries ---
+export PATH="$HOME/.local/bin:$PATH"
 
 # --- Tastenbelegung & Feinschliff ---
 # Tastenbelegung für die History-Substring-Suche
@@ -252,7 +255,7 @@ docker run --rm hello-world
 
 ## Überprüfung
 
-> Die stack-spezifischen Prüfungen stehen in der Setup-Anleitung des jeweiligen Stacks, z. B. in der [Python-Stack-Überprüfung](Luxus-Python-Stack/Stack-Setup.md#überprüfung).
+> ⚠️ **Die stack-spezifischen Prüfungen stehen in der Setup-Anleitung des jeweiligen Stacks.**
 
 ```shell
 mkdir -p ~/.local/bin
@@ -264,9 +267,15 @@ fail=0
 ok() { echo "ok $*"; }
 missing() { echo "MISSING $*"; fail=1; }
 
+base_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+zsh_clean() {
+    env -u ZDOTDIR -u VIRTUAL_ENV -u UV_PYTHON_PREFERENCE -u MAMBA_ROOT_PREFIX \
+        PATH="$base_path" zsh -ic "$1"
+}
+
 # ── System & Basis ───────────────────────────────────────────────────────────
 if command -v nala >/dev/null; then nala --version | head -1 || fail=1; else missing nala; fi
-zsh -ic 'echo "zsh $ZSH_VERSION"' || missing zsh
+zsh_clean 'echo "zsh $ZSH_VERSION"' || missing zsh
 [ "$(getent passwd "$USER" | cut -d: -f7)" = "$(command -v zsh)" ] && ok "login shell zsh" || missing "login shell zsh (neu anmelden)"
 python3 --version || missing python3
 for c in gcc make git awk; do
@@ -274,10 +283,10 @@ for c in gcc make git awk; do
 done
 
 # ── Globale Werkzeuge in frischer interaktiver Shell ─────────────────────────
-# Nicht die Setup-Shell prüfen: sie hat ~/.local/bin nur geerbt. Nach einem
-# Neustart muss der PATH aus ~/.zshrc kommen.
-zsh -ic 'r=0; for t in just direnv zoxide fzf rg jq gh; do if command -v "$t" >/dev/null; then echo "ok $t"; else echo "MISSING $t"; r=1; fi; done; exit $r' || fail=1
-zsh -ic 'just --version; direnv --version; gh --version | head -1' || fail=1
+# Nicht die Setup-Shell prüfen: sie hat ~/.local/bin nur geerbt. Der Test startet
+# zsh mit einem kontrollierten PATH, damit nur ~/.zshrc zählt.
+zsh_clean 'r=0; for t in just direnv zoxide fzf rg jq gh; do if command -v "$t" >/dev/null; then echo "ok $t"; else echo "MISSING $t"; r=1; fi; done; exit $r' || fail=1
+zsh_clean 'just --version; direnv --version; gh --version | head -1' || fail=1
 
 # ── Shell-Integration ────────────────────────────────────────────────────────
 [ -d ~/.antidote ] && ok antidote || missing antidote
@@ -286,12 +295,22 @@ zsh -ic 'just --version; direnv --version; gh --version | head -1' || fail=1
 grep -q 'setopt INTERACTIVE_COMMENTS' ~/.zshrc && ok INTERACTIVE_COMMENTS || missing INTERACTIVE_COMMENTS
 grep -q 'zoxide init zsh' ~/.zshrc && ok "zoxide init" || missing "zoxide init"
 grep -q 'direnv hook zsh' ~/.zshrc && ok "direnv hook" || missing "direnv hook"
+[ -x ~/.local/bin/test-ludesta ] && ok "test-ludesta" || missing "test-ludesta"
+zsh_clean 'command -v test-ludesta >/dev/null' && ok "$HOME/.local/bin im PATH" || missing "$HOME/.local/bin im PATH"
 
 # ── Git / GitHub ─────────────────────────────────────────────────────────────
-[ -f ~/.gitignore_global ] && ok .gitignore_global || missing .gitignore_global
-value="$(git config --global --get core.excludesfile)" && ok "core.excludesfile=$value" || missing core.excludesfile
-value="$(git config --global --get init.defaultBranch)" && ok "init.defaultBranch=$value" || missing init.defaultBranch
-value="$(git config --global --get pull.rebase)" && ok "pull.rebase=$value" || missing pull.rebase
+expected_ignore="$HOME/.gitignore_global"
+[ -f "$expected_ignore" ] && ok .gitignore_global || missing .gitignore_global
+value="$(git config --global --path --get core.excludesfile)"
+if [ "$value" = "$expected_ignore" ] && [ -f "$value" ]; then
+    ok "core.excludesfile=$value"
+else
+    missing "core.excludesfile (erwartet: $expected_ignore, ist: ${value:-nicht gesetzt})"
+fi
+value="$(git config --global --get init.defaultBranch)"
+[ "$value" = "main" ] && ok "init.defaultBranch=$value" || missing "init.defaultBranch (erwartet: main, ist: ${value:-nicht gesetzt})"
+value="$(git config --global --bool --get pull.rebase)"
+[ "$value" = "true" ] && ok "pull.rebase=$value" || missing "pull.rebase (erwartet: true, ist: ${value:-nicht gesetzt})"
 value="$(git config --global --get user.name)" && echo "user.name=$value" || echo "HINWEIS: user.name nicht gesetzt"
 value="$(git config --global --get user.email)" && echo "user.email=$value" || echo "HINWEIS: user.email nicht gesetzt"
 
@@ -299,15 +318,19 @@ value="$(git config --global --get user.email)" && echo "user.email=$value" || e
 code --version || missing code
 extensions="$(code --list-extensions)" || fail=1
 printf '%s\n' "$extensions" | grep -qix kilocode.kilo-code && ok kilocode.kilo-code || missing kilocode.kilo-code
-zsh -ic 'alias ocode' >/dev/null 2>&1 && ok "alias ocode" || missing "alias ocode"
+zsh_clean 'alias ocode' >/dev/null 2>&1 && ok "alias ocode" || missing "alias ocode"
 
 # ── Docker (optional) ────────────────────────────────────────────────────────
 if command -v docker >/dev/null; then
     docker --version || fail=1
     docker buildx version || fail=1                      # BuildKit wird vom E2E-Dockerfile benötigt
     docker compose version || fail=1                     # Compose-Plugin ist installiert
-    docker info --format '{{.ServerVersion}}' || fail=1  # muss die Serverversion ausgeben, nicht nur die des Clients
-    id -nG | grep -qw docker && ok "docker group" || missing "docker group (nach usermod neu einloggen)"
+    if docker info --format '{{.ServerVersion}}'; then   # muss die Serverversion ausgeben, nicht nur die des Clients
+        id -nG | grep -qw docker && ok "docker group" || echo "HINWEIS: Benutzer nicht in Gruppe docker (bei Rootless Docker normal; sonst ggf. neu einloggen)"
+    else
+        fail=1
+        id -nG | grep -qw docker && echo "HINWEIS: docker info fehlgeschlagen, obwohl die Gruppe docker vorhanden ist" || echo "HINWEIS: docker info fehlgeschlagen und Gruppe docker fehlt (nach usermod neu einloggen?)"
+    fi
 else
     echo "HINWEIS: Docker nicht installiert (optional für E2E)"
 fi
@@ -321,7 +344,9 @@ ls -la ~/.ssh/authorized_keys         # Server-Seite: Host-Key muss hier liegen
 
 exit "$fail"
 EOF
+
+# Das Skript wird nur erzeugt. Ausführen mit `test-ludesta` oder `~/.local/bin/test-ludesta`
 chmod +x ~/.local/bin/test-ludesta
 ```
 
-> Das Skript wird nur erzeugt. Ausführen mit `~/.local/bin/test-ludesta`; nach dem Stack-Setup liegt `~/.local/bin` auch im PATH.
+
