@@ -7,7 +7,7 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 |Folder|File|Inhalt|
 |-|-|-|
 |**`/`**|*Luxus-Python-Stack.md*|Stack-Dokumentation (dieses Dokument)|
-||*Stack-Setup.md*|Einrichtung des Stacks auf einem neuen System|
+||*Stack-Setup.md*|Stack-spezifische Einrichtung (setzt das [Basis-System](../Setup.md) voraus)|
 |**`lupysta/`**||Stack-Skill für die Arbeit im initialisierten Projekt (siehe unten)|
 |**`scripts/`**|*luxuspythonstack.sh*|Stack-Laufzeit mit `pyinit` und Shell-Funktionen|
 |**`templates/`**|*AGENTS.md*|Vorlage für die projektbezogene `AGENTS.md`|
@@ -33,7 +33,7 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 
 ## Installation
 
-**Die [Setup-Anleitung](Stack-Setup.md) befolgen.**
+**Zuerst das [Basis-System](../Setup.md) einrichten, danach die [Stack-Einrichtung](Stack-Setup.md) befolgen.**
 
 Kleiner Test
 ```shell

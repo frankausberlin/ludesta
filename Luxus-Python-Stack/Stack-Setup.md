@@ -2,99 +2,11 @@
 
 * Die Codeblöcke können per Kopieren/Einfügen in die Shell eingefügt werden. 
 * Dazwischen gibt es Hinweise („⚠️“), die beachtet werden müssen.
+* Dieses Setup setzt das [Basis-System](../Setup.md) voraus.
 
-## Basissystem
->* ⚠️ **Der Standard-Darkmode der bash zeigt Kommentare schlecht an, ich empfehle die Pallete 'VS Code' (dark)**
-
-```shell
-# Ich bevorzuge nala
-sudo apt update && sudo apt install -y nala
-sudo nala update && sudo nala upgrade -y
-
-# gits Folder und labor Folder (für jupyter) anlegen und Repository klonen
-sudo nala install -y git && mkdir -p ~/gits ~/labor
-git clone https://github.com/frankausberlin/ludesta ~/gits/ludesta
-
-# Systemgrundlagen / CLI-Tools & Produktivität / Build-Grundlagen & Entwicklerbibliotheken
-sudo nala install -y \
-  ca-certificates curl wget gnupg gpg software-properties-common \
-  openssh-server fail2ban ufw unattended-upgrades util-linux-extra net-tools \
-  util-linux-extra snapd 7zip xz-utils aria2 sqlite3 \
-  zsh gh tmux btop htop iotop nvtop fastfetch tree hwinfo s-tui \
-  ripgrep fzf zoxide jq tealdeer shellcheck shfmt apt-transport-https \
-  build-essential cmake make pkg-config libssl-dev zlib1g-dev libbz2-dev \
-  libreadline-dev libsqlite3-dev libncurses-dev libffi-dev liblzma-dev \
-  libxml2-dev libxmlsec1-dev tk-dev libyaml-dev libfuse2t64 \
-  python3 pipx
-
-# SSH aktivieren
-sudo systemctl enable --now ssh
-# IP mit 'ip a' ermitteln und per 'ssh <user>@<ip>' mit dieser Maschine verbinden
-
-# zu zsh wechseln
-sudo chsh -s $(which zsh) $USER
-```
->* ⚠️ **Neu anmelden und Option 2: Recommended settings wählen**
-
-## ZSH mit antidote und p10k
-```shell
-echo 'setopt INTERACTIVE_COMMENTS' >> ~/.zshrc
-```
->* ⚠️ **zsh neu öffnen (notwendig, um das Kommentarzeichen '#' verwenden zu können)**
+## Installation: UV, Ruff, Bump-my-version, Basedpyright, Nbstripout, VSCode-Python-Extension
 
 ```shell
-# Schriftarten (MesloLGS NF)
-mkdir -p ~/.local/share/fonts && cd ~/.local/share/fonts
-wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf
-wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf
-wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf
-wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf
-fc-cache -fv && cd ~
-
-# Antidote
-git clone --depth=1 https://github.com/mattmc3/antidote.git ~/.antidote
-
-# Plugin-Auswahl (p10k)
-cat << 'EOF' > ~/.zsh_plugins.txt
-romkatv/powerlevel10k
-zsh-users/zsh-completions
-Aloxaf/fzf-tab
-zsh-users/zsh-autosuggestions
-zsh-users/zsh-syntax-highlighting
-zsh-users/zsh-history-substring-search
-hlissner/zsh-autopair
-EOF
-
-# Integration in zsh
-cat << 'EOF' >> ~/.zshrc
-# --- Antidote & Plugins ---
-source ~/.antidote/antidote.zsh
-antidote load
-
-# --- Completions & Init ---
-autoload -Uz compinit && compinit
-
-# CLI-Tools aus dem Setup aktivieren
-eval "$(zoxide init zsh)"
-
-# --- Tastenbelegung & Feinschliff ---
-# Tastenbelegung für die History-Substring-Suche
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
-
-# fzf-tab-Konfiguration (macht die Tab-Autovervollständigung komfortabel)
-zstyle ':fzf-tab:*' fzf-command fzf
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color=always -- "$realpath"'
-EOF
-```
->* ⚠️ **Terminal neu starten. Powerlevel10k führt beim ersten Start durch den Konfigurationsassistenten. (fav: yyy1n2122125222221n1y)**
-
-## Installation: Just, Direnv, UV, Ruff, Bump-my-version, Basedpyright, Nbstripout
-
-```shell
-# just und direnv aus der Paketquelle
-sudo nala install -y just direnv
-
 # UV (der blitzschnelle, in Rust geschriebene Manager)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source "$HOME/.local/bin/env"
@@ -116,8 +28,9 @@ layout_uv() {
 }
 EOF
 
-# direnv in zsh aktivieren
-grep -q 'direnv hook zsh' ~/.zshrc || echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
+# python extension in vscode installieren
+n=0; until [ "$n" -ge 5 ] || code --install-extension ms-python.python; do n=$((n+1)); echo "Fehlgeschlagen ($n/5). Warte 5s..."; sleep 5; done
+
 exec zsh # zsh neu laden
 ```
 
@@ -239,80 +152,6 @@ chmod +x ~/.local/libexec/jupyter-lsp-shims/basedpyright-langserver
 exec zsh
 ```
 
-## VSCode
-```shell
-# Microsoft-GPG-Schlüssel herunterladen und einrichten
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
-
-# Paketquelle zum Paketmanager hinzufügen
-echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
-rm -f packages.microsoft.gpg
-
-# Paketliste aktualisieren und VS Code installieren
-sudo nala update && sudo nala install -y code
-
-# alias startet code und fragt vorher openrouter-key ab, kilo erkennt den dann
-cat << 'EOF' >> ~/.zshrc
-alias ocode='read -s "OPENROUTER_API_KEY?API-Key eingeben: " && echo && export OPENROUTER_API_KEY && code'
-EOF
-
-# Kilo-Code-Erweiterung & Python
-n=0; until [ "$n" -ge 5 ] || code --install-extension kilocode.kilo-code; do n=$((n+1)); echo "Fehlgeschlagen ($n/5). Warte 5s..."; sleep 5; done
-n=0; until [ "$n" -ge 5 ] || code --install-extension ms-python.python; do n=$((n+1)); echo "Fehlgeschlagen ($n/5). Warte 5s..."; sleep 5; done
-exec zsh
-```
-
-## GitHub:
-```shell
-# Globale .gitignore erstellen
-cat > ~/.gitignore_global << 'EOF'
-# Agent-Ordner
-.opencode/
-.kilocode/
-.cursor/
-.kilo/
-
-# Umgebungsdateien
-.env
-.env.*
-!.env.example
-
-# Virtuelle Umgebungen
-.venv/
-venv/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-
-# IDE
-.idea/
-*.swp
-*~
-
-# Betriebssystem
-.DS_Store
-Thumbs.db
-EOF
-
-# setze globales gitignore, verwende main anstatt master, merge-verhalten
-git config --global core.excludesfile ~/.gitignore_global
-git config --global init.defaultBranch main
-git config --global pull.rebase true
-```
-
->* ⚠️ **optional Daten eingeben, no-reply-email gibts hier: https://github.com/settings/emails**
-```shell
-#git config --global user.name "Your Name"
-#git config --global user.email "noreply-email" 
-# GitHub-Login („SSH“ wählen und den id_ed25519.pub-Schlüssel hochladen!)
-#gh auth login
-# Legt den Credential-Helper für HTTPS-Remotes fest
-#gh auth setup-git
-```
-
 ## Data-Science-Mamba-Umgebung
 >* ⚠️ **Für Kompatibilität mit der Colab-Runtime wird ipywidgets 7.7.1 verwendet.**
 >* ⚠️ **Um das Speichern von Notebook-Ausgaben in GitHub zu unterdrücken, im Repository-Ordner `nbstripout --install` ausführen.**
@@ -329,85 +168,6 @@ python  -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
 # act() { [ "$#" -ne 0 ] && echo $1 > ~/.startenv && mamba activate $1; } # Umgebung wechseln und merken
 ```
 
-## Network & Security
-
->* ⚠️ **Die Network & Security Einstellungen sind optional. Ich biete hier lediglich eine Variante an.**
-
-### Ausführen auf dem Host PC
-```shell
-# AUF DEM HOST: VM_USER/VM_IP einsetzen, dann ausführen
-VM_USER="<vm-user>"
-VM_IP="<vm-ip>"          # NAT: 127.0.0.1, beide ssh-Befehle zusätzlich mit -p <host-port>
-
-[ -f ~/.ssh/id_ed25519 ] || ssh-keygen -t ed25519
-ssh-copy-id -i ~/.ssh/id_ed25519.pub "${VM_USER}@${VM_IP}"
-ssh -o PreferredAuthentications=publickey "${VM_USER}@${VM_IP}" true
-```
-
-### Ausführen in der VM
-```shell
-# copy-paste-freundliche ausgabe von user und ip
-printf 'VM_USER="%s"\nVM_IP="%s"\n' "$USER" "$(hostname -I | awk '{print $1}')"
-```
-
-```shell
-# IN DER VM, nicht als root: erst ausführen, wenn der Login oben ohne Passwort klappt
-# 00- gewinnt gegen 50-cloud-init.conf, sshd nimmt den ersten Wert
-cat << EOF | sudo tee /etc/ssh/sshd_config.d/00-ludesta.conf > /dev/null
-PasswordAuthentication no
-KbdInteractiveAuthentication no
-PermitRootLogin no
-PermitEmptyPasswords no
-AllowUsers ${SUDO_USER:-$USER}
-Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
-EOF
-sudo sshd -t && sudo systemctl reload ssh
-
-# Erste drei Werte: no; allowusers: dein VM-Benutzername
-# Danach SSH-Login in einem zweiten Terminal prüfen, bisherige Sitzung offen lassen.
-sudo sshd -T | grep -E '^(passwordauthentication|kbdinteractiveauthentication|permitrootlogin|allowusers) '
-
-# Firewall: eingehend dicht, SSH gedrosselt, ausgehend offen
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
-sudo ufw limit ssh
-sudo ufw --force enable
-
-# Docker: keine Ports veröffentlichen; wenn unvermeidbar, nur an Loopback binden
-# docker run -p 127.0.0.1:8080:80 ...
-```
-
-## Docker (für E2E)
-
->* ⚠️ **Dieser Block ist dafür gedacht, wenn du den Stack in einer VM ohne Docker installierst.**
->* ⚠️ **Den Docker-Installationsblock überspringen, wenn `docker --version` und `docker info` bereits funktionieren.**
-
-```shell
-# Offiziellen GPG-Schlüssel:
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-# Füge repository hinzu
-sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
-Types: deb
-URIs: https://download.docker.com/linux/ubuntu
-Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
-Components: stable
-Architectures: $(dpkg --print-architecture)
-Signed-By: /etc/apt/keyrings/docker.asc
-EOF
-
-# install docker / user in group 
-sudo nala update && sudo nala install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-sudo usermod -aG docker $USER
-newgrp docker
-```
-> ⚠️ **Optional: run docker's hello-world**.
-
-```shell
-docker run --rm hello-world
-```
 
 ## Luxus-Python-Stack: pyinit, jupyter-launcher (jl), myprompt_my_jupyter (p10k)
 ```shell
@@ -429,70 +189,61 @@ exec zsh
 
 ## Überprüfung
 
-```shell
-# ── System & Basis ───────────────────────────────────────────────────────────
-nala --version | head -1
-zsh -ic 'echo "zsh $ZSH_VERSION"'
-python3 --version
-for c in gcc make git awk; do command -v "$c" >/dev/null && echo "ok $c" || echo "MISSING $c"; done
+> Die allgemeinen Prüfungen stehen in der [Basis-Überprüfung](../Setup.md#überprüfung).
 
-# ── Globale Werkzeuge in frischer interaktiver Shell ─────────────────────────
+```shell
+mkdir -p ~/.local/bin
+cat << 'EOF' > ~/.local/bin/test-lupysta
+#!/bin/bash
+set -o pipefail
+
+fail=0
+ok() { echo "ok $*"; }
+missing() { echo "MISSING $*"; fail=1; }
+
+# ── UV / Python-Werkzeuge ────────────────────────────────────────────────────
 # Nicht die Setup-Shell prüfen: sie hat ~/.local/bin nur geerbt. Nach einem
 # Neustart muss der PATH aus ~/.zshrc kommen.
-zsh -ic 'for t in uv ruff basedpyright bump-my-version nbstripout just direnv zoxide fzf rg jq gh; do command -v "$t" >/dev/null && echo "ok $t" || echo "MISSING $t"; done'
-uv --version
-zsh -ic 'just --version; direnv --version; gh --version | head -1'
-uv tool list                                # Versionen der globalen uv-Tools
+zsh -ic 'r=0; for t in uv ruff basedpyright bump-my-version nbstripout; do if command -v "$t" >/dev/null; then echo "ok $t"; else echo "MISSING $t"; r=1; fi; done; exit $r' || fail=1
+uv --version || fail=1
+uv tool list || fail=1                                # Versionen der globalen uv-Tools
 
 # ── Shell-Integration ────────────────────────────────────────────────────────
-[ -d ~/.antidote ] && echo "ok antidote" || echo "MISSING antidote"
-[ -f ~/.zsh_plugins.txt ] && echo "ok .zsh_plugins.txt" || echo "MISSING .zsh_plugins.txt"
-[ -f ~/.p10k.zsh ] && echo "ok p10k configured" || echo "MISSING p10k configured"
-grep -q 'my_jupyter' ~/.p10k.zsh 2>/dev/null && echo "ok p10k segment" || echo "MISSING p10k segment"
-grep -q 'direnv hook zsh' ~/.zshrc && echo "ok direnv hook" || echo "MISSING direnv hook"
-grep -q 'layout_uv' ~/.config/direnv/direnvrc 2>/dev/null && echo "ok layout_uv" || echo "MISSING layout_uv"
-grep -q 'luxuspythonstack.sh' ~/.zshrc && echo "ok stack functions" || echo "MISSING stack functions"
-[ -f ~/.agents/skills/lupysta/SKILL.md ] && echo "ok lupysta skill" || echo "MISSING lupysta skill"
-zsh -ic 'command -v pyinit >/dev/null && echo "ok pyinit" || echo "MISSING pyinit"'
-zsh -ic 'command -v jupyter-launcher >/dev/null && echo "ok jupyter-launcher" || echo "MISSING jupyter-launcher"'
-zsh -ic 'alias jl'                          # -> jl='jupyter-launcher -n -c'
-zsh -ic '[ -n "$UV_PYTHON_PREFERENCE" ] && echo "ok UV_PYTHON_PREFERENCE=$UV_PYTHON_PREFERENCE" || echo "MISSING UV_PYTHON_PREFERENCE"'
-zsh -ic '[ -n "$MAMBA_ROOT_PREFIX" ] && echo "ok MAMBA_ROOT_PREFIX=$MAMBA_ROOT_PREFIX" || echo "MISSING MAMBA_ROOT_PREFIX"'
+grep -q 'layout_uv' ~/.config/direnv/direnvrc 2>/dev/null && ok layout_uv || missing layout_uv
+grep -q 'my_jupyter' ~/.p10k.zsh 2>/dev/null && ok "p10k segment" || missing "p10k segment"
+grep -q 'luxuspythonstack.sh' ~/.zshrc && ok "stack functions" || missing "stack functions"
+[ -f ~/.agents/skills/lupysta/SKILL.md ] && ok "lupysta skill" || missing "lupysta skill"
+zsh -ic 'command -v pyinit >/dev/null' && ok pyinit || missing pyinit
+zsh -ic 'command -v jupyter-launcher >/dev/null' && ok jupyter-launcher || missing jupyter-launcher
+zsh -ic 'alias jl' >/dev/null 2>&1 && ok "alias jl" || missing "alias jl"
+zsh -ic 'if [ -n "$UV_PYTHON_PREFERENCE" ]; then echo "ok UV_PYTHON_PREFERENCE=$UV_PYTHON_PREFERENCE"; else echo "MISSING UV_PYTHON_PREFERENCE"; exit 1; fi' || fail=1
+zsh -ic 'if [ -n "$MAMBA_ROOT_PREFIX" ]; then echo "ok MAMBA_ROOT_PREFIX=$MAMBA_ROOT_PREFIX"; else echo "MISSING MAMBA_ROOT_PREFIX"; exit 1; fi' || fail=1
 
 # ── Mamba / Data Science ─────────────────────────────────────────────────────
-mamba --version | head -1
-zsh -ic 'mamba activate base && echo "ok mamba hook"'
+mamba --version | head -1 || fail=1
+zsh -ic 'mamba activate base' && ok "mamba hook" || missing "mamba hook"
 env_name="$(cat ~/.startenv 2>/dev/null || echo base)"
 echo "startenv: $env_name"
-mamba env list | grep -qE "^[[:space:]]*${env_name}[[:space:]]" && echo "ok env $env_name" || echo "MISSING env $env_name"
-mamba run -n "$env_name" jupyter lab --version
+mamba env list | grep -qE "^[[:space:]]*${env_name}[[:space:]]" && ok "env $env_name" || missing "env $env_name"
+mamba run -n "$env_name" jupyter lab --version || fail=1
 mamba run -n "$env_name" python -c 'import importlib.util as u; raise SystemExit(0 if u.find_spec("jupyter_http_over_ws") else 1)' \
-    >/dev/null 2>&1 && echo "ok jupyter_http_over_ws" || echo "MISSING jupyter_http_over_ws"
+    >/dev/null 2>&1 && ok jupyter_http_over_ws || missing jupyter_http_over_ws
 
 # Der Jupyter-LSP-Shim muss Vorrang vor dem echten basedpyright-langserver haben
-zsh -ic 'command -v basedpyright-langserver'   # -> ~/.local/libexec/jupyter-lsp-shims/basedpyright-langserver
+shim="$HOME/.local/libexec/jupyter-lsp-shims/basedpyright-langserver"
+resolved="$(zsh -ic 'command -v basedpyright-langserver')"
+[ "$resolved" = "$shim" ] && ok "basedpyright-langserver shim" || missing "basedpyright-langserver shim (got: ${resolved:-nothing})"
 
-# ── VS Code ──────────────────────────────────────────────────────────────────
-code --version
-extensions="$(code --list-extensions)"
-for e in kilocode.kilo-code ms-python.python; do
-    printf '%s\n' "$extensions" | grep -qix "$e" && echo "ok $e" || echo "MISSING $e"
-done
+# ── VS Code: Python-Stack ────────────────────────────────────────────────────
+extensions="$(code --list-extensions)" || fail=1
+printf '%s\n' "$extensions" | grep -qix ms-python.python && ok ms-python.python || missing ms-python.python
 for e in charliermarsh.ruff detachhead.basedpyright; do
     printf '%s\n' "$extensions" | grep -qix "$e" && echo "ok $e" || echo "HINWEIS: $e optional (wird pro Projekt empfohlen)"
 done
 
-# ── Docker ───────────────────────────────────────────────────────────────────
-docker --version
-docker buildx version                      # BuildKit wird vom E2E-Dockerfile benötigt
-docker compose version                     # Compose-Plugin ist installiert
-docker info --format '{{.ServerVersion}}'  # muss die Serverversion ausgeben, nicht nur die des Clients
-id -nG | grep -qw docker && echo "ok docker group" || echo "MISSING docker group (nach usermod neu einloggen)"
-
-# ── Network & Security (optional) ────────────────────────────────────────────
-sudo ufw status verbose
-systemctl is-active ssh ssh.socket    # mindestens einer muss aktiv sein
-sudo ss -tlnp | grep ':22 '           # ssh listening
-sudo sshd -T | grep -Ei '^(passwordauthentication|permitrootlogin|allowusers|maxauthtries)'
-ls -la ~/.ssh/authorized_keys         # Server-Seite: Host-Key muss hier liegen
+exit "$fail"
+EOF
+chmod +x ~/.local/bin/test-lupysta
 ```
+
+> Das Skript wird nur erzeugt. Ausführen mit `~/.local/bin/test-lupysta` bzw. `test-lupysta`, sobald `~/.local/bin` im PATH liegt. Es ergänzt die allgemeine Prüfung.
