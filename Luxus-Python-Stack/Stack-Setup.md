@@ -9,7 +9,7 @@
 ```shell
 # Ich bevorzuge nala
 sudo apt update && sudo apt install -y nala
-sudo nala update && sudo nala upgrade
+sudo nala update && sudo nala upgrade -y
 
 # gits Folder und labor Folder (für jupyter) anlegen und Repository klonen
 sudo nala install -y git && mkdir -p ~/gits ~/labor
@@ -32,7 +32,7 @@ sudo systemctl enable --now ssh
 # IP mit 'ip a' ermitteln und per 'ssh <user>@<ip>' mit dieser Maschine verbinden
 
 # zu zsh wechseln
-chsh -s $(which zsh) 
+sudo chsh -s $(which zsh) $USER
 ```
 > ⚠️ **Neu anmelden und Option 2: Recommended settings wählen**
 
