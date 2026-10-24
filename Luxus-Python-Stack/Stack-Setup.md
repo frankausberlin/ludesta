@@ -266,5 +266,8 @@ EOF
 
 # Das Skript wird nur erzeugt. Ausführen mit `test-lupysta` oder `~/.local/bin/test-lupysta`
 chmod +x ~/.local/bin/test-lupysta
+
+# und direkt mal testen
+test-lupysta
 ```
 
