@@ -335,12 +335,14 @@ else
     echo "HINWEIS: Docker nicht installiert (optional für E2E)"
 fi
 
-# ── Network & Security (optional, ohne Einfluss auf den Exitcode) ────────────
-sudo ufw status verbose
-systemctl is-active ssh ssh.socket    # mindestens einer muss aktiv sein
-sudo ss -tlnp | grep ':22 '           # ssh listening
-sudo sshd -T | grep -Ei '^(passwordauthentication|permitrootlogin|allowusers|maxauthtries)'
-ls -la ~/.ssh/authorized_keys         # Server-Seite: Host-Key muss hier liegen
+# Network & Security
+systemctl is-active --quiet ssh || systemctl is-active --quiet ssh.socket && ok "ssh aktiv" || echo "HINWEIS: ssh nicht aktiv"
+ss -tln 2>/dev/null | grep -q ':22 ' && ok "ssh auf Port 22" || echo "HINWEIS: kein Listener auf 22"
+[ -s ~/.ssh/authorized_keys ] && ok authorized_keys || echo "HINWEIS: authorized_keys fehlt"
+{ grep -qx 'ENABLED=yes' /etc/ufw/ufw.conf && grep -qx 'DEFAULT_INPUT_POLICY="DROP"' /etc/default/ufw && grep -qx 'DEFAULT_OUTPUT_POLICY="ACCEPT"' /etc/default/ufw; } 2>/dev/null && ok "ufw enabled + policies" || echo "HINWEIS: ufw-Status/Policies prüfen"
+t="$(mktemp -d)"; [ -d "$t" ] || t="${TMPDIR:-/tmp}"; ssh-keygen -q -t ed25519 -N '' -f "$t/k" 2>/dev/null; sshd -T -h "$t/k" 2>/dev/null > "$t/c"
+r=0; for c in "passwordauthentication no" "kbdinteractiveauthentication no" "permitrootlogin no" "permitemptypasswords no"; do grep -qx "$c" "$t/c" || r=1; done; grep -Eq "^allowusers( .*)? $USER( .*)?$" "$t/c" || r=1
+rm -rf "$t"; [ "$r" = 0 ] && ok "sshd hardening" || echo "HINWEIS: sshd-Config prüfen"
 
 exit "$fail"
 EOF
