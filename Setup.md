@@ -338,7 +338,6 @@ fi
 # Network & Security
 systemctl is-active --quiet ssh || systemctl is-active --quiet ssh.socket && ok "ssh aktiv" || echo "HINWEIS: ssh nicht aktiv"
 ss -tln 2>/dev/null | grep -q ':22 ' && ok "ssh auf Port 22" || echo "HINWEIS: kein Listener auf 22"
-[ -s ~/.ssh/authorized_keys ] && ok authorized_keys || echo "HINWEIS: authorized_keys fehlt"
 { grep -qx 'ENABLED=yes' /etc/ufw/ufw.conf && grep -qx 'DEFAULT_INPUT_POLICY="DROP"' /etc/default/ufw && grep -qx 'DEFAULT_OUTPUT_POLICY="ACCEPT"' /etc/default/ufw; } 2>/dev/null && ok "ufw enabled + policies" || echo "HINWEIS: ufw-Status/Policies prüfen"
 if t="$(mktemp -d)" && [ -d "$t" ]; then
     ssh-keygen -q -t ed25519 -N '' -f "$t/k" 2>/dev/null
@@ -359,6 +358,9 @@ EOF
 
 # Das Skript wird nur erzeugt. Ausführen mit `test-ludesta` oder `~/.local/bin/test-ludesta`
 chmod +x ~/.local/bin/test-ludesta
+
+# und direkt mal testen
+test-ludesta
 ```
 
 
