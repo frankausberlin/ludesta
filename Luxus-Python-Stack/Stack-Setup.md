@@ -98,6 +98,8 @@ sudo nala install -y just direnv
 # UV (der blitzschnelle, in Rust geschriebene Manager)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source "$HOME/.local/bin/env"
+# PATH dauerhaft für interaktive zsh-Sitzungen; ~/.profile wird von zsh beim Login nicht gelesen
+grep -q 'local/bin/env' ~/.zshrc || echo '[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"' >> ~/.zshrc
 
 # Grundausstattung
 uv tool install ruff && uv tool install bump-my-version && uv tool install basedpyright && uv tool install nbstripout
@@ -428,25 +430,66 @@ exec zsh
 ## Überprüfung
 
 ```shell
+# ── System & Basis ───────────────────────────────────────────────────────────
 nala --version | head -1
-for c in just direnv gcc; do command -v "$c" >/dev/null && echo "ok $c" || echo "MISSING $c"; done
-[ -d ~/.antidote ] && echo "antidote present"
-[ -f ~/.zsh_plugins.txt ] && echo ".zsh_plugins.txt present"
-[ -f ~/.p10k.zsh ] && echo "p10k configured"
-zsh -ic 'echo $ZSH_VERSION'
+zsh -ic 'echo "zsh $ZSH_VERSION"'
 python3 --version
+for c in gcc make git awk; do command -v "$c" >/dev/null && echo "ok $c" || echo "MISSING $c"; done
+
+# ── Globale Werkzeuge in frischer interaktiver Shell ─────────────────────────
+# Nicht die Setup-Shell prüfen: sie hat ~/.local/bin nur geerbt. Nach einem
+# Neustart muss der PATH aus ~/.zshrc kommen.
+zsh -ic 'for t in uv ruff basedpyright bump-my-version nbstripout just direnv zoxide fzf rg jq gh; do command -v "$t" >/dev/null && echo "ok $t" || echo "MISSING $t"; done'
 uv --version
-for t in ruff bump-my-version basedpyright nbstripout; do command -v "$t" >/dev/null && echo "ok $t" || echo "MISSING $t"; done
-direnv --version
+zsh -ic 'just --version; direnv --version; gh --version | head -1'
+uv tool list                                # Versionen der globalen uv-Tools
+
+# ── Shell-Integration ────────────────────────────────────────────────────────
+[ -d ~/.antidote ] && echo "ok antidote" || echo "MISSING antidote"
+[ -f ~/.zsh_plugins.txt ] && echo "ok .zsh_plugins.txt" || echo "MISSING .zsh_plugins.txt"
+[ -f ~/.p10k.zsh ] && echo "ok p10k configured" || echo "MISSING p10k configured"
+grep -q 'my_jupyter' ~/.p10k.zsh 2>/dev/null && echo "ok p10k segment" || echo "MISSING p10k segment"
+grep -q 'direnv hook zsh' ~/.zshrc && echo "ok direnv hook" || echo "MISSING direnv hook"
+grep -q 'layout_uv' ~/.config/direnv/direnvrc 2>/dev/null && echo "ok layout_uv" || echo "MISSING layout_uv"
+grep -q 'luxuspythonstack.sh' ~/.zshrc && echo "ok stack functions" || echo "MISSING stack functions"
+[ -f ~/.agents/skills/lupysta/SKILL.md ] && echo "ok lupysta skill" || echo "MISSING lupysta skill"
+zsh -ic 'command -v pyinit >/dev/null && echo "ok pyinit" || echo "MISSING pyinit"'
+zsh -ic 'command -v jupyter-launcher >/dev/null && echo "ok jupyter-launcher" || echo "MISSING jupyter-launcher"'
+zsh -ic 'alias jl'                          # -> jl='jupyter-launcher -n -c'
+zsh -ic '[ -n "$UV_PYTHON_PREFERENCE" ] && echo "ok UV_PYTHON_PREFERENCE=$UV_PYTHON_PREFERENCE" || echo "MISSING UV_PYTHON_PREFERENCE"'
+zsh -ic '[ -n "$MAMBA_ROOT_PREFIX" ] && echo "ok MAMBA_ROOT_PREFIX=$MAMBA_ROOT_PREFIX" || echo "MISSING MAMBA_ROOT_PREFIX"'
+
+# ── Mamba / Data Science ─────────────────────────────────────────────────────
 mamba --version | head -1
-zsh -ic 'mamba activate base && echo "mamba hook ok"'
+zsh -ic 'mamba activate base && echo "ok mamba hook"'
+env_name="$(cat ~/.startenv 2>/dev/null || echo base)"
+echo "startenv: $env_name"
+mamba env list | grep -qE "^[[:space:]]*${env_name}[[:space:]]" && echo "ok env $env_name" || echo "MISSING env $env_name"
+mamba run -n "$env_name" jupyter lab --version
+mamba run -n "$env_name" python -c 'import importlib.util as u; raise SystemExit(0 if u.find_spec("jupyter_http_over_ws") else 1)' \
+    >/dev/null 2>&1 && echo "ok jupyter_http_over_ws" || echo "MISSING jupyter_http_over_ws"
+
 # Der Jupyter-LSP-Shim muss Vorrang vor dem echten basedpyright-langserver haben
 zsh -ic 'command -v basedpyright-langserver'   # -> ~/.local/libexec/jupyter-lsp-shims/basedpyright-langserver
+
+# ── VS Code ──────────────────────────────────────────────────────────────────
 code --version
+extensions="$(code --list-extensions)"
+for e in kilocode.kilo-code ms-python.python; do
+    printf '%s\n' "$extensions" | grep -qix "$e" && echo "ok $e" || echo "MISSING $e"
+done
+for e in charliermarsh.ruff detachhead.basedpyright; do
+    printf '%s\n' "$extensions" | grep -qix "$e" && echo "ok $e" || echo "HINWEIS: $e optional (wird pro Projekt empfohlen)"
+done
+
+# ── Docker ───────────────────────────────────────────────────────────────────
 docker --version
 docker buildx version                      # BuildKit wird vom E2E-Dockerfile benötigt
+docker compose version                     # Compose-Plugin ist installiert
 docker info --format '{{.ServerVersion}}'  # muss die Serverversion ausgeben, nicht nur die des Clients
-# Network & Security (optional)
+id -nG | grep -qw docker && echo "ok docker group" || echo "MISSING docker group (nach usermod neu einloggen)"
+
+# ── Network & Security (optional) ────────────────────────────────────────────
 sudo ufw status verbose
 systemctl is-active ssh ssh.socket    # mindestens einer muss aktiv sein
 sudo ss -tlnp | grep ':22 '           # ssh listening
