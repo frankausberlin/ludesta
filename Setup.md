@@ -38,7 +38,7 @@ sudo systemctl enable --now ssh
 # zu zsh wechseln
 sudo chsh -s $(which zsh) $USER
 ```
->* ⚠️ **Neu anmelden und Option 2: Recommended settings wählen**
+>* ⚠️ **Neu anmelden, Terminal starten und Option 2: Recommended settings wählen**
 
 ## ZSH mit antidote und p10k
 ```shell

@@ -26,10 +26,6 @@ layout_uv() {
     export UV_PROJECT_ENVIRONMENT="$VIRTUAL_ENV"
 }
 EOF
-
-# python extension in vscode installieren
-n=0; until [ "$n" -ge 5 ] || code --install-extension ms-python.python; do n=$((n+1)); echo "Fehlgeschlagen ($n/5). Warte 5s..."; sleep 5; done
-
 exec zsh # zsh neu laden
 ```
 
@@ -182,6 +178,11 @@ sed -i '/^[[:space:]]*anaconda/a \    my_jupyter              # benutzerdefinier
 # Skill zugänglich machen
 mkdir -p ~/.agents/skills/
 ln -s ~/gits/ludesta/Luxus-Python-Stack/lupysta ~/.agents/skills/lupysta
+
+# python extension in vscode installieren
+n=0; until [ "$n" -ge 5 ] || code --install-extension ms-python.python; do n=$((n+1)); echo "Fehlgeschlagen ($n/5). Warte 5s..."; sleep 5; done
+n=0; until [ "$n" -ge 5 ] || code --install-extension charliermarsh.ruff; do n=$((n+1)); echo "Fehlgeschlagen ($n/5). Warte 5s..."; sleep 5; done
+n=0; until [ "$n" -ge 5 ] || code --install-extension detachhead.basedpyright; do n=$((n+1)); echo "Fehlgeschlagen ($n/5). Warte 5s..."; sleep 5; done
 
 exec zsh
 ```
