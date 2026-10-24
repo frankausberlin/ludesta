@@ -256,8 +256,8 @@ alias ocode='read -s "OPENROUTER_API_KEY?API-Key eingeben: " && echo && export O
 EOF
 
 # Kilo-Code-Erweiterung & Python
-code --install-extension kilocode.kilo-code
-code --install-extension ms-python.python
+n=0; until [ "$n" -ge 5 ] || code --install-extension kilocode.kilo-code; do n=$((n+1)); echo "Fehlgeschlagen ($n/5). Warte 5s..."; sleep 5; done
+n=0; until [ "$n" -ge 5 ] || code --install-extension ms-python.python; do n=$((n+1)); echo "Fehlgeschlagen ($n/5). Warte 5s..."; sleep 5; done
 exec zsh
 ```
 
