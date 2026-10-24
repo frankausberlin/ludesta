@@ -464,6 +464,8 @@ if expect_success "pyinit creates an app" pyinit "$APP" --python 3.12; then
     assert_contains "app .gitignore ignores agent artifacts" "$APP/.gitignore" "agent-artifacts.*"
     assert_contains "app README mentions the e2e runner" "$APP/README.md" "just test-e2e"
     assert_contains "app CONTRIBUTING mentions the agent runner" "$APP/CONTRIBUTING.md" "just test-agent"
+    assert_contains "app .envrc clears inherited environments" "$APP/.envrc" \
+        "unset UV_PROJECT_ENVIRONMENT VIRTUAL_ENV"
     expect_success_in "app just check is green" "$APP" just check
     rm -f "$DOCKER_MARKER" "$UV_MARKER"
     expect_success_in "app empty e2e suite exits 0" "$APP" \
@@ -715,6 +717,25 @@ if expect_success_in ".git-only target is accepted" "$GIT_ONLY" pyinit . --pytho
         fail ".git-only project uses the main branch"
     fi
     expect_success_in ".git-only project passes just check" "$GIT_ONLY" just check
+fi
+
+ENV_APP="$TMP_ROOT/env-app"
+DECOY_ENV="$TMP_ROOT/decoy-env"
+mkdir -p "$DECOY_ENV"
+if (
+    export UV_PROJECT_ENVIRONMENT="$DECOY_ENV/.venv"
+    export VIRTUAL_ENV="$DECOY_ENV/.venv"
+    pyinit "$ENV_APP" --python 3.12 --no-check
+) >"$LOG" 2>&1; then
+    pass "pyinit isolates an inherited uv environment"
+else
+    fail "pyinit isolates an inherited uv environment"
+fi
+assert_dir "inherited environment project has its own .venv" "$ENV_APP/.venv"
+if [[ ! -e "$DECOY_ENV/.venv" ]]; then
+    pass "inherited uv environment is ignored"
+else
+    fail "inherited uv environment is ignored (decoy was created)"
 fi
 
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"

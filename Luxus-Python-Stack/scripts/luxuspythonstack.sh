@@ -226,16 +226,24 @@ PYINIT_HELP
             cd "$_dir" || _die "cannot enter directory '$_dir'"
         fi
 
+        unset VIRTUAL_ENV UV_PROJECT_ENVIRONMENT UV_PROJECT UV_WORKING_DIR \
+            PYTHONHOME PYTHONPATH \
+            || _die "cannot clear the inherited Python environment"
+        export UV_PROJECT_ENVIRONMENT="$PWD/.venv" \
+            || _die "cannot set UV_PROJECT_ENVIRONMENT"
+
         local PROJECT_NAME PACKAGE_NAME
         PROJECT_NAME="$(basename "$PWD")"
         PACKAGE_NAME="$_package_name"
 
         # ─── Step 1: uv init (package layout for apps and libraries) ─────────
         if [[ "$_type" == "app" ]]; then
-            uv init --app --package --name "$PROJECT_NAME" --python "$_py_version" --vcs none \
+            uv init --app --package --name "$PROJECT_NAME" --python "$_py_version" \
+                --vcs none --no-workspace \
                 || _die "uv init failed"
         else
-            uv init --lib --name "$PROJECT_NAME" --python "$_py_version" --vcs none \
+            uv init --lib --name "$PROJECT_NAME" --python "$_py_version" \
+                --vcs none --no-workspace \
                 || _die "uv init failed"
         fi
 
@@ -578,6 +586,7 @@ if [[ -n "$CONDA_DEFAULT_ENV" && "$CONDA_DEFAULT_ENV" != "base" ]]; then
     conda deactivate 2>/dev/null || true
 fi
 watch_file uv.lock
+unset UV_PROJECT_ENVIRONMENT VIRTUAL_ENV
 layout uv  # requires the layout_uv() function in ~/.config/direnv/direnvrc
 PYINIT_ENVRC
 
@@ -1271,6 +1280,7 @@ PYINIT_JUST_CLI_DOCS
 
         # ─── Step 17: sync, hooks, and quality gate ───────────────────────────
         uv sync || _die "uv sync failed"
+        [[ -d "$PWD/.venv" ]] || _die "uv sync did not create $PWD/.venv"
         uv run pre-commit install || _die "pre-commit install failed"
         if [[ "$_type" == "lib" || $_cli -eq 1 ]]; then
             just docs || _die "documentation generation failed"

@@ -19,7 +19,7 @@ uv tool install ruff && uv tool install bump-my-version && uv tool install based
 mkdir -p ~/.config/direnv && cat << 'EOF' > ~/.config/direnv/direnvrc
 layout_uv() {
     # Falls noch keine Umgebung existiert, erstellt uv in Windeseile eine.
-    [ ! -d ".venv" ] && uv venv
+    [ ! -d ".venv" ] && uv venv .venv
     # direnv mitteilen, wo sich das bin-Verzeichnis befindet.
     export VIRTUAL_ENV="$(pwd)/.venv" && PATH_add "$VIRTUAL_ENV/bin"
     # UV kennt das ebenfalls.

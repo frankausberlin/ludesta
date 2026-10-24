@@ -38,6 +38,7 @@ Zusätzlich Integrationstests mit temporären Projekten (werden am Ende gelösch
 - **CLI-App** (`--cli`): korrekter Projekttyp in `AGENTS.md`, generierte CLI-Referenz, `just check` und `just docs-check` sind grün. Apps ohne `--cli` erhalten kein Docs-Gerüst.
 - **Bibliotheks-Bump**: `just bump patch` aktualisiert `uv.lock` im selben Commit, `uv sync --locked --dev` und `just check` bleiben grün, und der Tag `v0.1.1` wird erzeugt.
 - **`.git-only`-Ziel**: ein bereits initialisiertes Repo wird akzeptiert, `.git` bleibt erhalten und der Branch wird auf `main` gesetzt.
+- **Umgebungsisolation**: Ein geerbtes `UV_PROJECT_ENVIRONMENT`/`VIRTUAL_ENV` wird ignoriert; das neue Projekt erhält ein eigenes `.venv`, und das als Decoy gesetzte Verzeichnis bleibt unangetastet.
 
 Die Skripte geben pro Prüfung `ok - ...` bzw. `not ok - ...` aus und am Ende eine Zusammenfassung. Der Exit-Code ist 0, wenn alle Prüfungen bestanden wurden.
 
