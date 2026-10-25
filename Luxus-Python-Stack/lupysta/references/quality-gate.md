@@ -38,10 +38,11 @@ Ursache.
 
 1. Fehlermeldung vollständig lesen; nicht nur die letzte Zeile.
 2. Prüfen, ob der Fehler in `src/` oder in einer Abhängigkeit entsteht.
-3. Bei Bedarf einen fehlschlagenden Test zuerst schreiben:
-   `uv run pytest -k <name> -s`.
+3. Fehler reproduzieren: einen Regressionstest schreiben, der ohne den Fix
+   fehlschlägt (`uv run pytest -k <name> -s`).
 4. `just fix` nur für automatisch behebbare Lint- und Formatfehler verwenden.
-5. Danach `just check` erneut ausführen.
+5. Die Ursache beheben, nicht das Symptom.
+6. `just check` erneut ausführen; der Regressionstest ist mit dem Fix grün.
 
 ## Häufige Fehler
 
@@ -62,3 +63,4 @@ Ursache.
   mit `just test-e2e` bzw. `just test-agent` ausgeführt.
 - Bei leerer Suite melden beide Runner einen Hinweis und Exitcode 0. Sobald
   `test_*.py`-Dateien existieren, sind Fehler echte Fehler.
+
