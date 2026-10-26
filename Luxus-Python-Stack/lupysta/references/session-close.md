@@ -154,10 +154,14 @@ stamp="$(date -u +%Y-%m-%d-%H%M)"
 * **Offen**: ...
 ```
 
-Der Eintrag ist unveränderlich und wird mit der Aufgabe committet. Er ist Teil
-des Repos: keine Secrets und keine Rohprompts aufnehmen. ADR- und AP-Referenzen
-als Nummern nennen (`ADR-0001`, `AP-3`), nicht als Dateilinks. Wenn die Session
-nichts Dauerhaftes hinterlässt, entfällt der Eintrag.
+Ein Eintrag unter `journal/` wird mit der Aufgabe committet und ist ab dem
+Merge nach `main` unveränderlich. Er ist Teil des Repos: keine Secrets und keine
+Rohprompts aufnehmen. ADR- und AP-Referenzen als Nummern nennen (`ADR-0001`,
+`AP-3`), nicht als Dateilinks. Vor dem Merge dürfen solche Referenzen berichtigt
+werden, wenn eine noch nicht gemergte ADR oder ein AP umnummeriert wurde
+(Abschnitt 7); der dokumentierte Inhalt der Session bleibt dabei unverändert.
+Ein Eintrag in der Legacy-`JOURNAL.md` wird nicht committet und bleibt lokal.
+Wenn die Session nichts Dauerhaftes hinterlässt, entfällt der Eintrag.
 
 ## 7. Konsistenz prüfen
 
@@ -166,14 +170,17 @@ Vor dem Merge:
 - Den eigenen Branch gegen den aktuellen `main`-Stand abgleichen (nach
   `git fetch`, falls ein Remote existiert) und rebasen.
 - Noch nicht auf `main` gemergte ADRs und APs umnummerieren, wenn ihre Nummer
-  dort bereits vergeben ist; alle Referenzen im selben Commit aktualisieren.
+  dort bereits vergeben ist; alle Referenzen im selben Commit aktualisieren,
+  einschließlich der Journal-Einträge aus Abschnitt 6. Diese Berichtigung ist
+  vor dem Merge zulässig und verletzt die Unveränderlichkeit nicht.
   Auf `main` gemergte Nummern bleiben unverändert, auch bei revidierten ADRs
   mit `_`-Präfix.
 - Verweise auf `docs/adr/` müssen auf existierende Dateien zeigen; nach einer
   Revision darf kein Verweis mehr den alten Namen (ohne `_`) nennen.
 - `just check` ist grün.
 - Jede Datei in `docs/adr/` folgt dem Muster `_?NNNN-entscheidung.md`.
-- ADRs, APs und der Journal-Eintrag sind mit der Aufgabe committet.
+- ADRs, APs und der Journal-Eintrag sind mit der Aufgabe committet; das gilt
+  nur für Einträge unter `journal/`, die Legacy-`JOURNAL.md` bleibt lokal.
 
 Nach dem Merge die bisherige Duplikatprüfung als Nachkontrolle wiederholen:
 

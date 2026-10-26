@@ -61,7 +61,9 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
    Migration weiterhin in `JOURNAL.md`), ADR- und Attention-Point-Kandidaten
    prüfen und bei Bedarf anlegen.
 3. Alle beabsichtigten Änderungen auf dem Branch committen; ADRs, Attention
-   Points und der Journal-Eintrag gehören in denselben Commit.
+   Points und der Journal-Eintrag unter `journal/` gehören in denselben Commit.
+   `JOURNAL.md` bleibt bis zur freigegebenen Migration lokal und wird nicht
+   committet (in bestehenden Projekten ist sie gitignored).
 4. Den fertigen Branch lokal mit `just merge [branch]` mergen; Einzelheiten
    stehen in [`references/git-release.md`](references/git-release.md).
 
