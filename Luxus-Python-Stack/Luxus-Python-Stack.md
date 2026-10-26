@@ -9,12 +9,8 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 |**`/`**|*Luxus-Python-Stack.md*|Stack-Dokumentation (dieses Dokument)|
 ||*Stack-Setup.md*|Stack-spezifische Einrichtung (setzt das [Basis-System](../Setup.md) voraus)|
 |**`lupysta/`**||Stack-Skill für die Arbeit im initialisierten Projekt (siehe unten)|
-|**`scripts/`**|*luxuspythonstack.sh*|Stack-Laufzeit mit `pyinit` und Shell-Funktionen|
-|**`templates/`**|*AGENTS.md*|Vorlage für die projektbezogene `AGENTS.md`|
-||*agent/*|Gerüst für die opt-in Agent-Tests|
-||*e2e/*|Gerüst für die opt-in Docker-E2E-Tests|
-||*workflows/*|GitHub-Actions-Workflows (`ci.yml`, `e2e.yml`, `release.yml`)|
-||*scripts/design_report.py*|Vorlage für den Design-Report im Projekt|
+|**`scripts/`**|*luxuspythonstack.sh*|Shell-Funktionen (`jupyter-launcher`, `prompt_my_jupyter`, Alias `jl`)|
+|**extern**|*pyinit*|Projekt-Init in eigenem Repository (`~/gits/pyinit`), per `uv tool` installiert|
 	  	     
      
 ## Aufbau des Skills
@@ -41,7 +37,7 @@ Kleiner Test
 mkdir ~/gits/myproject && cd ~/gits/myproject
 
 # projekt initialisieren und environment automatik aktivieren
-pyinit
+pyinit new app
 direnv allow
 
 # Du siehst nun im p10k-prompt rechts ein gelbes dreieck, das bedeutet, dass dieser folder 
@@ -134,9 +130,9 @@ ocode .
 - Aktiviert durch den direnv-Hook und `layout uv`; `layout uv` legt bei Bedarf
   `.venv` an und setzt `VIRTUAL_ENV`/`PATH`. Eine vorhandene `.venv` allein
   genügt nicht.
-- Initialisiert mit `pyinit` (App), `pyinit --lib` (Bibliothek) oder
-  `pyinit --cli` (App mit Typer-CLI-Referenz). `pyinit` schreibt `.envrc`, ruft
-  aber kein `direnv allow` auf.
+- Initialisiert mit `pyinit new app`, `pyinit new lib`, `pyinit new app-cli`
+  oder `pyinit new mcp`; ohne Verzeichnis legt der Befehl im aktuellen Ordner
+  an. `pyinit` schreibt `.envrc`, ruft aber kein `direnv allow` auf.
 - Qualitätsgate: `just check` → `ruff check`, `ruff format --check`,
   `basedpyright`, bei Bedarf `docs-check` und `pytest` mit Coverage.
 - Weitere Befehle: `just fix`, `just test`, `just lint`, `just typecheck`,
@@ -147,6 +143,8 @@ ocode .
 
 ```text
 src/<paketname>/
+├── main.py                 # App: Einstieg; App-CLI: Typer-Delegate; MCP: stdio-Start
+└── server.py               # nur MCP: Tool, Resource, Server
 tests/
 ├── conftest.py             # Gate für die opt-in Suiten
 ├── e2e/                    # Docker-Gerüst, zunächst ohne test_*.py
@@ -154,15 +152,16 @@ tests/
 scripts/design_report.py
 scripts/test-e2e.sh
 scripts/test-agent.sh
-docs/                       # Lib: Diátaxis-Gerüst + index.md/api.md; App --cli: reference/cli.md
-docs/adr/                   # bei Bedarf, nicht von pyinit angelegt
+docs/                       # Lib: Diátaxis-Gerüst + index.md/api.md; App-CLI: reference/cli.md
+docs/adr/                   # ADR-Konvention (README.md); die erste ADR legt der Nutzer an
+pyinit.toml                 # Herkunft: Profil, Artefakte, Versionen
 pyproject.toml
 uv.lock
 Justfile
 AGENTS.md
 journal/                    # versionierte Session-Chronik (README.md + Einträge)
 .envrc
-.dockerignore
+.dockerignore               # nur mit E2E-Artefakt
 .pre-commit-config.yaml
 .github/workflows/ci.yml    # release.yml bei Bibliotheken
 .github/workflows/e2e.yml   # Docker-Suite; CI automatisch ab vorhandenen Tests
@@ -176,9 +175,9 @@ Echte Tests bleiben projektspezifisch.
 
 Bibliotheken erhalten von `pyinit` ein Diátaxis-Gerüst: `docs/tutorials/`,
 `docs/how-to/`, `docs/reference/` und `docs/explanation/` mit je einer
-Leitseite und Einträgen in der MkDocs-Navigation. Apps mit `--cli` erhalten nur
-`docs/reference/cli.md`; Apps ohne `--cli` kein Docs-Gerüst. `docs/adr/`
-entsteht mit der ersten ADR.
+Leitseite und Einträgen in der MkDocs-Navigation. `app-cli` erhält nur
+`docs/reference/cli.md`; `app` und `mcp` erhalten kein Docs-Gerüst. `docs/adr/`
+entsteht mit dem ADR-Gerüst; die erste ADR legt der Nutzer an.
 
 * `AGENTS.md` enthält das Projektprofil, die ADR-Konventionen und die Attention Points.
 * Der Skill beschreibt die Arbeitsweisen; die Projektdateien bleiben die ausführbare Quelle.
@@ -233,31 +232,15 @@ Orientierung:
 
 ## `pyinit`-Ablauf
 
-| Schritt | Inhalt | Details |
-| ---: | --- | --- |
-| 01 | Argumente | `while`/`case`-Parser; `--lib`, `--cli`, `--python X.Y`, `--no-check`, `--help`; höchstens ein Verzeichnis; unbekannte Optionen und ungültige Kombinationen werden vor jeder Änderung abgelehnt. |
-| 02 | Python-Version | Format `X.Y`, mindestens `3.11` (z. B. `3.12`), sonst Abbruch. |
-| 03 | Name ableiten | Projektname aus dem Zielverzeichnis; Paketname kleingeschrieben und `-` → `_`; ungültige Identifier und Keywords werden abgelehnt. |
-| 04 | Ziel prüfen | Nicht vorhandenes oder leeres Ziel ist erlaubt; ein Ziel, das nur `.git` enthält, ebenfalls; Dateien und sonstige Inhalte werden abgelehnt. |
-| 05 | Werkzeuge und Vorlagen | `uv`, `just`, `git`, `awk` und alle Vorlagen (`AGENTS.md`, `scripts/design_report.py`, `e2e/*`, `agent/*`) werden vor dem ersten Schreibzugriff geprüft. |
-| 06 | Ziel betreten, `uv init` | In einer Subshell; `UV_PYTHON_PREFERENCE=only-managed`; App: `uv init --app --package`; Lib: `uv init --lib`. |
-| 07 | Dev-Abhängigkeiten | `ruff`, `pytest`, `pytest-cov`, `basedpyright`, `colorlog`, `bump-my-version`, `pre-commit`, `pip-audit`, `radon`, `vulture`; zusätzlich `uv add --group e2e pytest`; Lib zusätzlich MkDocs; CLI zusätzlich `typer`. |
-| 08 | `pyproject.toml` patchen | Einstiegspunkt für Apps; Versionsmarker für `bump-my-version`. |
-| 09 | Paketquelle | `__init__.py` mit Docstring und Version; App: `main.py`; Lib: `py.typed`. |
-| 10 | Tests und Gerüste | `tests/test_smoke.py` mit echtem Smoke-Test; `tests/conftest.py` als Gate; `tests/e2e/` (README, conftest, Dockerfile), `tests/agent/` (README, conftest), `.dockerignore`, `scripts/test-e2e.sh`, `scripts/test-agent.sh` aus den Vorlagen. |
-| 10b | Design-Report | `scripts/design_report.py` aus der Vorlage kopieren. |
-| 11 | Tool-Konfiguration | Ruff, basedpyright, pytest (`--strict-markers`, Marker `e2e` und `agent`, kein `-m`-Filter), Coverage, bump-my-version. |
-| 12 | `.gitignore` | Python, Umgebungen, Caches, Docs-Ausgabe, `ignore/`, `.refactor/`, `.kilo/`, `e2e-artifacts.*`, `agent-artifacts.*`; `.vscode/` bleibt versionierbar. |
-| 13 | VS Code | `settings.json`, `launch.json`, `extensions.json`. |
-| 14 | direnv | `.envrc` mit Conda-Schutz, `watch_file uv.lock`, `layout uv`; kein automatisches `direnv allow`. |
-| 15 | Justfile | `test`, `test-e2e`, `test-agent`, `lint`, `typecheck`, `check`, `fix`, `clean`, `audit`, `bump`, `rate-design`, `refactor`, `merge`; `run` nur für Apps; `check` ruft `docs-check` auf, wenn vorhanden. |
-| 16 | GitHub Actions | `ci.yml` immer; `release.yml` nur für Bibliotheken; `e2e.yml` für die Docker-Suite (automatisch ab vorhandenen Tests). |
-| 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, Testing, ADR-Konventionen, Attention Points, Herkunft (Contract-Version 4). |
-| 18 | Journal und Projektdokumente | `journal/README.md`, `README.md` und `CONTRIBUTING.md` mit `just test-e2e`/`just test-agent`, `.editorconfig`, `LICENSE` (MIT, Autor aus `git config user.name`, Fallback `Project Author`; vor Veröffentlichung prüfen). |
-| 19 | pre-commit | Standard-Hooks plus lokale Ruff-Hooks; basedpyright läuft im Gate und in CI. |
-| 20 | Dokumentation | Lib: `mkdocs.yml`, `docs/index.md`, `docs/api.md`, Diátaxis-Gerüst (`tutorials/`, `how-to/`, `reference/`, `explanation/`), `just docs*`; App mit `--cli`: `scripts/gen_cli_docs.py`, `docs/reference/cli.md`, `just docs*`; sonst kein Docs-Gerüst. |
-| 21 | Git | `git init -q -b main`. |
-| 22 | Sync, Hooks, Gate | `uv sync`, `uv run pre-commit install`, ggf. `just docs`, dann `just check`; mit `--no-check` entfällt nur das Gate. |
+`pyinit` löst ein Profil zu einem Artefaktgraphen auf, rendert alle Dateien im
+Speicher und schreibt sie atomar über ein Staging-Verzeichnis. Danach folgen
+`uv lock`, `git init`, `uv sync`, `pre-commit install`, bei Bedarf `just docs`
+und `just check`.
+
+Die Details je Artefakt und Profil stehen im pyinit-Repository:
+[`../../pyinit/docs/artefakte.md`](../../pyinit/docs/artefakte.md). Zur Laufzeit
+zeigen `pyinit describe <id>`, `pyinit list` und
+`pyinit new <profil> --dry-run` dieselben Daten.
 
 ## Unterstützte Umgebung
 
@@ -267,6 +250,10 @@ nicht unterstützt und nicht portiert.
 
 ## Uninstall
 
+- `pyinit` entfernen: `uv tool uninstall pyinit`; den Clone `~/gits/pyinit`
+  separat löschen. Existiert ein zweiter Clone, zeigt die editable Installation
+  auf den zuerst installierten Pfad – nach dem Löschen mit
+  `uv tool install --editable <pfad>` neu installieren.
 - Zum Deinstallieren den Skill-Link entfernen und die `source`-Zeile aus der
   Shell-Konfiguration löschen. 
 - Systemlinks in Harnesses auf den Skill-Folder sind zu entfernen.

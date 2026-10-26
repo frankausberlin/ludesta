@@ -164,7 +164,47 @@ python  -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
 ```
 
 
-## Luxus-Python-Stack: pyinit, jupyter-launcher (jl), myprompt_my_jupyter (p10k)
+## Luxus-Python-Stack: pyinit (Projekt-Init)
+
+`pyinit` ist ein eigenständiges Tool mit eigenem Repository. Es wird geklont und
+als editierbares uv-Tool installiert, damit lokale Änderungen sofort wirken.
+
+```shell
+# Projekt-Init klonen und als uv-Tool installieren
+git clone https://github.com/frankausberlin/pyinit ~/gits/pyinit
+uv tool install --editable ~/gits/pyinit
+
+# ~/.local/bin muss im PATH liegen; dort legt uv tool install die Entrypoints ab
+case ":$PATH:" in
+    *":$HOME/.local/bin:"*) ;;
+    *) echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc ;;
+esac
+
+# Installation prüfen
+pyinit --help
+pyinit list
+```
+
+**Updates**
+
+```shell
+git -C ~/gits/pyinit pull --ff-only
+# nach Änderungen an pyproject.toml oder am Entrypoint erneut installieren:
+uv tool install --editable --force ~/gits/pyinit
+```
+
+**Uninstall und Neuinstallation**
+
+```shell
+uv tool uninstall pyinit
+```
+
+Wird der Clone verschoben oder neu geklont, zeigt die editable Installation auf
+den alten Pfad. Dann mit `uv tool install --editable --force ~/gits/pyinit` neu
+installieren; bei einem zweiten Clone den neuen Pfad verwenden.
+
+## Luxus-Python-Stack: Shell-Funktionen (jl, p10k)
+
 ```shell
 # Funktionen laden
 cat << 'EOF' >> ~/.zshrc
@@ -210,7 +250,7 @@ zsh_clean() {
 # ── UV / Python-Werkzeuge ────────────────────────────────────────────────────
 # Nicht die Setup-Shell prüfen: sie hat ~/.local/bin nur geerbt. Der Test startet
 # zsh mit einem kontrollierten PATH, damit nur ~/.zshrc zählt.
-zsh_clean 'r=0; for t in uv ruff basedpyright bump-my-version nbstripout; do if command -v "$t" >/dev/null; then echo "ok $t"; else echo "MISSING $t"; r=1; fi; done; exit $r' || fail=1
+zsh_clean 'r=0; for t in uv ruff basedpyright bump-my-version nbstripout pyinit; do if command -v "$t" >/dev/null; then echo "ok $t"; else echo "MISSING $t"; r=1; fi; done; exit $r' || fail=1
 uv --version || fail=1
 uv tool list || fail=1                                # Versionen der globalen uv-Tools
 
@@ -221,7 +261,7 @@ grep -q 'luxuspythonstack.sh' ~/.zshrc && ok "stack functions" || missing "stack
 [ -f ~/.agents/skills/lupysta/SKILL.md ] && ok "lupysta skill" || missing "lupysta skill"
 [ -x ~/.local/bin/test-lupysta ] && ok "test-lupysta" || missing "test-lupysta"
 zsh_clean 'command -v test-lupysta >/dev/null' && ok "$HOME/.local/bin im PATH" || missing "$HOME/.local/bin im PATH"
-zsh_clean 'command -v pyinit >/dev/null' && ok pyinit || missing pyinit
+zsh_clean 'pyinit list | grep -q mcp' && ok "pyinit profile mcp" || missing "pyinit profile mcp"
 zsh_clean 'command -v jupyter-launcher >/dev/null' && ok jupyter-launcher || missing jupyter-launcher
 zsh_clean 'alias jl' >/dev/null 2>&1 && ok "alias jl" || missing "alias jl"
 zsh_clean '

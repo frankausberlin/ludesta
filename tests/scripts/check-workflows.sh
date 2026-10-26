@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Lint the GitHub Actions workflows of this repository and of the project templates.
+# Lint the GitHub Actions workflows of this repository.
 #
 # Uses a local actionlint when it is on PATH, otherwise the official Docker
 # image. Fails with a clear message when neither is available.
@@ -11,7 +11,6 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 shopt -s nullglob
 WORKFLOWS=(
     "$REPO_ROOT"/.github/workflows/*.yml
-    "$REPO_ROOT"/Luxus-Python-Stack/templates/workflows/*.yml
 )
 shopt -u nullglob
 

@@ -3,7 +3,8 @@
 
 Only tracked Markdown files are checked. External URLs, anchors, and absolute
 paths are ignored. Fenced code blocks and inline code are skipped so that
-examples are not treated as links.
+examples are not treated as links. Targets outside the repository, such as a
+sibling clone, count as external and are skipped.
 """
 
 from __future__ import annotations
@@ -82,6 +83,10 @@ def check_file(path: Path) -> list[str]:
         if not clean:
             continue
         resolved = (path.parent / clean).resolve()
+        try:
+            resolved.relative_to(ROOT)
+        except ValueError:
+            continue
         if not resolved.exists():
             relative = path.relative_to(ROOT)
             problems.append(f"{relative}:{number}: broken link: {target}")

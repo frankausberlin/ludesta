@@ -28,19 +28,15 @@ jobs:
       - name: Bash syntax
         run: |
           bash -n Luxus-Python-Stack/scripts/luxuspythonstack.sh \
-            Luxus-Python-Stack/templates/agent/test-agent.sh \
-            Luxus-Python-Stack/templates/e2e/test-e2e.sh \
-            tests/test-pyinit.sh tests/fresh-clone.sh \
+            tests/test-shell.sh \
             tests/scripts/check-links.sh tests/scripts/check-workflows.sh
       - name: ShellCheck
         run: |
           shellcheck -S warning Luxus-Python-Stack/scripts/luxuspythonstack.sh \
-            Luxus-Python-Stack/templates/agent/test-agent.sh \
-            Luxus-Python-Stack/templates/e2e/test-e2e.sh \
-            tests/test-pyinit.sh tests/fresh-clone.sh \
+            tests/test-shell.sh \
             tests/scripts/check-links.sh tests/scripts/check-workflows.sh
-      - name: Fast tests
-        run: bash tests/test-pyinit.sh --fast
+      - name: Shell tests
+        run: bash tests/test-shell.sh
       - name: Link check
         run: bash tests/scripts/check-links.sh
       - name: Workflow lint
@@ -51,13 +47,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
-      - uses: extractions/setup-just@v4
-      - name: Install zsh and shellcheck
-        run: sudo apt-get update && sudo apt-get install -y zsh shellcheck
-      - name: Full test suite
-        run: bash tests/test-pyinit.sh
-      - name: Fresh clone
-        run: bash tests/fresh-clone.sh
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+      - name: Shell tests with zsh prompt checks
+        run: bash tests/test-shell.sh
       - name: Workflow lint
         run: bash tests/scripts/check-workflows.sh
