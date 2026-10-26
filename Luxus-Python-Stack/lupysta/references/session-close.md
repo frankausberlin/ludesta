@@ -2,8 +2,8 @@
 
 Dieses Rezept wird am Ende jeder erfüllten Aufgabe ausgeführt, spätestens am
 Sitzungsende. Es entscheidet, ob die Aufgabe eine ADR oder einen Attention
-Point hinterlässt, und schreibt `JOURNAL.md` fort. „Keine Einträge“ ist ein
-gültiges Ergebnis.
+Point hinterlässt, und legt einen Eintrag unter `journal/` an. „Keine
+Einträge“ ist ein gültiges Ergebnis.
 
 ## 1. Aufgabe prüfen
 
@@ -97,8 +97,9 @@ Bedarf anlegen.
      ```
 
      Der Ausschluss `[^_]` verhindert Treffer auf den neuen `_`-Dateinamen.
-     `JOURNAL.md` ist lokal und historisch; dortige Einträge werden nicht
-     umgeschrieben.
+     Journal-Einträge unter `journal/` sind historisch und werden nicht
+     umgeschrieben; ADR- und AP-Referenzen nennen dort nur die Nummer
+     (`ADR-0001`, `AP-3`), nicht den Dateinamen.
   5. Die alte ADR-Datei umbenennen: `<filename>` wird zu `_<filename>`.
      Beispiel: `0003-wir-verwenden-zsh.md` wird zu
      `_0003-wir-verwenden-zsh.md`.
@@ -130,9 +131,18 @@ Im Abschnitt `## Attention Points` in `AGENTS.md` ergänzen:
 - APs dürfen präzisiert werden; ihre Identität bleibt stabil.
 - APs nicht mit Skill-Inhalten oder ADR-Begründungen duplizieren.
 
-## 6. JOURNAL fortschreiben
+## 6. Journal-Eintrag anlegen
 
-Am Ende von `JOURNAL.md` einen datierten Eintrag anhängen:
+Existiert im Projekt nur `JOURNAL.md` und wurde die Migration (Abschnitt 9)
+nicht freigegeben, dort einen datierten Eintrag anhängen. Sonst am Ende der
+Session eine neue Datei unter `journal/` anlegen:
+
+`journal/YYYY-MM-DD-HHMM-<slug>.md` (UTC). Den Slug kleingeschrieben mit
+Bindestrichen bilden; existiert die Datei bereits, einen Suffix ergänzen.
+
+```shell
+stamp="$(date -u +%Y-%m-%d-%H%M)"
+```
 
 ```markdown
 ## YYYY-MM-DD — Kurztitel
@@ -143,6 +153,11 @@ Am Ende von `JOURNAL.md` einen datierten Eintrag anhängen:
 * **Attention Points**: AP-N (neu) / keine
 * **Offen**: ...
 ```
+
+Der Eintrag ist unveränderlich und wird mit der Aufgabe committet. Er ist Teil
+des Repos: keine Secrets und keine Rohprompts aufnehmen. ADR- und AP-Referenzen
+als Nummern nennen (`ADR-0001`, `AP-3`), nicht als Dateilinks. Wenn die Session
+nichts Dauerhaftes hinterlässt, entfällt der Eintrag.
 
 ## 7. Konsistenz prüfen
 
@@ -158,7 +173,7 @@ Vor dem Merge:
   Revision darf kein Verweis mehr den alten Namen (ohne `_`) nennen.
 - `just check` ist grün.
 - Jede Datei in `docs/adr/` folgt dem Muster `_?NNNN-entscheidung.md`.
-- ADRs und APs sind mit der Aufgabe committet; `JOURNAL.md` bleibt lokal.
+- ADRs, APs und der Journal-Eintrag sind mit der Aufgabe committet.
 
 Nach dem Merge die bisherige Duplikatprüfung als Nachkontrolle wiederholen:
 
@@ -183,3 +198,19 @@ Referenzen im selben Commit.
 
 Wenn unklar ist, ob eine Entscheidung eine ADR oder eine Situation einen AP
 verdient, den Nutzer fragen. Lieber kein Eintrag als ein spekulativer.
+
+## 9. Migration von `JOURNAL.md`
+
+Für bestehende Projekte, nur nach Zustimmung des Nutzers:
+
+```shell
+mkdir -p journal
+mv JOURNAL.md "journal/$(date -u +%Y-%m-%d-%H%M)-import.md"
+# JOURNAL.md aus .gitignore entfernen
+git add journal .gitignore
+git commit -m "docs: migrate journal to journal/"
+```
+
+Die lokale Historie wird als eine Import-Datei übernommen; nicht automatisch
+nach Sessions aufsplitten. Bis zur Migration bleibt `JOURNAL.md` die
+Legacy-Quelle. Existieren beide, gilt `journal/`.

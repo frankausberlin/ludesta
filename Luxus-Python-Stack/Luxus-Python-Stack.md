@@ -29,7 +29,7 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 ||*quality-gate.md*|Qualitätsgate und Fehlersuche|
 ||*refactoring-recipes.md*|Konkrete Refactoring-Rezepte|
 ||*refactoring.md*|Design-Report, Baseline und Refactoring-Ablauf|
-||*session-close.md*|Aufgabenabschluss: ADRs, Attention Points und `JOURNAL.md`|
+||*session-close.md*|Aufgabenabschluss: ADRs, Attention Points und `journal/`|
 
 ## Installation
 
@@ -37,7 +37,7 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 
 Kleiner Test
 ```shell
-# zuerst ein kleine python-projekt anlegen
+# zuerst ein kleines python-projekt anlegen
 mkdir ~/gits/myproject && cd ~/gits/myproject
 
 # projekt initialisieren und environment automatik aktivieren
@@ -57,7 +57,7 @@ jl
 # Hier nochmal die Situation: 
 # 1. du hast ein standard-python-environment ds12 das normalerweise in der shell aktiv ist
 # 2. du hast einen Jupyer-Server am laufen auf http://127.0.0.1:8888/lab
-# 3. du hast ein Python-Projekt mit aktiviertem Environment in ~/gits/myproject (ersetzt ds12)
+# 3. du hast ein Python-Projekt mit aktiviertem (direnv allow) Environment in ~/gits/myproject (ersetzt ds12)
 
 # jetzt wechsel in den labor Folder und achte auf den p10k-prompt, er zeigt an, das ein jupyter 
 # läuft und diesen folder als arbeitsverzeichnis verwendet.
@@ -67,7 +67,7 @@ cd ~/labor
 cd ~/gits/myproject
 
 # und wenn wir schon mal hier sind, starten wir doch direkt mal code mit flüchtigem openrouter-key 
-# (der alias macht ein READ für das OR-Token, einfach Copy/Paste einfügen)
+# der alias macht ein READ für das OR-Token, einfach Copy/Paste einfügen, die vscode extension kilo erkennt diesen
 ocode .
 
 # dannach öffne die kilo-extension in code und prüfe ob der skill vorhanden ist
@@ -101,7 +101,7 @@ ocode .
 | 1 | Mamba / Jupyter | Mamba + UV | `act <envname>` oder beim Shellstart `~/.startenv`/`base`, solange keine `.envrc` im CWD liegt |
 | 2 | Projekte | UV + direnv | `.envrc` mit `layout uv` nach `direnv allow`; eine vorhandene `.venv` allein genügt nicht |
 | 3 | CI/CD | GitHub Actions + UV | Bei Push/PR oder manuell |
-| 4 | KI-Agenten | `AGENTS.md` + Skill + `JOURNAL.md` | Start der Agentensitzung |
+| 4 | KI-Agenten | `AGENTS.md` + Skill + `journal/` | Start der Agentensitzung |
 
 ### Ebene 0: Global / System
 
@@ -160,7 +160,7 @@ pyproject.toml
 uv.lock
 Justfile
 AGENTS.md
-JOURNAL.md                  # gitignored
+journal/                    # versionierte Session-Chronik (README.md + Einträge)
 .envrc
 .dockerignore
 .pre-commit-config.yaml
@@ -199,18 +199,18 @@ Die vierte Ebene besteht aus vier Teilen:
 | --- | --- |
 | Installierter lupysta-Skill | Beschreibt alle möglichen Arbeitsweisen als Rezepte. |
 | Projekt-`AGENTS.md` | Enthält Projektprofil, ADR-Konventionen und Attention Points; keine zweite Skill-Kopie. |
-| `JOURNAL.md` | Chronologische Historie und aktueller Stand; gitignored. |
+| `journal/` | Versionierte Session-Chronik; ein unveränderlicher Eintrag pro Session. |
 | `docs/adr/` | Architekturentscheidungen; der Inhalt ist unveränderlich, Revisionen entstehen als neue ADR. |
 
 Ablauf:
 
 1. `AGENTS.md` lesen: Projektprofil, ADR-Konventionen und Attention Points.
-2. Den letzten Eintrag in `JOURNAL.md` lesen, falls vorhanden.
+2. Die neuesten Einträge unter `journal/` lesen, falls vorhanden.
 3. `docs/adr/` sichten, falls vorhanden.
 4. `uv sync` und `git status` ausführen.
 5. Nur die Rezepte laden, die zur Aufgabe passen.
 6. Am Ende `just check` grün halten, [`session-close.md`](lupysta/references/session-close.md)
-   ausführen und `JOURNAL.md` fortschreiben.
+   ausführen und einen Journal-Eintrag unter `journal/` anlegen.
 7. Lokal mit `just merge` mergen; Agenten pushen nie.
 
 `AGENTS.md` ist die Quelle für projektbezogene Regeln. Der Skill beschreibt die
@@ -229,7 +229,7 @@ Orientierung:
 | Dokumentation | `just docs`, `just docs-check`, `just docs-serve` | [`lupysta/references/documentation.md`](lupysta/references/documentation.md) |
 | Git und Release | `just merge`, `just bump patch\|minor\|major` | [`lupysta/references/git-release.md`](lupysta/references/git-release.md) |
 | Refactoring | `just rate-design run\|save\|compare`, `just refactor` | [`lupysta/references/refactoring.md`](lupysta/references/refactoring.md) |
-| Projektwissen | `AGENTS.md`, `docs/adr/`, `JOURNAL.md` | [`lupysta/references/session-close.md`](lupysta/references/session-close.md) |
+| Projektwissen | `AGENTS.md`, `docs/adr/`, `journal/` | [`lupysta/references/session-close.md`](lupysta/references/session-close.md) |
 
 ## `pyinit`-Ablauf
 
@@ -247,13 +247,13 @@ Orientierung:
 | 10 | Tests und Gerüste | `tests/test_smoke.py` mit echtem Smoke-Test; `tests/conftest.py` als Gate; `tests/e2e/` (README, conftest, Dockerfile), `tests/agent/` (README, conftest), `.dockerignore`, `scripts/test-e2e.sh`, `scripts/test-agent.sh` aus den Vorlagen. |
 | 10b | Design-Report | `scripts/design_report.py` aus der Vorlage kopieren. |
 | 11 | Tool-Konfiguration | Ruff, basedpyright, pytest (`--strict-markers`, Marker `e2e` und `agent`, kein `-m`-Filter), Coverage, bump-my-version. |
-| 12 | `.gitignore` | Python, Umgebungen, Caches, Docs-Ausgabe, `JOURNAL.md`, `ignore/`, `.refactor/`, `.kilo/`, `e2e-artifacts.*`, `agent-artifacts.*`; `.vscode/` bleibt versionierbar. |
+| 12 | `.gitignore` | Python, Umgebungen, Caches, Docs-Ausgabe, `ignore/`, `.refactor/`, `.kilo/`, `e2e-artifacts.*`, `agent-artifacts.*`; `.vscode/` bleibt versionierbar. |
 | 13 | VS Code | `settings.json`, `launch.json`, `extensions.json`. |
 | 14 | direnv | `.envrc` mit Conda-Schutz, `watch_file uv.lock`, `layout uv`; kein automatisches `direnv allow`. |
 | 15 | Justfile | `test`, `test-e2e`, `test-agent`, `lint`, `typecheck`, `check`, `fix`, `clean`, `audit`, `bump`, `rate-design`, `refactor`, `merge`; `run` nur für Apps; `check` ruft `docs-check` auf, wenn vorhanden. |
 | 16 | GitHub Actions | `ci.yml` immer; `release.yml` nur für Bibliotheken; `e2e.yml` für die Docker-Suite (automatisch ab vorhandenen Tests). |
-| 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, Testing, ADR-Konventionen, Attention Points, Herkunft (Contract-Version 3). |
-| 18 | Journal und Projektdokumente | `JOURNAL.md`, `README.md` und `CONTRIBUTING.md` mit `just test-e2e`/`just test-agent`, `.editorconfig`, `LICENSE` (MIT, Autor aus `git config user.name`, Fallback `Project Author`; vor Veröffentlichung prüfen). |
+| 17 | `AGENTS.md` | Aus `templates/AGENTS.md` gerendert: Projektprofil, Testing, ADR-Konventionen, Attention Points, Herkunft (Contract-Version 4). |
+| 18 | Journal und Projektdokumente | `journal/README.md`, `README.md` und `CONTRIBUTING.md` mit `just test-e2e`/`just test-agent`, `.editorconfig`, `LICENSE` (MIT, Autor aus `git config user.name`, Fallback `Project Author`; vor Veröffentlichung prüfen). |
 | 19 | pre-commit | Standard-Hooks plus lokale Ruff-Hooks; basedpyright läuft im Gate und in CI. |
 | 20 | Dokumentation | Lib: `mkdocs.yml`, `docs/index.md`, `docs/api.md`, Diátaxis-Gerüst (`tutorials/`, `how-to/`, `reference/`, `explanation/`), `just docs*`; App mit `--cli`: `scripts/gen_cli_docs.py`, `docs/reference/cli.md`, `just docs*`; sonst kein Docs-Gerüst. |
 | 21 | Git | `git init -q -b main`. |

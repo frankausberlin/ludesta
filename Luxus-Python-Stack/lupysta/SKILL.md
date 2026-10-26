@@ -6,7 +6,7 @@ description: >
   Refactoring, Projektjournal, ADRs und Attention Points. E2E- und
   Agent-Tests werden als opt-in Gerüste erzeugt und sind nicht Teil von
   `just check`.
-version: 0.10.0
+version: 0.11.0
 platforms: [linux]
 metadata:
   tags: [python, uv, quality-gate, refactoring, adr]
@@ -22,13 +22,16 @@ Projektinitialisierung, Shell-Funktionen und Systemeinrichtung sind nicht
 Teil dieses Skills.
 
 Die dauerhaft relevanten Projektdateien sind `AGENTS.md` (Profil, ADRs,
-Attention Points), `JOURNAL.md` (Sitzungsgedächtnis) und `docs/adr/`
+Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
 (Architekturentscheidungen). Alles Weitere wird nur bei Bedarf geladen.
 
 ## Sitzungsstart
 
 1. `AGENTS.md` lesen: Projektprofil, ADR-Konventionen und Attention Points.
-2. Den letzten Eintrag in `JOURNAL.md` lesen, falls vorhanden.
+2. Die neuesten Einträge unter `journal/` lesen
+   (`ls -1 journal | grep -v '^README\.md$' | sort | tail -n 3`).
+   Existiert nur `JOURNAL.md`, ist das die Legacy-Quelle; die Migration
+   beschreibt [`references/session-close.md`](references/session-close.md).
 3. `docs/adr/` sichten, falls vorhanden; die Dateinamen genügen für den
    Überblick.
 4. `uv sync` ausführen.
@@ -54,10 +57,11 @@ Attention Points), `JOURNAL.md` (Sitzungsgedächtnis) und `docs/adr/`
 
 1. `just check` ausführen; das Gate muss grün sein.
 2. [`references/session-close.md`](references/session-close.md) ausführen:
-   `JOURNAL.md` fortschreiben, ADR- und Attention-Point-Kandidaten prüfen und
-   bei Bedarf anlegen.
-3. Alle beabsichtigten Änderungen auf dem Branch committen; ADRs und Attention
-   Points gehören in denselben Commit. `JOURNAL.md` bleibt lokal.
+   einen Eintrag unter `journal/` anlegen (in Legacy-Projekten ohne freigegebene
+   Migration weiterhin in `JOURNAL.md`), ADR- und Attention-Point-Kandidaten
+   prüfen und bei Bedarf anlegen.
+3. Alle beabsichtigten Änderungen auf dem Branch committen; ADRs, Attention
+   Points und der Journal-Eintrag gehören in denselben Commit.
 4. Den fertigen Branch lokal mit `just merge [branch]` mergen; Einzelheiten
    stehen in [`references/git-release.md`](references/git-release.md).
 
@@ -65,7 +69,7 @@ Attention Points), `JOURNAL.md` (Sitzungsgedächtnis) und `docs/adr/`
 
 | Rezept | Inhalt |
 | --- | --- |
-| [`references/session-close.md`](references/session-close.md) | Aufgabenabschluss: ADR- und Attention-Point-Kandidaten prüfen, `JOURNAL.md` fortschreiben. |
+| [`references/session-close.md`](references/session-close.md) | Aufgabenabschluss: ADR- und Attention-Point-Kandidaten prüfen, Journal-Eintrag unter `journal/` anlegen. |
 | [`references/quality-gate.md`](references/quality-gate.md) | `just check`, `fix`, `test`, `lint`, `typecheck`, `audit`, `clean` und Fehlersuche. |
 | [`references/documentation.md`](references/documentation.md) | `docs`, `docs-check`, `docs-serve` und generierte Seiten. |
 | [`references/git-release.md`](references/git-release.md) | Worktree, `just merge`, `bump`, CI und Veröffentlichung. |

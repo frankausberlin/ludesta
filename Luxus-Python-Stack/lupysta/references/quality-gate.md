@@ -32,7 +32,7 @@ Ursache.
 | `just audit` | Abhängigkeiten auf bekannte Sicherheitslücken prüfen. |
 | `just clean` | Caches und generierte Artefakte entfernen; `.refactor/baselines/` bleibt erhalten. |
 
-`just clean` löscht keine Quellen, keine `.venv` und keine `JOURNAL.md`.
+`just clean` löscht keine Quellen, keine `.venv` und kein `journal/`.
 
 ## Fehlersuche
 

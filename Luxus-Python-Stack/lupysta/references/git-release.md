@@ -17,8 +17,8 @@ jedes initialisierte Projekt. Prüfe vor der Verwendung, welche Rezepte das
   ```
 - Im Worktree `uv sync` und `just check` ausführen.
 - Änderungen im Worktree committen.
-- Den Worktree erst entfernen, wenn keine lokalen `JOURNAL.md`-Inhalte
-  verloren gehen.
+- Den Worktree erst entfernen, wenn er sauber ist; Journal-Einträge sind
+  mitcommittet.
 
 ## `just merge`
 
@@ -36,8 +36,7 @@ Vor dem Merge:
 
 1. Es ermittelt den Worktree, in dem `main` ausgecheckt ist.
 2. Es führt dort `git merge --ff-only <branch>` aus.
-3. Es entfernt den Quell-Worktree nur, wenn dieser sauber ist und keine
-   lokalen `JOURNAL.md`-Inhalte enthält.
+3. Es entfernt den Quell-Worktree nur, wenn dieser sauber ist.
 4. Andernfalls bleibt der Worktree stehen; der Pfad wird genannt.
 5. Es pusht nie.
 6. Nach dem Merge nur die Eindeutigkeit der ADR- und AP-Nummern als Kontrolle
@@ -104,5 +103,5 @@ mehreren Worktrees mehrere Kandidaten sieht, den Branch explizit übergeben:
 
 - Kein Force-Push.
 - Kein `git reset --hard` auf fremde Arbeit.
-- Kein Entfernen eines Worktrees mit lokalen `JOURNAL.md`-Inhalten.
+- Kein Entfernen eines Worktrees mit uncommitteten Änderungen.
 - Keine manuellen Tags und keine manuellen Versionsnummern.

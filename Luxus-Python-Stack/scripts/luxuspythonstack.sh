@@ -11,8 +11,8 @@ _LUXUS_REAL_SOURCE="$(readlink -f "$_LUXUS_SOURCE" 2>/dev/null || printf '%s\n' 
 _LUXUS_SCRIPT_DIR="$(cd "$(dirname "$_LUXUS_REAL_SOURCE")" && pwd)"
 unset _LUXUS_SOURCE _LUXUS_REAL_SOURCE
 
-_LUPYSTA_VERSION="0.10.0"
-_LUPYSTA_CONTRACT_VERSION="3"
+_LUPYSTA_VERSION="0.11.0"
+_LUPYSTA_CONTRACT_VERSION="4"
 
 
 
@@ -508,9 +508,6 @@ site/
 # Refactoring artifacts (generated)
 .refactor/
 
-# Agent journal (volatile)
-JOURNAL.md
-
 # Agent artifacts
 .kilo/
 
@@ -633,7 +630,7 @@ clean:
     fi
     find . -path ./.venv -prune -o -path ./.git -prune -o -type d -name __pycache__ -print -exec rm -rf {} +
     find . -path ./.venv -prune -o -path ./.git -prune -o -type f \( -name '*.pyc' -o -name '*.pyo' \) -print -exec rm -f {} +
-    echo "Cleaned caches and generated artifacts, including e2e-artifacts.* and agent-artifacts.* (kept .refactor/baselines, .venv and JOURNAL.md)."
+    echo "Cleaned caches and generated artifacts, including e2e-artifacts.* and agent-artifacts.* (kept .refactor/baselines, .venv and journal/)."
 
 # Audit dependencies for known security vulnerabilities
 audit:
@@ -771,11 +768,6 @@ merge branch="" target="main":
             echo "merge: '$branch' merged into '$target'."
             echo "merge: source worktree is the current checkout; switch to '$target'"
             echo "       and remove the worktree and branch manually if you no longer need them."
-        elif [ -e "$source_path/JOURNAL.md" ]; then
-            echo "merge: '$branch' merged into '$target'."
-            echo "merge: worktree '$source_path' left in place because it contains"
-            echo "       JOURNAL.md. Move or review that file, then remove"
-            echo "       the worktree and branch manually."
         elif [ -n "$(git -C "$source_path" status --porcelain)" ]; then
             echo "merge: '$branch' merged into '$target'."
             echo "merge: worktree '$source_path' left in place because it is dirty."
@@ -855,8 +847,24 @@ PYINIT_JUST_RUN
             || _die "rendering AGENTS.md failed"
 
         # ─── Step 13: journal and project documents ───────────────────────────
-        cat > JOURNAL.md <<'PYINIT_JOURNAL'
-Session history: past sessions are appended here (latest at the end).
+        mkdir -p journal || _die "creating journal/ failed"
+        cat > journal/README.md <<'PYINIT_JOURNAL'
+# Journal
+
+One entry per session, immutable. Filename:
+`YYYY-MM-DD-HHMM-<slug>.md` (UTC; lowercase slug, hyphens).
+
+Create the entry at the end of a session and commit it with the change.
+Latest entries:
+
+```shell
+ls -1 journal | grep -v '^README\.md$' | sort | tail -n 3
+```
+
+Categories, tags and frontmatter are intentionally not part of the convention
+yet; they can be added later as metadata without renaming files. Entries are a
+chronicle, not a normative source: durable decisions belong in ADRs/APs and the
+current state in the project documentation.
 PYINIT_JOURNAL
 
         local _docs_gate="" _readme_docs="" _check_desc=""
@@ -957,10 +965,16 @@ uv sync           # install all dependencies
 4. Commit: \`git add -A && git commit -m "feat: ..."\`
 5. From any checkout, merge locally: \`just merge feat/my-feature\`
    (fast-forward only; it removes a clean source worktree and deletes the
-   branch, but keeps a worktree with local JOURNAL.md)
+   branch)
 6. Publishing is a maintainer step: review local \`main\` with
    \`git log --oneline origin/main..main\` and \`git diff origin/main..main\`, then
    \`git push origin main\`
+
+## Journal
+
+Session notes live under \`journal/\` (one file per session, committed with the
+change). They are a chronicle, not a normative source; durable decisions belong
+in \`docs/adr/\` and attention points in \`AGENTS.md\`.
 
 ## Quality Gate
 

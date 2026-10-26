@@ -397,7 +397,7 @@ if expect_success "pyinit creates an app" pyinit "$APP" --python 3.12; then
     assert_contains "app AGENTS.md has attention points" "$APP/AGENTS.md" "## Attention Points"
     assert_contains "app AGENTS.md records the project type" "$APP/AGENTS.md" "Projekttyp: App"
     assert_contains "app AGENTS.md has a testing section" "$APP/AGENTS.md" "## Testing"
-    assert_contains "app AGENTS.md records the contract version" "$APP/AGENTS.md" 'contract_version: `3`'
+    assert_contains "app AGENTS.md records the contract version" "$APP/AGENTS.md" 'contract_version: `4`'
     assert_not_contains "app AGENTS.md has no feature list" "$APP/AGENTS.md" "Verwendet:"
     assert_not_contains "app AGENTS.md has no old managed block" "$APP/AGENTS.md" "AGENTS_MANAGED_BEGIN"
     assert_no_file "app has no SESSION.md" "$APP/SESSION.md"
@@ -464,6 +464,11 @@ if expect_success "pyinit creates an app" pyinit "$APP" --python 3.12; then
     assert_contains "app .gitignore ignores agent artifacts" "$APP/.gitignore" "agent-artifacts.*"
     assert_contains "app README mentions the e2e runner" "$APP/README.md" "just test-e2e"
     assert_contains "app CONTRIBUTING mentions the agent runner" "$APP/CONTRIBUTING.md" "just test-agent"
+    assert_file "app has a journal readme" "$APP/journal/README.md"
+    assert_contains "journal readme documents the filename pattern" "$APP/journal/README.md" "YYYY-MM-DD-HHMM"
+    assert_no_file "app has no legacy journal" "$APP/JOURNAL.md"
+    assert_not_contains "app .gitignore does not ignore the journal" "$APP/.gitignore" "JOURNAL.md"
+    assert_contains "app CONTRIBUTING mentions the journal" "$APP/CONTRIBUTING.md" "journal/"
     assert_contains "app .envrc clears inherited environments" "$APP/.envrc" \
         "unset UV_PROJECT_ENVIRONMENT VIRTUAL_ENV"
     expect_success_in "app just check is green" "$APP" just check
@@ -631,15 +636,24 @@ PASS_PROBE
 
     git -C "$APP" worktree add -q "$TMP_ROOT/wt-session" -b feat/session
     printf '# worktree\n' >>"$TMP_ROOT/wt-session/README.md"
-    (cd "$TMP_ROOT/wt-session" && git -c user.name=Test -c user.email=test@example.com \
-        commit -q --no-verify -am worktree)
-    printf 'journal state\n' >"$TMP_ROOT/wt-session/JOURNAL.md"
-    expect_success_in "merge protects journal files" "$APP" just merge feat/session
-    assert_file "journal file remains in worktree" "$TMP_ROOT/wt-session/JOURNAL.md"
+    mkdir -p "$TMP_ROOT/wt-session/journal"
+    printf '## 2026-10-26 — Test\n' >"$TMP_ROOT/wt-session/journal/2026-10-26-1015-test.md"
+    (cd "$TMP_ROOT/wt-session" && git add -A && \
+        git -c user.name=Test -c user.email=test@example.com \
+        commit -q --no-verify -m worktree)
+    expect_success_in "merge removes a clean worktree with a committed journal" \
+        "$APP" just merge feat/session
+    assert_file "journal entry survives in main" \
+        "$APP/journal/2026-10-26-1015-test.md"
     if git -C "$APP" worktree list | grep -q "wt-session"; then
-        pass "worktree with journal remains registered"
+        fail "worktree with committed journal is removed"
     else
-        fail "worktree with journal remains registered"
+        pass "worktree with committed journal is removed"
+    fi
+    if git -C "$APP" show-ref --verify --quiet refs/heads/feat/session; then
+        fail "merged journal branch is deleted"
+    else
+        pass "merged journal branch is deleted"
     fi
 fi
 

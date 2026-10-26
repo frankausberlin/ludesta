@@ -65,6 +65,6 @@ für die folgenden Schritte; ein separater Worktree ist optional.
 
 - `just check` ist grün.
 - Die Änderungen sind in kleinen Commits dokumentiert.
-- `JOURNAL.md` ist aktualisiert und [`session-close.md`](session-close.md)
-  wurde ausgeführt.
+- Ein Journal-Eintrag unter `journal/` ist angelegt und
+  [`session-close.md`](session-close.md) wurde ausgeführt.
 - Der Branch wird über [`git-release.md`](git-release.md) gemergt.
