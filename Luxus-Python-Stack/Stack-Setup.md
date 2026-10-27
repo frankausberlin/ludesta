@@ -166,8 +166,7 @@ python  -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
 
 ## Luxus-Python-Stack: pyinit (Projekt-Init)
 
-`pyinit` ist ein eigenständiges Tool mit eigenem Repository. Es wird geklont und
-als editierbares uv-Tool installiert, damit lokale Änderungen sofort wirken.
+>* ⚠️ **`pyinit` ist ein eigenständiges Tool mit eigenem Repository. Es wird geklont und als editierbares uv-Tool installiert, damit lokale Änderungen sofort wirken.**
 
 ```shell
 # Projekt-Init klonen und als uv-Tool installieren
