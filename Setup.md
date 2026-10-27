@@ -31,6 +31,9 @@ sudo nala install -y \
 # just und direnv
 sudo nala install -y just direnv
 
+# morning routine
+alias suu="sudo nala update && sudo nala upgrade -y"
+
 # SSH aktivieren
 sudo systemctl enable --now ssh
 # IP mit 'ip a' ermitteln und per 'ssh <user>@<ip>' mit dieser Maschine verbinden
