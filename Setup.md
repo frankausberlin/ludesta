@@ -32,7 +32,8 @@ sudo nala install -y \
 sudo nala install -y just direnv
 
 # morning routine
-alias suu="sudo nala update && sudo nala upgrade -y"
+echo 'alias suu="sudo nala update && sudo nala upgrade -y"' >> ~/.zshrc
+echo 'alias rlb="exec zsh"' >> ~/.zshrc
 
 # SSH aktivieren
 sudo systemctl enable --now ssh
