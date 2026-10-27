@@ -27,9 +27,11 @@ jobs:
             || { sudo apt-get update && sudo apt-get install -y shellcheck; }
       - name: Bash syntax
         run: |
-          bash -n Luxus-Python-Stack/scripts/luxuspythonstack.sh \
+          for script in Luxus-Python-Stack/scripts/luxuspythonstack.sh \
             tests/test-shell.sh \
-            tests/scripts/check-links.sh tests/scripts/check-workflows.sh
+            tests/scripts/check-links.sh tests/scripts/check-workflows.sh; do
+            bash -n "$script" || exit "$?"
+          done
       - name: ShellCheck
         run: |
           shellcheck -S warning Luxus-Python-Stack/scripts/luxuspythonstack.sh \

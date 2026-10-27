@@ -73,7 +73,7 @@ Die `AGENTS.md` enthält das Projektprofil, die **ADR**-Konventionen und die Att
 2. In der VM eine bash öffnen und die [Setup-Anleitung für das Basis-System](Setup.md) befolgen.
 3. Danach den stack-spezifischen Teil der [Python-Stack-Einrichtung](Luxus-Python-Stack/Stack-Setup.md) befolgen. Er klont `pyinit` aus `https://github.com/frankausberlin/pyinit` und installiert es mit `uv tool install --editable`.
 
-Wer an ludesta selbst arbeitet: `just check` prüft Bash-Syntax, ShellCheck, Shell-Tests, relative Markdown-Links und die Workflows; es ist dieselbe Prüfung wie in der CI. Einzige Voraussetzung ist `just`.
+Wer an ludesta selbst arbeitet: `just check` prüft Bash-Syntax, ShellCheck, Shell-Tests, relative Markdown-Links und die Workflows; es ist dieselbe Prüfung wie in der CI. Benötigt werden `just`, Bash, Git, ShellCheck und Python 3 sowie `actionlint` im PATH oder ein funktionierender Docker-Daemon für den Workflow-Lint. Zsh ist optional; ohne Zsh entfallen die Prompt-Prüfungen. Fehlen actionlint und Docker, lässt sich der übrige Teil mit `just syntax shellcheck shell-tests links` ausführen.
 
 
 ## Die Luxus Stacks

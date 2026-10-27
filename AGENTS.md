@@ -22,7 +22,9 @@ Diese Datei enthält die projektbezogenen Regeln für die Arbeit in ludesta.
 - Vor und nach jeder Änderung `just check` ausführen: Bash-Syntax,
   ShellCheck, Shell-Tests, Link-Check und Workflow-Lint. Dieselben Prüfungen
   laufen in der CI; `just check` ist die lokale Entsprechung, kein Ersatz.
-- Der Workflow-Lint braucht Docker; ohne Docker den Rest einzeln ausführen
+- Das Gate braucht `just`, Bash, Git, ShellCheck und Python 3. Der Workflow-Lint
+  nutzt `actionlint` im PATH oder ersatzweise einen funktionierenden
+  Docker-Daemon. Fehlt beides, den Rest einzeln ausführen
   (`just syntax shellcheck shell-tests links`).
 - Markdown-Links relativ halten; der Link-Check prüft nur Dateien im
   Arbeitsbaum, keine externen URLs.

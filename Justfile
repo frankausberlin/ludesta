@@ -9,7 +9,7 @@ check: syntax shellcheck shell-tests links workflows
 
 # Bash syntax check of every shell script
 syntax:
-    bash -n {{scripts}}
+    for script in {{scripts}}; do bash -n "$script" || exit "$?"; done
 
 # ShellCheck at warning level
 shellcheck:
@@ -23,6 +23,6 @@ shell-tests:
 links:
     bash tests/scripts/check-links.sh
 
-# Workflow lint (needs Docker)
+# Workflow lint (actionlint or Docker)
 workflows:
     bash tests/scripts/check-workflows.sh
