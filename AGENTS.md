@@ -16,3 +16,16 @@ Diese Datei enthält die projektbezogenen Regeln für die Arbeit in ludesta.
   ein Schritt des Maintainers.
 - Keine destruktiven Git-Befehle: kein Force-Push, kein `reset --hard` auf
   fremde Arbeit, keine ungefragte Worktree-Entfernung.
+
+## Qualitätsgate
+
+- Vor und nach jeder Änderung `just check` ausführen: Bash-Syntax,
+  ShellCheck, Shell-Tests, Link-Check und Workflow-Lint. Dieselben Prüfungen
+  laufen in der CI; `just check` ist die lokale Entsprechung, kein Ersatz.
+- Der Workflow-Lint braucht Docker; ohne Docker den Rest einzeln ausführen
+  (`just syntax shellcheck shell-tests links`).
+- Markdown-Links relativ halten; der Link-Check prüft nur Dateien im
+  Arbeitsbaum, keine externen URLs.
+- ludesta ist kein `pyinit`-Projekt: Es gibt kein `journal/` und kein
+  `docs/adr/`. Dauerhafte Entscheidungen stehen in den Stack-Dokumenten, die
+  zusammen mit dem Skill gepflegt werden.

@@ -198,6 +198,13 @@ jupyter-launcher() {
 }
 
 # Standard alias for quick access (tokenless + Colab mode, default directory)
+#
+# Trade-off: -n disables the token and -c disables the XSRF check for Colab.
+# The server still binds to 127.0.0.1, so nothing is reachable from the network,
+# but any local process or browser tab can then send requests without
+# credentials. Fine for a throwaway VM, not for a machine with personal data.
+# Safer variant for such a machine (token stays enabled, Colab still works):
+#   alias jl='jupyter-launcher -c'
 alias jl='jupyter-launcher -n -c'
 
 
