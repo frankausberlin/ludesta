@@ -44,7 +44,8 @@ Begründung, der AP die Handhabung. Den ADR-Text nicht im AP duplizieren.
 
 Dateiname: `docs/adr/NNNN-entscheidung.md` (vierstellige Nummer, danach die
 Entscheidung als kleingeschriebene Wörter mit Bindestrichen). `docs/adr/` bei
-Bedarf anlegen.
+Bedarf anlegen. `pyinit` legt dort zusätzlich `README.md` als Leitdatei an;
+sie ist keine ADR und folgt dem Nummernschema nicht.
 
 ```markdown
 # ADR-NNNN: Titel
@@ -178,7 +179,8 @@ Vor dem Merge:
 - Verweise auf `docs/adr/` müssen auf existierende Dateien zeigen; nach einer
   Revision darf kein Verweis mehr den alten Namen (ohne `_`) nennen.
 - `just check` ist grün.
-- Jede Datei in `docs/adr/` folgt dem Muster `_?NNNN-entscheidung.md`.
+- Jede ADR-Datei in `docs/adr/` folgt dem Muster `_?NNNN-entscheidung.md`;
+  die vom Generator angelegte Leitdatei `README.md` ist davon ausgenommen.
 - ADRs, APs und der Journal-Eintrag sind mit der Aufgabe committet; das gilt
   nur für Einträge unter `journal/`, die Legacy-`JOURNAL.md` bleibt lokal.
 
@@ -191,10 +193,11 @@ grep -oE '^### AP-[0-9]+' AGENTS.md | sort | uniq -d
 
 Das erste Kommando ignoriert das `_`-Präfix revidierter ADRs. Die AP-Prüfung
 erfasst auch Tombstones, weil ihre Überschrift mit `### AP-N` beginnt. Zusätzlich
-prüfen, dass keine Datei die Konvention verletzt (die Ausgabe muss leer sein):
+prüfen, dass keine ADR-Datei die Konvention verletzt (die Ausgabe muss leer
+sein; `README.md` ist ausgenommen):
 
 ```shell
-ls docs/adr 2>/dev/null | grep -Ev '^_?[0-9]{4}-[a-z0-9-]+\.md$'
+ls docs/adr 2>/dev/null | grep -Ev '^(README\.md|_?[0-9]{4}-[a-z0-9-]+\.md)$'
 ```
 
 Weicht der Branch von `main` ab, nummeriert er seine noch nicht gemergten
@@ -203,23 +206,42 @@ Referenzen im selben Commit.
 
 ## 8. Arbeitsbaum
 
-Eine Aufgabe ist erst abgeschlossen, wenn `main` ausgecheckt und der
-Arbeitsbaum sauber ist.
+Eine Aufgabe ist erst abgeschlossen, wenn der Merge nach `main` erfolgt ist
+und `main` im Hauptcheckout ausgecheckt und sauber ist.
 
 ```shell
-git status --short --branch
-git branch --show-current   # muss "main" ausgeben
+git worktree list            # Hauptcheckout mit [main] identifizieren
+git status --short --branch  # im Hauptcheckout: ## main
+git branch --show-current    # im Hauptcheckout: main
 ```
 
-- Den fertigen Branch lokal nach `main` mergen. Bevorzugt mit
-  `just merge [branch]`; ohne `just` manuell per Fast-Forward:
+- Den fertigen Aufgaben-Branch lokal nach `main` mergen. Bevorzugt mit
+  `just merge [branch]`; ohne `just` im Hauptcheckout manuell per
+  Fast-Forward:
   `git switch main && git merge --ff-only <branch> && git branch -d <branch>`.
-- `main` bleibt ausgecheckt, der Branch wird gelöscht. Einen
-  Harness-Worktree nicht ungefragt entfernen.
+- `just merge` mergt in dem Worktree, in dem `main` ausgecheckt ist. Läuft der
+  Befehl in einem anderen Worktree, bleibt dieser nach dem Merge auf seinem
+  Branch stehen; `just merge` nennt den Zielpfad. Danach in den Hauptcheckout
+  wechseln: Ein `git switch main` im Quell-Worktree scheitert, solange `main`
+  im Hauptcheckout ausgecheckt ist.
+- Ein temporärer Aufgaben-Branch wird gelöscht. Sein sauberer Quell-Worktree
+  wird von `just merge` entfernt, sofern er nicht der aktuelle Checkout ist.
+  War er der aktuelle Checkout, nach dem Wechsel in den Hauptcheckout
+  `git worktree remove <pfad>` und `git branch -d <branch>` ausführen.
+  Einen Harness-Worktree nicht ungefragt entfernen.
+- Ein stabiler Harness-Branch (zum Beispiel `vskilo`) ist kein
+  Aufgaben-Branch. Er und sein Worktree bleiben nach dem Merge bestehen und
+  werden für die nächste Aufgabe wiederverwendet. Solche Branches aus dem
+  Harness-Worktree mergen, damit `just merge` den Worktree nicht entfernt
+  (siehe [`git-release.md`](git-release.md)).
+- Abschlusskontrolle im Hauptcheckout (oder mit `git -C <pfad>`):
+  `git branch --show-current` gibt `main` aus und `git status --short` ist
+  leer. In einem Harness-Worktree zeigt `git worktree list` den Hauptcheckout
+  mit `main`; der Worktree selbst darf auf seinem stabilen Branch bleiben.
 - Kein Push. Veröffentlichen ist ein Schritt des Maintainers und nur von
   `main` aus zulässig.
 - Ein Plan oder Rezept darf einen Branch verlangen; der Endzustand folgt
-  aus `AGENTS.md` und bleibt `main`. Details in
+  aus `AGENTS.md`. Der Hauptcheckout bleibt auf `main`. Details in
   [`git-release.md`](git-release.md).
 
 ## 9. Bei Unsicherheit

@@ -62,8 +62,9 @@ cd ~/labor
 # und jetzt nochmal den wechsel in den projekt-folder und der prompt ändert sich wieder
 cd ~/gits/myproject
 
-# und wenn wir schon mal hier sind, starten wir doch direkt mal code mit flüchtigem openrouter-key 
-# der alias macht ein READ für das OR-Token, einfach Copy/Paste einfügen, die vscode extension kilo erkennt diesen
+# und wenn wir schon mal hier sind, starten wir doch direkt mal code mit einem
+# OpenRouter-Key, der nur für den gestarteten VS-Code-Prozess gilt.
+# ocode liest das Token verdeckt ein; einfach einfügen. Die Kilo-Erweiterung erkennt es.
 ocode .
 
 # dannach öffne die kilo-extension in code und prüfe ob der skill vorhanden ist
@@ -238,8 +239,8 @@ Speicher und schreibt sie atomar über ein Staging-Verzeichnis. Danach folgen
 und `just check`.
 
 Die Details je Artefakt und Profil stehen im pyinit-Repository:
-[`../../pyinit/docs/artefakte.md`](../../pyinit/docs/artefakte.md). Zur Laufzeit
-zeigen `pyinit describe <id>`, `pyinit list` und
+[`docs/artefakte.md`](https://github.com/frankausberlin/pyinit/blob/main/docs/artefakte.md).
+Zur Laufzeit zeigen `pyinit describe <id>`, `pyinit list` und
 `pyinit new <profil> --dry-run` dieselben Daten.
 
 ## Unterstützte Umgebung

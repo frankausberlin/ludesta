@@ -48,14 +48,15 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
 - **Tests, Lint und Typen nicht abschwächen**, um Fehler zu verstecken.
 - **Generierte Dokumentation nicht von Hand ändern.** Stattdessen den
   Generator ausführen und das Ergebnis committen.
-- **Agenten pushen nie; am Ende steht `main`.** Der fertige Branch wird
-  lokal nach `main` gemergt und gelöscht, `main` bleibt ausgecheckt. Der
-  Maintainer prüft und veröffentlicht.
+- **Agenten pushen nie; der Hauptcheckout bleibt auf `main`.** Der fertige
+  Aufgaben-Branch wird lokal nach `main` gemergt und gelöscht; ein stabiler
+  Harness-Branch und sein Worktree bleiben bestehen. `main` ist im
+  Hauptcheckout ausgecheckt. Der Maintainer prüft und veröffentlicht.
 - **Keine destruktiven Git-Befehle.** Kein Force-Push, kein `reset --hard` auf
   fremde Arbeit, keine ungefragte Worktree-Entfernung.
 - **Am Ende jeder erfüllten Aufgabe** den Abschnitt
   [Sitzungsende](#sitzungsende) ausführen; er ist erst abgeschlossen, wenn
-  `main` ausgecheckt ist.
+  `main` im Hauptcheckout ausgecheckt ist.
 
 ## Sitzungsende
 
@@ -68,9 +69,10 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
    Points und der Journal-Eintrag unter `journal/` gehören in denselben Commit.
    `JOURNAL.md` bleibt bis zur freigegebenen Migration lokal und wird nicht
    committet (in bestehenden Projekten ist sie gitignored).
-4. Den fertigen Branch lokal nach `main` mergen – bevorzugt mit
-   `just merge [branch]`, ohne `just` manuell per Fast-Forward. Branch
-   löschen und `main` auschecken; Einzelheiten in
+4. Den fertigen Aufgaben-Branch lokal nach `main` mergen – bevorzugt mit
+   `just merge [branch]`, ohne `just` manuell per Fast-Forward. Den
+   Hauptcheckout auf `main` bringen und einen temporären Branch löschen; ein
+   stabiler Harness-Branch bleibt bestehen. Einzelheiten in
    [`references/session-close.md`](references/session-close.md)
    (Abschnitt 8) und [`references/git-release.md`](references/git-release.md).
 
@@ -78,7 +80,7 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
 
 | Rezept | Inhalt |
 | --- | --- |
-| [`references/session-close.md`](references/session-close.md) | Aufgabenabschluss: ADR-/AP-Kandidaten, Journal-Eintrag, Merge nach `main` und ausgecheckter Arbeitsbaum. |
+| [`references/session-close.md`](references/session-close.md) | Aufgabenabschluss: ADR-/AP-Kandidaten, Journal-Eintrag, Merge nach `main` und ausgecheckter Hauptcheckout. |
 | [`references/quality-gate.md`](references/quality-gate.md) | `just check`, `fix`, `test`, `lint`, `typecheck`, `audit`, `clean` und Fehlersuche. |
 | [`references/documentation.md`](references/documentation.md) | `docs`, `docs-check`, `docs-serve` und generierte Seiten. |
 | [`references/git-release.md`](references/git-release.md) | Worktree, `just merge`, `bump`, CI und Veröffentlichung. |

@@ -112,15 +112,26 @@ rm -f packages.microsoft.gpg
 # Paketliste aktualisieren und VS Code installieren
 sudo nala update && sudo nala install -y code
 
-# alias startet code und fragt vorher openrouter-key ab, kilo erkennt den dann
+# Funktion startet code und fragt vorher den openrouter-key ab; der Key gilt
+# nur für den gestarteten VS-Code-Prozess, nicht für die aufrufende Shell.
 cat << 'EOF' >> ~/.zshrc
-alias ocode='read -s "OPENROUTER_API_KEY?API-Key eingeben: " && echo && export OPENROUTER_API_KEY && code'
+ocode() {
+  local _ocode_key
+  if ! IFS= read -rs '_ocode_key?API-Key eingeben: '; then
+    printf '\n'
+    return 1
+  fi
+  printf '\n'
+  [[ -n "$_ocode_key" ]] || return 1
+  ( export OPENROUTER_API_KEY="$_ocode_key"; command code "$@" )
+}
 EOF
 
 # Kilo-Code-Erweiterung
 n=0; until [ "$n" -ge 5 ] || code --install-extension kilocode.kilo-code; do n=$((n+1)); echo "Fehlgeschlagen ($n/5). Warte 5s..."; sleep 5; done
 exec zsh
 ```
+>* ⚠️ **Key-Grenzen und laufendes VS Code:** `ocode` exportiert den Key nicht in die aufrufende Shell. Er gilt für den gestarteten VS-Code-Prozess und wird an dessen Kindprozesse, Integrated Terminals und Extensions vererbt. Eine bereits laufende VS-Code-Instanz behält die Umgebung ihres ersten Starts; für einen neuen Key alle VS-Code-Fenster beenden und `ocode` erneut ausführen. Eine isolierte Instanz mit `code --user-data-dir "$HOME/.vscode-ocode"` hat getrennte Einstellungen und Extensions. Eine alte `alias ocode=...`-Zeile in `~/.zshrc` entfernen.
 
 ## GitHub:
 ```shell
@@ -318,7 +329,7 @@ value="$(git config --global --get user.email)" && echo "user.email=$value" || e
 code --version || missing code
 extensions="$(code --list-extensions)" || fail=1
 printf '%s\n' "$extensions" | grep -qix kilocode.kilo-code && ok kilocode.kilo-code || missing kilocode.kilo-code
-zsh_clean 'alias ocode' >/dev/null 2>&1 && ok "alias ocode" || missing "alias ocode"
+zsh_clean 'typeset -f ocode' >/dev/null 2>&1 && ok "funktion ocode" || missing "funktion ocode"
 
 # ── Docker (optional) ────────────────────────────────────────────────────────
 if command -v docker >/dev/null; then
