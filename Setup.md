@@ -194,8 +194,8 @@ git config --global pull.rebase true
 ### Ausführen auf dem Host PC
 ```shell
 # AUF DEM HOST: VM_USER/VM_IP einsetzen, dann ausführen
-VM_USER="<vm-user>"
-VM_IP="<vm-ip>"          # NAT: 127.0.0.1, beide ssh-Befehle zusätzlich mit -p <host-port>
+# VM_USER="<vm-user>"
+# VM_IP="<vm-ip>"          # NAT: 127.0.0.1, beide ssh-Befehle zusätzlich mit -p <host-port>
 
 [ -f ~/.ssh/id_ed25519 ] || ssh-keygen -t ed25519
 ssh-copy-id -i ~/.ssh/id_ed25519.pub "${VM_USER}@${VM_IP}"
