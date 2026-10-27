@@ -6,6 +6,9 @@ jedes initialisierte Projekt. Prüfe vor der Verwendung, welche Rezepte das
 
 ## Branch und Worktree
 
+- Der Branch ist temporär: Er dient der Arbeit und wird nach dem Merge nach
+  `main` gelöscht. Den Abschluss regelt
+  [`session-close.md`](session-close.md) (Abschnitt 8).
 - Auf einem Branch arbeiten: `feat/...`, `fix/...`, `docs/...`,
   `refactor/...` oder `chore/...`.
 - Commit-Nachrichten beschreiben die Änderung, zum Beispiel
@@ -55,6 +58,9 @@ git rebase main
 just check
 just merge <branch>
 ```
+
+Der Merge ist der letzte Schritt der Pflicht-Checkliste in
+[`session-close.md`](session-close.md); danach ist `main` ausgecheckt.
 
 ## Version und Tag
 

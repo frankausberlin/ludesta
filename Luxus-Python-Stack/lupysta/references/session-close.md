@@ -133,7 +133,7 @@ Im Abschnitt `## Attention Points` in `AGENTS.md` ergänzen:
 
 ## 6. Journal-Eintrag anlegen
 
-Existiert im Projekt nur `JOURNAL.md` und wurde die Migration (Abschnitt 9)
+Existiert im Projekt nur `JOURNAL.md` und wurde die Migration (Abschnitt 10)
 nicht freigegeben, dort einen datierten Eintrag anhängen. Sonst am Ende der
 Session eine neue Datei unter `journal/` anlegen:
 
@@ -201,12 +201,33 @@ Weicht der Branch von `main` ab, nummeriert er seine noch nicht gemergten
 ADRs und APs auf die nächsten freien Nummern um und aktualisiert alle
 Referenzen im selben Commit.
 
-## 8. Bei Unsicherheit
+## 8. Arbeitsbaum
+
+Eine Aufgabe ist erst abgeschlossen, wenn `main` ausgecheckt und der
+Arbeitsbaum sauber ist.
+
+```shell
+git status --short --branch
+git branch --show-current   # muss "main" ausgeben
+```
+
+- Den fertigen Branch lokal nach `main` mergen. Bevorzugt mit
+  `just merge [branch]`; ohne `just` manuell per Fast-Forward:
+  `git switch main && git merge --ff-only <branch> && git branch -d <branch>`.
+- `main` bleibt ausgecheckt, der Branch wird gelöscht. Einen
+  Harness-Worktree nicht ungefragt entfernen.
+- Kein Push. Veröffentlichen ist ein Schritt des Maintainers und nur von
+  `main` aus zulässig.
+- Ein Plan oder Rezept darf einen Branch verlangen; der Endzustand folgt
+  aus `AGENTS.md` und bleibt `main`. Details in
+  [`git-release.md`](git-release.md).
+
+## 9. Bei Unsicherheit
 
 Wenn unklar ist, ob eine Entscheidung eine ADR oder eine Situation einen AP
 verdient, den Nutzer fragen. Lieber kein Eintrag als ein spekulativer.
 
-## 9. Migration von `JOURNAL.md`
+## 10. Migration von `JOURNAL.md`
 
 Für bestehende Projekte, nur nach Zustimmung des Nutzers:
 

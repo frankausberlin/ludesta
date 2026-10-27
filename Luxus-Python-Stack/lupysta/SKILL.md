@@ -6,7 +6,7 @@ description: >
   Refactoring, Projektjournal, ADRs und Attention Points. E2E- und
   Agent-Tests werden als opt-in Gerüste erzeugt und sind nicht Teil von
   `just check`.
-version: 0.11.0
+version: 0.12.0
 platforms: [linux]
 metadata:
   tags: [python, uv, quality-gate, refactoring, adr]
@@ -41,17 +41,21 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
 ## Grundregeln
 
 - **`AGENTS.md` ist die Projektquelle.** Sie enthält die projektbezogenen
-  Regeln, die ADR-Konventionen und die Attention Points.
+  Regeln, die ADR-Konventionen und die Attention Points; bei Branch-,
+  Merge- und Publish-Fragen schlägt sie Rezepte und Pläne.
 - **`just check` grün halten.** Vor und nach jeder Änderung gilt das
   Qualitätsgate des Projekts.
 - **Tests, Lint und Typen nicht abschwächen**, um Fehler zu verstecken.
 - **Generierte Dokumentation nicht von Hand ändern.** Stattdessen den
   Generator ausführen und das Ergebnis committen.
-- **Agenten pushen nie.** Der Maintainer prüft und veröffentlicht.
+- **Agenten pushen nie; am Ende steht `main`.** Der fertige Branch wird
+  lokal nach `main` gemergt und gelöscht, `main` bleibt ausgecheckt. Der
+  Maintainer prüft und veröffentlicht.
 - **Keine destruktiven Git-Befehle.** Kein Force-Push, kein `reset --hard` auf
   fremde Arbeit, keine ungefragte Worktree-Entfernung.
 - **Am Ende jeder erfüllten Aufgabe** den Abschnitt
-  [Sitzungsende](#sitzungsende) ausführen.
+  [Sitzungsende](#sitzungsende) ausführen; er ist erst abgeschlossen, wenn
+  `main` ausgecheckt ist.
 
 ## Sitzungsende
 
@@ -64,14 +68,17 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
    Points und der Journal-Eintrag unter `journal/` gehören in denselben Commit.
    `JOURNAL.md` bleibt bis zur freigegebenen Migration lokal und wird nicht
    committet (in bestehenden Projekten ist sie gitignored).
-4. Den fertigen Branch lokal mit `just merge [branch]` mergen; Einzelheiten
-   stehen in [`references/git-release.md`](references/git-release.md).
+4. Den fertigen Branch lokal nach `main` mergen – bevorzugt mit
+   `just merge [branch]`, ohne `just` manuell per Fast-Forward. Branch
+   löschen und `main` auschecken; Einzelheiten in
+   [`references/session-close.md`](references/session-close.md)
+   (Abschnitt 8) und [`references/git-release.md`](references/git-release.md).
 
 ## Rezeptindex
 
 | Rezept | Inhalt |
 | --- | --- |
-| [`references/session-close.md`](references/session-close.md) | Aufgabenabschluss: ADR- und Attention-Point-Kandidaten prüfen, Journal-Eintrag unter `journal/` anlegen. |
+| [`references/session-close.md`](references/session-close.md) | Aufgabenabschluss: ADR-/AP-Kandidaten, Journal-Eintrag, Merge nach `main` und ausgecheckter Arbeitsbaum. |
 | [`references/quality-gate.md`](references/quality-gate.md) | `just check`, `fix`, `test`, `lint`, `typecheck`, `audit`, `clean` und Fehlersuche. |
 | [`references/documentation.md`](references/documentation.md) | `docs`, `docs-check`, `docs-serve` und generierte Seiten. |
 | [`references/git-release.md`](references/git-release.md) | Worktree, `just merge`, `bump`, CI und Veröffentlichung. |
