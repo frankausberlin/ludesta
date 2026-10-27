@@ -43,7 +43,7 @@ Das Projekt-Init selbst ist stackabhängig und liegt außerhalb dieses Repos. Le
 
 ### Projekt anlegen mit pyinit
 
-Das Herz des Stacks ist das Projekt-Init `pyinit`. Es erzeugt ein vorkonfiguriertes Projektgerüst aus einem Profil. Dem Agenten-Skill ist das Tool unbekannt, er weiß nicht, ob es sich um eine vorgefertigte Schablone handelt oder ein individuell angelegtes Projekt.
+Das Herz des Stacks ist das Projekt-Init `pyinit`. Es erzeugt ein vorkonfiguriertes Projektgerüst aus einem Profil. Bei der regulären Arbeit in einem initialisierten Projekt ist der Generator für den Agenten-Skill nicht mehr relevant: Er arbeitet mit den vorhandenen Projektdateien, unabhängig davon, ob sie aus einer Schablone oder individuell stammen. Das Migrationsrezept nutzt `pyinit` dagegen ausdrücklich als Zielreferenz, ohne bestehende Projekte automatisch zu aktualisieren.
 
 ```shell
 pyinit list                       # Profile anzeigen: app, app-cli, lib, mcp

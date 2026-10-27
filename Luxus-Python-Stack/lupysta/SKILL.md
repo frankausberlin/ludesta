@@ -1,12 +1,12 @@
 ---
 name: lupysta
 description: >
-  Arbeitsweise für bereits initialisierte Python-Projekte des
-  Luxus-Python-Stacks: Qualitätsgate, Dokumentation, Git und Release,
+  Arbeitsweise für Python-Projekte des Luxus-Python-Stacks: Migration
+  bestehender Projekte, Qualitätsgate, Dokumentation, Git und Release,
   Refactoring, Projektjournal, ADRs und Attention Points. E2E- und
   Agent-Tests werden als opt-in Gerüste erzeugt und sind nicht Teil von
   `just check`.
-version: 0.12.0
+version: 0.13.0
 platforms: [linux]
 metadata:
   tags: [python, uv, quality-gate, refactoring, adr]
@@ -17,13 +17,24 @@ metadata:
 ## Zweck und Grenzen
 
 Dieser Skill beschreibt, **wie** in einem bereits initialisierten Projekt
-gearbeitet wird. Er erzeugt keine Projekte und richtet keine Umgebung ein:
-Projektinitialisierung, Shell-Funktionen und Systemeinrichtung sind nicht
-Teil dieses Skills.
+gearbeitet und wie ein bestehendes Python-Projekt in den Stack migriert wird.
+Die reguläre Projektinitialisierung, Shell-Funktionen und Systemeinrichtung
+sind nicht Teil dieses Skills. Bei Migrationen dient `pyinit` als Zielreferenz,
+nicht als Update-Werkzeug für bestehende Projekte.
 
 Die dauerhaft relevanten Projektdateien sind `AGENTS.md` (Profil, ADRs,
 Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
 (Architekturentscheidungen). Alles Weitere wird nur bei Bedarf geladen.
+
+## Einstieg bei einem Bestandsprojekt
+
+Ist das Projekt noch nicht in den Luxus-Python-Stack initialisiert oder wurde
+eine Migration ausdrücklich verlangt, zuerst
+[`references/project-migration.md`](references/project-migration.md) laden und
+befolgen. Dem normalen Sitzungsstart dabei nicht vorausgreifen: `uv sync`,
+`just check` und andere Projektbefehle werden entsprechend dem Migrationsrezept
+erst verwendet, wenn ihre Voraussetzungen vorhanden sind. Nach abgeschlossener
+Migration gilt wieder der normale Sitzungsstart.
 
 ## Sitzungsstart
 
@@ -81,6 +92,7 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
 | Rezept | Inhalt |
 | --- | --- |
 | [`references/session-close.md`](references/session-close.md) | Aufgabenabschluss: ADR-/AP-Kandidaten, Journal-Eintrag, Merge nach `main` und ausgecheckter Hauptcheckout. |
+| [`references/project-migration.md`](references/project-migration.md) | Bestehende Python-Projekte migrieren: Baseline, Zielreferenz, Datei-Mapping, Verifikation und Herkunft. |
 | [`references/quality-gate.md`](references/quality-gate.md) | `just check`, `fix`, `test`, `lint`, `typecheck`, `audit`, `clean` und Fehlersuche. |
 | [`references/documentation.md`](references/documentation.md) | `docs`, `docs-check`, `docs-serve` und generierte Seiten. |
 | [`references/git-release.md`](references/git-release.md) | Worktree, `just merge`, `bump`, CI und Veröffentlichung. |

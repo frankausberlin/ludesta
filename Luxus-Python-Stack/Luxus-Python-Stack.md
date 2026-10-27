@@ -22,6 +22,7 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 ||*documentation.md*|Dokumentationsrezepte für `just docs*`|
 ||*e2e-tests.md*|E2E-Tests (Gerüst von `pyinit`; Tests projektspezifisch; nicht Teil von `just check`)|
 ||*git-release.md*|Worktree, Merge, Versionierung und Release|
+||*project-migration.md*|Bestehende Python-Projekte in den aktuellen Stack überführen|
 ||*quality-gate.md*|Qualitätsgate und Fehlersuche|
 ||*refactoring-recipes.md*|Konkrete Refactoring-Rezepte|
 ||*refactoring.md*|Design-Report, Baseline und Refactoring-Ablauf|
