@@ -1,12 +1,11 @@
 # Agent-Tests
 
-Status: Das Skelett wird von `pyinit` erzeugt; der Harness ist
-projektspezifisch. Opt-in bedeutet: nicht Teil von `just check`, nur manuell
-über `just test-agent` und nie in der CI.
+Status: Der Harness ist projektspezifisch. Opt-in bedeutet: nicht Teil von
+`just check`, nur manuell über `just test-agent` und nie in der CI.
 
-`pyinit` legt für App, Bibliothek und CLI-App ein Gerüst unter `tests/agent/`
-an. Es enthält bewusst keine `test_*.py`-Dateien, keinen Provider-Adapter und
-keinen Harness. Echte Agent-Tests werden nicht generiert.
+Ein vorhandenes Skelett unter `tests/agent/` enthält zunächst keine
+`test_*.py`-Dateien, keinen Provider-Adapter und keinen Harness. Tests und
+Harness werden projektspezifisch ergänzt.
 
 ## Wann sinnvoll
 
@@ -58,8 +57,7 @@ Vor einem Lauf mit echten Tests prüfen:
 - Zeit-, Schritt- und Kostenlimits sind gesetzt.
 - Ein fehlender Provider ist ein lauter Fehler, kein stiller Skip.
 
-Der Preflight gehört in den projektspezifischen Harness, nicht in das
-generierte Skelett.
+Der Preflight gehört in den projektspezifischen Harness.
 
 ## Limits
 

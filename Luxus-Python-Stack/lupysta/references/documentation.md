@@ -9,7 +9,7 @@ Prüfe vor der Verwendung die tatsächlich vorhandenen Befehle.
 | Variante | Projekttyp | Quelle | Ausgabe |
 | --- | --- | --- | --- |
 | MkDocs | Bibliothek | `mkdocs.yml`, `docs/` mit Diátaxis-Gerüst, Docstrings | Statische MkDocs-Seite. |
-| CLI-Referenz | App mit `--cli` | Typer-App in `src/<paket>/cli.py` | `docs/reference/cli.md`. |
+| CLI-Referenz | CLI-App | Typer-App in `src/<paket>/cli.py` | `docs/reference/cli.md`. |
 
 Eine Bibliothek nutzt MkDocs, eine CLI-App die generierte Referenz; beide
 Varianten entstehen im selben Projekt nicht gleichzeitig.
@@ -37,9 +37,10 @@ Ein veralteter Generatorstand lässt das Gate fehlschlagen.
 ## Bibliotheken
 
 - `mkdocs.yml` und `docs/` gehören zum Projekt.
-- `pyinit` legt das Diátaxis-Gerüst an: `docs/tutorials/`, `docs/how-to/`,
-  `docs/reference/` und `docs/explanation/`, jeweils mit einer Leitseite. Alle
-  vier Bereiche stehen in der Navigation.
+- Das Diátaxis-Gerüst unter `docs/` umfasst `docs/tutorials/`, `docs/how-to/`,
+  `docs/reference/` und `docs/explanation/`, jeweils mit einer Leitseite. Die
+  tatsächlich vorhandene Struktur und die Navigation in `mkdocs.yml` sind
+  maßgeblich.
 - Neue Inhalte in den passenden Bereich einsortieren; die Leitseiten erklären,
   welche Form dort hingehört.
 - `mkdocstrings` liest die öffentliche API aus den Docstrings.

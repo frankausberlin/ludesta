@@ -44,7 +44,7 @@ Begründung, der AP die Handhabung. Den ADR-Text nicht im AP duplizieren.
 
 Dateiname: `docs/adr/NNNN-entscheidung.md` (vierstellige Nummer, danach die
 Entscheidung als kleingeschriebene Wörter mit Bindestrichen). `docs/adr/` bei
-Bedarf anlegen. `pyinit` legt dort zusätzlich `README.md` als Leitdatei an;
+Bedarf anlegen. Eine vorhandene `README.md` in `docs/adr/` ist eine Leitdatei;
 sie ist keine ADR und folgt dem Nummernschema nicht.
 
 ```markdown
@@ -134,7 +134,7 @@ Im Abschnitt `## Attention Points` in `AGENTS.md` ergänzen:
 
 ## 6. Journal-Eintrag anlegen
 
-Existiert im Projekt nur `JOURNAL.md` und wurde die Migration (Abschnitt 10)
+Existiert im Projekt nur `JOURNAL.md` und wurde die Übernahme (Abschnitt 10)
 nicht freigegeben, dort einen datierten Eintrag anhängen. Sonst am Ende der
 Session eine neue Datei unter `journal/` anlegen:
 
@@ -180,7 +180,7 @@ Vor dem Merge:
   Revision darf kein Verweis mehr den alten Namen (ohne `_`) nennen.
 - `just check` ist grün.
 - Jede ADR-Datei in `docs/adr/` folgt dem Muster `_?NNNN-entscheidung.md`;
-  die vom Generator angelegte Leitdatei `README.md` ist davon ausgenommen.
+  eine vorhandene Leitdatei `README.md` ist davon ausgenommen.
 - ADRs, APs und der Journal-Eintrag sind mit der Aufgabe committet; das gilt
   nur für Einträge unter `journal/`, die Legacy-`JOURNAL.md` bleibt lokal.
 
@@ -249,7 +249,7 @@ git branch --show-current    # im Hauptcheckout: main
 Wenn unklar ist, ob eine Entscheidung eine ADR oder eine Situation einen AP
 verdient, den Nutzer fragen. Lieber kein Eintrag als ein spekulativer.
 
-## 10. Migration von `JOURNAL.md`
+## 10. Übernahme von `JOURNAL.md`
 
 Für bestehende Projekte, nur nach Zustimmung des Nutzers:
 
@@ -262,5 +262,5 @@ git commit -m "docs: migrate journal to journal/"
 ```
 
 Die lokale Historie wird als eine Import-Datei übernommen; nicht automatisch
-nach Sessions aufsplitten. Bis zur Migration bleibt `JOURNAL.md` die
+nach Sessions aufsplitten. Bis zur Übernahme bleibt `JOURNAL.md` die
 Legacy-Quelle. Existieren beide, gilt `journal/`.

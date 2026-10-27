@@ -1,13 +1,13 @@
 # E2E-Tests
 
-Status: wird von `pyinit` erzeugt; die Suite ist opt-in im Sinne von „nicht
-Teil von `just check`“. Lokal läuft sie nur über `just test-e2e`; in CI startet
-der Workflow bei Push und Pull Request automatisch und wird mit der ersten
-Testdatei aktiv. Einen zusätzlichen Freigabeschritt pro Lauf gibt es nicht.
+Status: Die Suite ist opt-in im Sinne von „nicht Teil von `just check`“.
+Lokal läuft sie nur über `just test-e2e`; in CI startet der Workflow bei Push
+und Pull Request automatisch und wird mit der ersten Testdatei aktiv. Einen
+zusätzlichen Freigabeschritt pro Lauf gibt es nicht.
 
-`pyinit` legt für App, Bibliothek und CLI-App ein Docker-Gerüst unter
-`tests/e2e/` an. Es enthält bewusst keine `test_*.py`-Dateien. Echte
-E2E-Tests sind projektspezifisch und werden nicht generiert.
+Das Docker-Gerüst unter `tests/e2e/` kann bewusst keine `test_*.py`-Dateien
+enthalten. Echte E2E-Tests sind projektspezifisch und werden im Projekt
+ergänzt.
 
 ## Wann sinnvoll
 
@@ -125,8 +125,8 @@ ist bewusst minimal.
 
 ## CI
 
-`pyinit` erzeugt `.github/workflows/e2e.yml`. Der Job läuft bei jedem Push,
-Pull Request und manuell (`workflow_dispatch`) und führt `just test-e2e` aus.
+Der Workflow `.github/workflows/e2e.yml` läuft bei jedem Push, Pull Request
+und manuell (`workflow_dispatch`) und führt `just test-e2e` aus.
 Solange die Suite leer ist, endet er in Sekunden ohne Docker-Build. Sobald
 echte Tests existieren, laufen Docker-Build und Suite automatisch; ein
 separater Freigabeschritt pro Lauf ist nicht vorgesehen.

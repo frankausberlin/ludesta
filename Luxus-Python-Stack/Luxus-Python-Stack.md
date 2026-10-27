@@ -8,6 +8,7 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 |-|-|-|
 |**`/`**|*Luxus-Python-Stack.md*|Stack-Dokumentation (dieses Dokument)|
 ||*Stack-Setup.md*|Stack-spezifische Einrichtung (setzt das [Basis-System](../Setup.md) voraus)|
+||*Projekt-Migration.md*|Eigenständiger, ausdrücklich zu beauftragender Agentenauftrag|
 |**`lupysta/`**||Stack-Skill für die Arbeit im initialisierten Projekt (siehe unten)|
 |**`scripts/`**|*luxuspythonstack.sh*|Shell-Funktionen (`jupyter-launcher`, `prompt_my_jupyter`, Alias `jl`)|
 |**extern**|*pyinit*|Projekt-Init in eigenem Repository (`~/gits/pyinit`), per `uv tool` installiert|
@@ -18,15 +19,24 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 |Folder|File|Inhalt|
 |-|-|-|
 |**`lupysta/`**|*SKILL.md*|Skill-Übersicht und Rezeptindex|
-|**`lupysta/references`**|*agent-tests.md*|Agent-Tests (Gerüst von `pyinit`; Tests projektspezifisch; nicht Teil von `just check`)|
+|**`lupysta/references`**|*agent-tests.md*|Opt-in Agent-Tests (Harness projektspezifisch; nicht Teil von `just check`)|
 ||*documentation.md*|Dokumentationsrezepte für `just docs*`|
-||*e2e-tests.md*|E2E-Tests (Gerüst von `pyinit`; Tests projektspezifisch; nicht Teil von `just check`)|
+||*e2e-tests.md*|Opt-in E2E-Tests (Tests projektspezifisch; nicht Teil von `just check`)|
 ||*git-release.md*|Worktree, Merge, Versionierung und Release|
-||*project-migration.md*|Bestehende Python-Projekte in den aktuellen Stack überführen|
 ||*quality-gate.md*|Qualitätsgate und Fehlersuche|
 ||*refactoring-recipes.md*|Konkrete Refactoring-Rezepte|
 ||*refactoring.md*|Design-Report, Baseline und Refactoring-Ablauf|
 ||*session-close.md*|Aufgabenabschluss: ADRs, Attention Points und `journal/`|
+
+## Projekt-Migration
+
+[`Projekt-Migration.md`](Projekt-Migration.md) ist ein eigenständiger
+Agentenauftrag auf Ebene der Stack-Dokumentation, kein Rezept des
+Lupysta-Skills und kein zusätzlicher Skill. Er wird nur nach ausdrücklicher
+Beauftragung ausgeführt; die normale Projektarbeit mit Lupysta führt nicht in
+diesen Ablauf. `pyinit` dient darin als festgelegte Zielreferenz und erhält
+keinen Update- oder Merge-Modus. Nach erfolgreicher Migration wird an den
+normalen [Lupysta-Sitzungsstart](lupysta/SKILL.md) übergeben.
 
 ## Installation
 
@@ -198,7 +208,7 @@ Die vierte Ebene besteht aus vier Teilen:
 
 | Teil | Verantwortung |
 | --- | --- |
-| Installierter lupysta-Skill | Beschreibt alle möglichen Arbeitsweisen als Rezepte. |
+| Installierter lupysta-Skill | Beschreibt die reguläre Projektarbeit als Rezepte. |
 | Projekt-`AGENTS.md` | Enthält Projektprofil, ADR-Konventionen und Attention Points; keine zweite Skill-Kopie. |
 | `journal/` | Versionierte Session-Chronik; ein unveränderlicher Eintrag pro Session. |
 | `docs/adr/` | Architekturentscheidungen; der Inhalt ist unveränderlich, Revisionen entstehen als neue ADR. |
@@ -243,6 +253,14 @@ Die Details je Artefakt und Profil stehen im pyinit-Repository:
 [`docs/artefakte.md`](https://github.com/frankausberlin/pyinit/blob/main/docs/artefakte.md).
 Zur Laufzeit zeigen `pyinit describe <id>`, `pyinit list` und
 `pyinit new <profil> --dry-run` dieselben Daten.
+
+Skill und Generator liegen in getrennten Repositories. Bei jeder Änderung von
+`version:` in [`lupysta/SKILL.md`](lupysta/SKILL.md) ist die gekoppelte
+Konstante `LUPYSTA_VERSION` in `src/pyinit/models.py` in einem separaten
+Change im Pyinit-Repository anzugleichen. Dieser Abgleich ist ausdrückliche
+repoübergreifende Folgearbeit. `CONTRACT_VERSION` beziehungsweise
+`contract_version` ändert sich nur bei einer tatsächlichen Änderung des
+Gerüst-Contracts, nicht durch eine reine Skill- oder Dokumentationsänderung.
 
 ## Unterstützte Umgebung
 

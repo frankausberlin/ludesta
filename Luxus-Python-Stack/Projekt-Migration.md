@@ -1,15 +1,19 @@
 # Projekt-Migration
 
-Dieses Rezept überführt ein bestehendes Python-Projekt in den aktuellen
-Luxus-Python-Stack. Es gilt sowohl für ein älteres `pyinit`-Projekt als auch für
-ein fremdes Projekt ohne `pyinit.toml`. Nicht-Python-Projekte und die reguläre
-Neuanlage sind kein Anwendungsfall dieses Rezepts.
+Dieser eigenständige Stack-Auftrag überführt ein bestehendes Python-Projekt in
+den Luxus-Python-Stack. Er wird nur ausgeführt, wenn eine Projekt-Migration
+ausdrücklich beauftragt wurde. Der normale Lupysta-Sitzungsstart lädt oder
+startet diesen Auftrag nicht; ein zusätzlicher Skill ist nicht erforderlich.
 
-`pyinit` bleibt die Quelle für Profile, Artefakte und den Zielzustand. Das Rezept
-beschreibt die bewusste, agentengeführte Migration und erweitert `pyinit` nicht
-um einen Update- oder Merge-Modus.
+Der Auftrag gilt sowohl für ein älteres `pyinit`-Projekt als auch für ein
+fremdes Projekt ohne `pyinit.toml`. Nicht-Python-Projekte und die reguläre
+Neuanlage sind keine Anwendungsfälle.
 
-## Ziel und Grundregeln
+`pyinit` bleibt die Quelle für Profile, Artefakte und den Zielzustand. Dieser
+Auftrag beschreibt die bewusste, agentengeführte Migration und erweitert
+`pyinit` nicht um einen Update- oder Merge-Modus.
+
+## Auftrag, Ziel und Grundregeln
 
 Das Ziel ist kein bytegleiches frisch erzeugtes Gerüst. Das migrierte Projekt
 soll stack-kompatibel, nachvollziehbar verankert und vollständig geprüft sein.
@@ -24,11 +28,15 @@ erhalten.
 - Keine Tests, Lint-Regeln, Typprüfungen oder Coverage-Anforderungen abschwächen,
   um den Migrationsaufwand zu verstecken.
 - Keine ursprünglichen Herkunftsdaten erfinden und keine neuen Felder des
-  `pyinit.toml`-Schemas durch dieses Rezept einführen.
+  `pyinit.toml`-Schemas durch diesen Auftrag einführen.
 - Branch-, Commit-, Merge- und Publish-Regeln des Projekts einhalten. Agenten
   pushen nicht.
 
-## 1. Fall bestimmen und Preflight ausführen
+## 1. Voraussetzungen prüfen und Fall bestimmen
+
+Der Auftrag nennt das Bestandsprojekt. Vor dem Schreiben müssen dessen Regeln
+und bisherigen Befehle zugänglich sowie ein `pyinit`-Zielstand festlegbar
+sein. Fehlende Voraussetzungen werden vor dem Schreiben geklärt.
 
 Ordne den Bestand einem der folgenden Fälle zu:
 
@@ -60,7 +68,7 @@ Release-Prozesse sind nicht mechanisch nach dem Standardprofil zu migrieren.
 Dafür zuerst einen gesonderten Migrationsplan und die nötigen Entscheidungen
 einholen.
 
-## 2. Bestand inventarisieren
+## 2. Bestand und Baseline erfassen
 
 Mindestens folgende Bereiche erfassen:
 
@@ -79,7 +87,7 @@ Die Projektversion, Lizenz, Autoren, Abhängigkeiten, Entrypoints,
 Release-Konfiguration und öffentlichen Schnittstellen gehören zum Bestand und
 dürfen nicht durch Template-Standardwerte ersetzt werden.
 
-## 3. Zielstand festlegen und Referenz erzeugen
+## 3. Festen Zielstand bestimmen und Referenz erzeugen
 
 Eine Migration läuft gegen genau einen `pyinit`-Stand, nicht gegen ein während
 der Arbeit wechselndes „aktuell“.
@@ -93,6 +101,10 @@ der Arbeit wechselndes „aktuell“.
 4. Werden die gerenderten Dateiinhalte benötigt, ein temporäres Referenzprojekt
    außerhalb des Bestandsprojekts erzeugen. Seine Dateien einzeln bewerten,
    nicht als Ganzes übernehmen.
+
+Die verbindlichen Regeln zur Versionskopplung und zur Abgrenzung vom
+Gerüst-Contract stehen im
+[`pyinit`-Ablauf der Stack-Dokumentation](Luxus-Python-Stack.md#pyinit-ablauf).
 
 Das Profil beschreibt die nächstliegende Stack-Basis, nicht zwingend jede
 Projektfähigkeit. Zusätzliche fachliche Entrypoints oder eine Kombination wie
@@ -116,7 +128,7 @@ Unklare Profil-, Verhaltens- oder Release-Entscheidungen vor der Umsetzung
 klären. Eine Abweichung ist zulässig; eine stillschweigend veränderte
 Schnittstelle ist es nicht.
 
-## 5. Schrittweise migrieren
+## 5. Schrittweise umsetzen
 
 - In kleinen, getrennt prüfbaren Schritten arbeiten, beispielsweise Paketierung
   und Quality Gate, optionale Suiten, Dokumentation und Agentenstruktur.
@@ -127,9 +139,10 @@ Schnittstelle ist es nicht.
   Einen zusätzlichen Smoke-Test nur ergänzen, wenn er für das Projekt sinnvoll
   ist und keinen vorhandenen Test verdrängt.
 - `AGENTS.md` zusammenführen. Vorhandene ADRs, Attention Points und
-  Journal-Einträge samt Nummern und Historie erhalten. Eine Migration von
+  Journal-Einträge samt Nummern und Historie erhalten. Die Übernahme der
   Legacy-`JOURNAL.md` folgt ausschließlich
-  [`session-close.md`](session-close.md) und setzt Zustimmung voraus.
+  [`session-close.md`](lupysta/references/session-close.md) und setzt
+  Zustimmung voraus.
 - CI und Release vorsichtig übernehmen. Bestehende Environments, Secrets,
   Trusted Publisher und Tag-Verträge nicht still verändern oder aktivieren.
 - Neue Lint-, Typ- oder Coverage-Probleme nicht durch Abschwächen des Gates
@@ -179,15 +192,15 @@ Die alte Verhaltens-Baseline und das neue Stack-Gate sind beide relevant:
 Ein unverändert grünes altes Kommando ersetzt `just check` nicht; ein grünes
 neues Gate ersetzt den Vergleich mit dem bisherigen Verhalten nicht.
 
-## 8. Abschluss
+## 8. Abschließen und an Lupysta übergeben
 
-- [`session-close.md`](session-close.md) ausführen und die Migrationsbasis,
-  wesentlichen Entscheidungen, Abweichungen und verbleibenden Risiken im
-  Journal festhalten.
+- [`session-close.md`](lupysta/references/session-close.md) ausführen und die
+  Migrationsbasis, wesentlichen Entscheidungen, Abweichungen und verbleibenden
+  Risiken im Journal festhalten.
 - Eine ADR nur für eine echte Projektentscheidung anlegen; das allgemeine
   Migrationsverfahren nicht projektbezogen duplizieren. Attention Points nur
   für wiederkehrende projektspezifische Stolpersteine aufnehmen.
 - Die regulären Prüfungen, den lokalen Merge und die Endzustandskontrolle nach
   den Projektregeln durchführen. Nicht pushen.
-- Nach abgeschlossener Migration gilt wieder der normale Sitzungsstart des
-  lupysta-Skills.
+- Nach abgeschlossener Migration die reguläre Projektarbeit an den normalen
+  [Lupysta-Sitzungsstart](lupysta/SKILL.md) übergeben.

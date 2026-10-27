@@ -11,7 +11,7 @@ Das *luxuriös* steht für die Verwendung komfortabler Mechanismen und Werkzeuge
 
 ## Komponenten
 
-Ein **Luxus Stack** (z.B. Python) befindet sich im **gleichnamigen Folder** (*Luxus-&lt;domain>-Stack/*) und besteht aus der **Dokumentation** (*Luxus-&lt;domain>-Stack.md, Stack-Setup.md*), dem **Skill** (*&lt;skill-folder>/*) und den **Stack-Skripten** (*&lt;stack-script>.sh*) mit den Stack-Funktionen.
+Ein **Luxus Stack** (z.B. Python) befindet sich im **gleichnamigen Folder** (*Luxus-&lt;domain>-Stack/*) und besteht aus der **Dokumentation** (*Luxus-&lt;domain>-Stack.md, Stack-Setup.md* und weitere Stack-Dokumente), dem **Skill** (*&lt;skill-folder>/*) und den **Stack-Skripten** (*&lt;stack-script>.sh*) mit den Stack-Funktionen.
 
 Das Projektgerüst erzeugt **pyinit**, ein eigenständiges Tool mit eigenem Repository (`~/gits/pyinit`). ludesta dokumentiert Installation und Verwendung, bettet den Generator aber nicht ein.
 
@@ -43,7 +43,7 @@ Das Projekt-Init selbst ist stackabhängig und liegt außerhalb dieses Repos. Le
 
 ### Projekt anlegen mit pyinit
 
-Das Herz des Stacks ist das Projekt-Init `pyinit`. Es erzeugt ein vorkonfiguriertes Projektgerüst aus einem Profil. Bei der regulären Arbeit in einem initialisierten Projekt ist der Generator für den Agenten-Skill nicht mehr relevant: Er arbeitet mit den vorhandenen Projektdateien, unabhängig davon, ob sie aus einer Schablone oder individuell stammen. Das Migrationsrezept nutzt `pyinit` dagegen ausdrücklich als Zielreferenz, ohne bestehende Projekte automatisch zu aktualisieren.
+Das Herz des Stacks ist das Projekt-Init `pyinit`. Es erzeugt ein vorkonfiguriertes Projektgerüst aus einem Profil. Bei der regulären Arbeit in einem initialisierten Projekt ist der Generator für den Agenten-Skill nicht mehr relevant: Er arbeitet mit den vorhandenen Projektdateien, unabhängig davon, ob sie aus einer Schablone oder individuell stammen. Der eigenständige [Projekt-Migrationsauftrag](Luxus-Python-Stack/Projekt-Migration.md) wird nur ausdrücklich beauftragt und nutzt `pyinit` als Zielreferenz, ohne bestehende Projekte automatisch zu aktualisieren.
 
 ```shell
 pyinit list                       # Profile anzeigen: app, app-cli, lib, mcp
