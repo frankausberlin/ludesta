@@ -267,6 +267,26 @@ newgrp docker
 docker run --rm hello-world
 ```
 
+## nodejs 
+
+> ⚠️ **Optional: install nodejs (from nodejs.org)**.
+
+```shell
+# Download and install fnm:
+curl -o- https://fnm.vercel.app/install | bash
+
+# Download and install Node.js:
+fnm install 24
+
+# Verify the Node.js version:
+node -v # Should print "v24.22.1".
+
+# Download and install pnpm:
+corepack enable pnpm
+
+# Verify pnpm version:
+pnpm -v
+```
 
 ## Überprüfung
 
