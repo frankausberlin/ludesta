@@ -60,7 +60,7 @@ Ohne Verzeichnis legt `new <profil>` im aktuellen Ordner an; das Ziel muss fehle
 
 Der Agent-Skill beschreibt im vollen Umfang das Arbeiten mit allen unterstützten Arbeitsweisen, basierend auf dem Stack-Init. Dafür ist er modular aufgebaut und lädt komplexe Rezepte nur bei Bedarf.
 
-Die `AGENTS.md` enthält das Projektprofil, die **ADR**-Konventionen und die Attention Points. **Attention Points** sind projektbezogene Stolpersteine und Eigenheiten, die Agent und Nutzer gemeinsam pflegen; ADRs halten Architekturentscheidungen in `docs/adr/` fest.
+Die `AGENTS.md` enthält das Projektprofil, die **ADR**-Konventionen, gepflegt allein vom Benutzer und die Attention Points. **Attention Points** sind projektbezogene Stolpersteine und Eigenheiten, die Agent und Nutzer gemeinsam pflegen; ADRs halten Architekturentscheidungen in `docs/adr/` fest.
 
 
 ## Installation

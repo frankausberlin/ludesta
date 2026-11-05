@@ -197,9 +197,6 @@ neues Gate ersetzt den Vergleich mit dem bisherigen Verhalten nicht.
 - [`session-close.md`](lupysta/references/session-close.md) ausführen und die
   Migrationsbasis, wesentlichen Entscheidungen, Abweichungen und verbleibenden
   Risiken im Journal festhalten.
-- Eine ADR nur für eine echte Projektentscheidung anlegen; das allgemeine
-  Migrationsverfahren nicht projektbezogen duplizieren. Attention Points nur
-  für wiederkehrende projektspezifische Stolpersteine aufnehmen.
 - Die regulären Prüfungen, den lokalen Merge und die Endzustandskontrolle nach
   den Projektregeln durchführen. Nicht pushen.
 - Nach abgeschlossener Migration die reguläre Projektarbeit an den normalen

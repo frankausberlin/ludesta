@@ -26,7 +26,7 @@ Der Luxus-Python-Stack ist eine Kombination aus Werkzeugen, Skripten, Aliasen un
 ||*quality-gate.md*|Qualitätsgate und Fehlersuche|
 ||*refactoring-recipes.md*|Konkrete Refactoring-Rezepte|
 ||*refactoring.md*|Design-Report, Baseline und Refactoring-Ablauf|
-||*session-close.md*|Aufgabenabschluss: ADRs, Attention Points und `journal/`|
+||*session-close.md*|Aufgabenabschluss: Attention Points und `journal/`|
 
 ## Projekt-Migration
 
@@ -165,7 +165,7 @@ scripts/design_report.py
 scripts/test-e2e.sh
 scripts/test-agent.sh
 docs/                       # Lib: Diátaxis-Gerüst + index.md/api.md; App-CLI: reference/cli.md
-docs/adr/                   # ADR-Konvention (README.md); die erste ADR legt der Nutzer an
+docs/adr/                   # ADR-Konvention (README.md für den Nutzer)
 pyinit.toml                 # Herkunft: Profil, Artefakte, Versionen
 pyproject.toml
 uv.lock
@@ -189,9 +189,9 @@ Bibliotheken erhalten von `pyinit` ein Diátaxis-Gerüst: `docs/tutorials/`,
 `docs/how-to/`, `docs/reference/` und `docs/explanation/` mit je einer
 Leitseite und Einträgen in der MkDocs-Navigation. `app-cli` erhält nur
 `docs/reference/cli.md`; `app` und `mcp` erhalten kein Docs-Gerüst. `docs/adr/`
-entsteht mit dem ADR-Gerüst; die erste ADR legt der Nutzer an.
+entsteht mit dem ADR-Gerüst.
 
-* `AGENTS.md` enthält das Projektprofil, die ADR-Konventionen und die Attention Points.
+* `AGENTS.md` enthält das Projektprofil, die Attention Points und einen Hinweis auf die ADR-Konventionen.
 * Der Skill beschreibt die Arbeitsweisen; die Projektdateien bleiben die ausführbare Quelle.
 
 ### Ebene 3: CI/CD

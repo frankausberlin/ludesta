@@ -1,7 +1,7 @@
 # Session-Abschluss
 
 Dieses Rezept wird am Ende jeder erfüllten Aufgabe ausgeführt, spätestens am
-Sitzungsende. Es entscheidet, ob die Aufgabe eine ADR oder einen Attention
+Sitzungsende. Es entscheidet, ob die Aufgabe einen Attention
 Point hinterlässt, und legt einen Eintrag unter `journal/` an. „Keine
 Einträge“ ist ein gültiges Ergebnis.
 
@@ -12,21 +12,7 @@ Einträge“ ist ein gültiges Ergebnis.
   offensichtlich? Welche Entscheidung könnte später hinterfragt werden?
 - Nur projektbezogenes Wissen dokumentieren, nicht die Arbeit nacherzählen.
 
-## 2. ADR-Kandidat?
-
-Eine ADR ist sinnvoll, wenn mindestens zwei der folgenden Punkte zutreffen:
-
-- Es gab eine echte Entscheidung zwischen Alternativen.
-- Die Entscheidung ist architekturrelevant oder wirkt quer durch das Projekt.
-- Sie ist später schwer rückgängig zu machen.
-- Der nächste Agent braucht die Begründung, nicht nur das Ergebnis.
-- Die Entscheidung betrifft Schnittstellen, Datenmodell, Abhängigkeiten,
-  Sicherheit oder Betrieb.
-
-Keine ADR für Routineentscheidungen, Namensgebung, Formatierung oder
-Implementierungsdetails, die der Code selbst erklärt.
-
-## 3. Attention-Point-Kandidat?
+## 2. Attention-Point-Kandidat?
 
 Ein Attention Point ist sinnvoll, wenn alle folgenden Punkte zutreffen:
 
@@ -40,76 +26,7 @@ Ein AP beschreibt **wie** man in einer Situation handelt; eine ADR beschreibt
 **warum** entschieden wurde. Beides kann zusammengehören: Die ADR trägt die
 Begründung, der AP die Handhabung. Den ADR-Text nicht im AP duplizieren.
 
-## 4. ADR anlegen
-
-Dateiname: `docs/adr/NNNN-entscheidung.md` (vierstellige Nummer, danach die
-Entscheidung als kleingeschriebene Wörter mit Bindestrichen). `docs/adr/` bei
-Bedarf anlegen. Eine vorhandene `README.md` in `docs/adr/` ist eine Leitdatei;
-sie ist keine ADR und folgt dem Nummernschema nicht.
-
-```markdown
-# ADR-NNNN: Titel
-
-- Status: accepted
-- Datum: YYYY-MM-DD
-
-## Kontext
-
-...
-
-## Entscheidung
-
-...
-
-## Konsequenzen
-
-...
-
-## Alternativen
-
-...
-```
-
-* Die nächste freie Nummer verwenden, beginnend mit `0001`.
-* Veröffentlichte ADRs niemals löschen oder umnummerieren. Sobald eine ADR auf
-  `main` gemergt ist, gilt ihre Nummer als vergeben – auch dann, wenn die
-  Entscheidung später revidiert wird.
-* Der Dateiname nennt die Entscheidung selbst, nicht nur das Thema:
-  * `0003-auswahl-der-shell.md` ist falsch; der Name sagt dem Agenten nichts,
-    er muss die Datei lesen.
-  * `0003-wir-verwenden-zsh.md` ist richtig; der Name ist die Entscheidung.
-* Ein `ADR`-Präfix im Dateinamen ist nicht nötig. Das Verzeichnis `docs/adr/`
-  benennt die Dokumentart; der Standard (MADR, adr-tools) verwendet
-  `NNNN-titel.md`.
-* `_`-Dateien zählen bei der Nummernvergabe mit. Werkzeuge, die nur nach
-  führenden Ziffern suchen (z. B. `adr-tools`), übersehen sie; die nächste
-  Nummer daher immer über alle Dateien in `docs/adr/` bestimmen.
-* Wird eine Entscheidung revidiert, passiert Folgendes:
-  1. Eine neue ADR mit der nächsten Nummer anlegen.
-  2. Die alte auf `Status: superseded by ADR-MMMM` setzen.
-  3. In beiden Dateien aufeinander verweisen: Die neue ADR verlinkt
-     `_NNNN-...md`, die alte verlinkt `MMMM-...md`.
-  4. Vor dem Umbenennen eingehende Verweise auf den alten Namen ermitteln und
-     im selben Changeset anpassen. Beispiel für
-     `0003-wir-verwenden-zsh.md`:
-
-     ```shell
-     git grep -nE '(^|[^_])0003-wir-verwenden-zsh\.md' -- '*.md'
-     ```
-
-     Der Ausschluss `[^_]` verhindert Treffer auf den neuen `_`-Dateinamen.
-     Journal-Einträge unter `journal/` sind historisch und werden nicht
-     umgeschrieben; ADR- und AP-Referenzen nennen dort nur die Nummer
-     (`ADR-0001`, `AP-3`), nicht den Dateinamen.
-  5. Die alte ADR-Datei umbenennen: `<filename>` wird zu `_<filename>`.
-     Beispiel: `0003-wir-verwenden-zsh.md` wird zu
-     `_0003-wir-verwenden-zsh.md`.
-
-  Nach dem Umbenennen zeigt `ls -1 docs/adr` zuerst alle aktiven und danach
-  alle revidierten Entscheidungen. Das `_` ist eine lokale Konvention; der
-  Status im Dokument bleibt die inhaltliche Wahrheit.
-
-## 5. Attention Point anlegen
+## 3. Attention Point anlegen
 
 Im Abschnitt `## Attention Points` in `AGENTS.md` ergänzen:
 
@@ -132,7 +49,7 @@ Im Abschnitt `## Attention Points` in `AGENTS.md` ergänzen:
 - APs dürfen präzisiert werden; ihre Identität bleibt stabil.
 - APs nicht mit Skill-Inhalten oder ADR-Begründungen duplizieren.
 
-## 6. Journal-Eintrag anlegen
+## 4. Journal-Eintrag anlegen
 
 Existiert im Projekt nur `JOURNAL.md` und wurde die Übernahme (Abschnitt 10)
 nicht freigegeben, dort einen datierten Eintrag anhängen. Sonst am Ende der
@@ -164,7 +81,7 @@ werden, wenn eine noch nicht gemergte ADR oder ein AP umnummeriert wurde
 Ein Eintrag in der Legacy-`JOURNAL.md` wird nicht committet und bleibt lokal.
 Wenn die Session nichts Dauerhaftes hinterlässt, entfällt der Eintrag.
 
-## 7. Konsistenz prüfen
+## 5. Konsistenz prüfen
 
 Vor dem Merge:
 
@@ -204,7 +121,7 @@ Weicht der Branch von `main` ab, nummeriert er seine noch nicht gemergten
 ADRs und APs auf die nächsten freien Nummern um und aktualisiert alle
 Referenzen im selben Commit.
 
-## 8. Arbeitsbaum
+## 6. Arbeitsbaum
 
 Eine Aufgabe ist erst abgeschlossen, wenn der Merge nach `main` erfolgt ist
 und `main` im Hauptcheckout ausgecheckt und sauber ist.
@@ -246,8 +163,8 @@ git branch --show-current    # im Hauptcheckout: main
 
 ## 9. Bei Unsicherheit
 
-Wenn unklar ist, ob eine Entscheidung eine ADR oder eine Situation einen AP
-verdient, den Nutzer fragen. Lieber kein Eintrag als ein spekulativer.
+Wenn unklar ist, ob eine Situation einen AP verdient, den Nutzer fragen. 
+Lieber kein Eintrag als ein spekulativer.
 
 ## 10. Übernahme von `JOURNAL.md`
 

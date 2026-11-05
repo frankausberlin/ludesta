@@ -30,7 +30,7 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
 
 ## Sitzungsstart
 
-1. `AGENTS.md` lesen: Projektprofil, ADR-Konventionen und Attention Points.
+1. `AGENTS.md` lesen: Projektprofil, ADR-Liste und Attention Points.
 2. Die neuesten Einträge unter `journal/` lesen
    (`ls -1 journal | grep -v '^README\.md$' | sort | tail -n 3`).
    Existiert nur `JOURNAL.md`, ist das die Legacy-Quelle; der Umgang damit
@@ -44,7 +44,7 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
 ## Grundregeln
 
 - **`AGENTS.md` ist die Projektquelle.** Sie enthält die projektbezogenen
-  Regeln, die ADR-Konventionen und die Attention Points; bei Branch-,
+  Regeln, die ADR-Liste und die Attention Points; bei Branch-,
   Merge- und Publish-Fragen schlägt sie Rezepte und Pläne.
 - **`just check` grün halten.** Vor und nach jeder Änderung gilt das
   Qualitätsgate des Projekts.
@@ -66,9 +66,8 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
 1. `just check` ausführen; das Gate muss grün sein.
 2. [`references/session-close.md`](references/session-close.md) ausführen:
    einen Eintrag unter `journal/` anlegen (in Legacy-Projekten ohne freigegebene
-   Journal-Übernahme weiterhin in `JOURNAL.md`), ADR- und
-   Attention-Point-Kandidaten prüfen und bei Bedarf anlegen.
-3. Alle beabsichtigten Änderungen auf dem Branch committen; ADRs, Attention
+   Journal-Übernahme weiterhin in `JOURNAL.md`), Attention-Point-Kandidaten prüfen und bei Bedarf anlegen.
+3. Alle beabsichtigten Änderungen auf dem Branch committen; Attention
    Points und der Journal-Eintrag unter `journal/` gehören in denselben Commit.
    `JOURNAL.md` bleibt bis zur freigegebenen Journal-Übernahme lokal und wird
    nicht committet (in bestehenden Projekten ist sie gitignored).
@@ -83,7 +82,7 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
 
 | Rezept | Inhalt |
 | --- | --- |
-| [`references/session-close.md`](references/session-close.md) | Aufgabenabschluss: ADR-/AP-Kandidaten, Journal-Eintrag, Merge nach `main` und ausgecheckter Hauptcheckout. |
+| [`references/session-close.md`](references/session-close.md) | Aufgabenabschluss: AP-Kandidaten, Journal-Eintrag, Merge nach `main` und ausgecheckter Hauptcheckout. |
 | [`references/quality-gate.md`](references/quality-gate.md) | `just check`, `fix`, `test`, `lint`, `typecheck`, `audit`, `clean` und Fehlersuche. |
 | [`references/documentation.md`](references/documentation.md) | `docs`, `docs-check`, `docs-serve` und generierte Seiten. |
 | [`references/git-release.md`](references/git-release.md) | Worktree, `just merge`, `bump`, CI und Veröffentlichung. |

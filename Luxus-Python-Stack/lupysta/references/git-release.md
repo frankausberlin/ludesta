@@ -34,10 +34,9 @@ Vor dem Merge:
 
 1. Den Branch auf den aktuellen `main`-Stand rebasen (`git fetch`, falls ein
    Remote existiert).
-2. Noch nicht veröffentlichte ADR- und AP-Nummern gegen `main` abgleichen und
+2. Noch nicht veröffentlichte AP-Nummern gegen `main` abgleichen und
    bei Kollisionen umnummerieren; alle Referenzen im selben Commit
-   aktualisieren. Revidierte ADRs mit `_`-Präfix behalten ihre Nummer (siehe
-   [`session-close.md`](session-close.md)).
+   aktualisieren (siehe [`session-close.md`](session-close.md)).
 3. `just check` ausführen.
 
 `just merge [branch]` ist aus jedem Checkout bedienbar:
@@ -59,8 +58,7 @@ Vor dem Merge:
 6. Existiert der Quell-Branch nur als lokaler Branch ohne Worktree, wird er
    gelöscht.
 7. Es pusht nie.
-8. Nach dem Merge nur die Eindeutigkeit der ADR- und AP-Nummern als Kontrolle
-   erneut prüfen.
+8. Nach dem Merge nur die Eindeutigkeit AP-Nummer als Kontrolle erneut prüfen.
 
 Ohne Argument sucht das Rezept einen eindeutigen Kandidaten: zuerst einen
 Branch in einem anderen Worktree, sonst den einzigen lokalen Branch, der
@@ -71,7 +69,7 @@ Bei Divergenz:
 
 ```shell
 git rebase main
-# ADR-/AP-Nummern gegen main abgleichen und ggf. umnummerieren
+# AP-Nummern gegen main abgleichen und ggf. umnummerieren
 just check
 just merge <branch>
 ```
