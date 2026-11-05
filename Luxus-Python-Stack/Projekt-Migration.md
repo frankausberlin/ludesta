@@ -139,8 +139,9 @@ Schnittstelle ist es nicht.
   Einen zusätzlichen Smoke-Test nur ergänzen, wenn er für das Projekt sinnvoll
   ist und keinen vorhandenen Test verdrängt.
 - `AGENTS.md` zusammenführen. Vorhandene ADRs, Attention Points und
-  Journal-Einträge samt Nummern und Historie erhalten. Die Übernahme der
-  Legacy-`JOURNAL.md` folgt ausschließlich
+  Journal-Einträge erhalten; ADR-Nummern und Historie bleiben unverändert. Der
+  Agent legt keine ADRs an; Migrationsentscheidungen werden im Journal
+  festgehalten. Die Übernahme der Legacy-`JOURNAL.md` folgt ausschließlich
   [`session-close.md`](lupysta/references/session-close.md) und setzt
   Zustimmung voraus.
 - CI und Release vorsichtig übernehmen. Bestehende Environments, Secrets,

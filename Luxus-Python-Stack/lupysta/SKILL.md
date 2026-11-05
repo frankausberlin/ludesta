@@ -3,9 +3,9 @@ name: lupysta
 description: >
   Arbeitsweise für bereits eingerichtete Python-Projekte des
   Luxus-Python-Stacks: Qualitätsgate, Dokumentation, Git und Release,
-  Refactoring, Projektjournal, ADRs und Attention Points. E2E- und
-  Agent-Tests sind opt-in und nicht Teil von `just check`.
-version: 0.14.0
+  Refactoring, Projektjournal und Attention Points; ADRs liest der Agent
+  nur. E2E- und Agent-Tests sind opt-in und nicht Teil von `just check`.
+version: 0.15.0
 platforms: [linux]
 metadata:
   tags: [python, uv, quality-gate, refactoring, adr]
@@ -24,19 +24,22 @@ Das eingerichtete Projekt und seine `AGENTS.md` bilden den Vertrag für die
 Arbeit. Maßgeblich sind die tatsächlich vorhandenen Projektdateien, Befehle
 und Regeln; die Kenntnis eines ursprünglichen Generators ist nicht erforderlich.
 
-Die dauerhaft relevanten Projektdateien sind `AGENTS.md` (Projektregeln, ADRs,
-Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
-(Architekturentscheidungen). Alles Weitere wird nur bei Bedarf geladen.
+Die dauerhaft relevanten Projektdateien sind `AGENTS.md` (Projektregeln,
+Hinweis auf die ADR-Konventionen, Attention Points), `journal/`
+(Sitzungsgedächtnis) und `docs/adr/` (vom Nutzer gepflegte
+Architekturentscheidungen; der Agent liest sie nur). Alles Weitere wird nur bei
+Bedarf geladen.
 
 ## Sitzungsstart
 
-1. `AGENTS.md` lesen: Projektprofil, ADR-Liste und Attention Points.
+1. `AGENTS.md` lesen: Projektprofil, Hinweis auf die ADR-Konventionen und
+   Attention Points.
 2. Die neuesten Einträge unter `journal/` lesen
    (`ls -1 journal | grep -v '^README\.md$' | sort | tail -n 3`).
    Existiert nur `JOURNAL.md`, ist das die Legacy-Quelle; der Umgang damit
    steht in [`references/session-close.md`](references/session-close.md).
 3. `docs/adr/` sichten, falls vorhanden; die Dateinamen genügen für den
-   Überblick.
+   Überblick. Nur lesen, nicht anlegen oder ändern.
 4. `uv sync` ausführen.
 5. `git status` prüfen und den aktuellen Branch verstehen.
 6. Nur die Rezepte laden, die zur Aufgabe passen.
@@ -44,8 +47,12 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
 ## Grundregeln
 
 - **`AGENTS.md` ist die Projektquelle.** Sie enthält die projektbezogenen
-  Regeln, die ADR-Liste und die Attention Points; bei Branch-,
-  Merge- und Publish-Fragen schlägt sie Rezepte und Pläne.
+  Regeln, den Hinweis auf die ADR-Konventionen und die Attention Points; bei
+  Branch-, Merge- und Publish-Fragen schlägt sie Rezepte und Pläne.
+- **ADRs gehören dem Nutzer.** Der Agent liest vorhandene ADRs, legt aber keine
+  an, ändert sie nicht und nummeriert sie nicht um.
+- **APs sind gegenwartsbezogen: keine Nummern, keine Tombstones.** Obsolete APs
+  werden ersatzlos gelöscht; die Git-Historie ist das Archiv.
 - **`just check` grün halten.** Vor und nach jeder Änderung gilt das
   Qualitätsgate des Projekts.
 - **Tests, Lint und Typen nicht abschwächen**, um Fehler zu verstecken.
@@ -66,7 +73,8 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
 1. `just check` ausführen; das Gate muss grün sein.
 2. [`references/session-close.md`](references/session-close.md) ausführen:
    einen Eintrag unter `journal/` anlegen (in Legacy-Projekten ohne freigegebene
-   Journal-Übernahme weiterhin in `JOURNAL.md`), Attention-Point-Kandidaten prüfen und bei Bedarf anlegen.
+   Journal-Übernahme weiterhin in `JOURNAL.md`), Attention-Point-Kandidaten
+   prüfen, bei Bedarf anlegen und obsolete APs ersatzlos löschen.
 3. Alle beabsichtigten Änderungen auf dem Branch committen; Attention
    Points und der Journal-Eintrag unter `journal/` gehören in denselben Commit.
    `JOURNAL.md` bleibt bis zur freigegebenen Journal-Übernahme lokal und wird
@@ -76,7 +84,7 @@ Attention Points), `journal/` (Sitzungsgedächtnis) und `docs/adr/`
    Hauptcheckout auf `main` bringen und einen temporären Branch löschen; ein
    stabiler Harness-Branch bleibt bestehen. Einzelheiten in
    [`references/session-close.md`](references/session-close.md)
-   (Abschnitt 8) und [`references/git-release.md`](references/git-release.md).
+   (Abschnitt 6) und [`references/git-release.md`](references/git-release.md).
 
 ## Rezeptindex
 

@@ -23,35 +23,38 @@ Ein Attention Point ist sinnvoll, wenn alle folgenden Punkte zutreffen:
 - Sie ist kein Einmal-Bug und kein persönlicher Workaround.
 
 Ein AP beschreibt **wie** man in einer Situation handelt; eine ADR beschreibt
-**warum** entschieden wurde. Beides kann zusammengehören: Die ADR trägt die
-Begründung, der AP die Handhabung. Den ADR-Text nicht im AP duplizieren.
+**warum** entschieden wurde. ADRs gehören allein dem Nutzer: Der Agent liest
+vorhandene ADRs und befolgt sie, legt aber keine an, ändert sie nicht und
+nummeriert sie nicht um. Eine ADR wird im AP höchstens referenziert; den
+ADR-Text nicht im AP duplizieren.
 
 ## 3. Attention Point anlegen
 
 Im Abschnitt `## Attention Points` in `AGENTS.md` ergänzen:
 
 ```markdown
-### AP-N: Kurztitel
+### Kurztitel
 
 - **Situation**: ...
 - **Handhabung**: ...
-- **Involvierte ADRs**: ...
-- **Kontext**: ...
 ```
 
-- Die nächste freie Nummer ist die höchste in `AGENTS.md` verwendete
-  AP-Nummer plus eins; Tombstones zählen mit.
-- Wird ein AP nicht mehr gültig, den aktiven Text durch einen einzeiligen
-  Tombstone ersetzen:
-  `### AP-N: entfernt (YYYY-MM-DD)`
-  Die Nummer bleibt dauerhaft vergeben und wird nicht neu verwendet. Ein
-  Tombstone ist kein aktiver AP.
-- APs dürfen präzisiert werden; ihre Identität bleibt stabil.
+- Die Überschrift nennt das Problem; die `Situation` wiederholt sie nicht und
+  ist genau ein Satz.
+- Die `Handhabung` ist ein Satz oder ein kurzer Abschnitt; bei mehreren
+  Schritten eine kurze Liste. Codebeispiele gehören bei Bedarf in die
+  Handhabung.
+- Mehrere Prosa-Absätze oder längere Begründungen sind ein Rezept, kein AP.
+- APs haben keine Nummern und keine Tombstones. Obsolete APs werden ersatzlos
+  gelöscht; die Git-Historie ist das Archiv (`git log -p -- AGENTS.md`).
+- Überschriften sind eindeutig und beschreibend; die Identität ist der Titel.
+- Umbenennen, Zusammenführen und Entfernen sind erlaubt; nur aktuelle Verweise
+  werden angepasst, Journal-Einträge bleiben historisch.
 - APs nicht mit Skill-Inhalten oder ADR-Begründungen duplizieren.
 
 ## 4. Journal-Eintrag anlegen
 
-Existiert im Projekt nur `JOURNAL.md` und wurde die Übernahme (Abschnitt 10)
+Existiert im Projekt nur `JOURNAL.md` und wurde die Übernahme (Abschnitt 8)
 nicht freigegeben, dort einen datierten Eintrag anhängen. Sonst am Ende der
 Session eine neue Datei unter `journal/` anlegen:
 
@@ -67,17 +70,16 @@ stamp="$(date -u +%Y-%m-%d-%H%M)"
 
 * **Stand**: ...
 * **Änderungen**: ...
-* **ADRs**: ADR-0001 (neu) / keine
-* **Attention Points**: AP-N (neu) / keine
+* **ADRs**: keine / vom Nutzer angelegt: ADR-0001
+* **Attention Points**: keine / "Kurztitel" (neu)
 * **Offen**: ...
 ```
 
 Ein Eintrag unter `journal/` wird mit der Aufgabe committet und ist ab dem
 Merge nach `main` unveränderlich. Er ist Teil des Repos: keine Secrets und keine
-Rohprompts aufnehmen. ADR- und AP-Referenzen als Nummern nennen (`ADR-0001`,
-`AP-3`), nicht als Dateilinks. Vor dem Merge dürfen solche Referenzen berichtigt
-werden, wenn eine noch nicht gemergte ADR oder ein AP umnummeriert wurde
-(Abschnitt 7); der dokumentierte Inhalt der Session bleibt dabei unverändert.
+Rohprompts aufnehmen. Vorhandene ADRs als Nummer nennen (`ADR-0001`); APs mit
+ihrem Titel nennen, nicht als Nummer. Spätere Umbenennungen oder das Löschen
+eines APs ändern den historischen Eintrag nicht.
 Ein Eintrag in der Legacy-`JOURNAL.md` wird nicht committet und bleibt lokal.
 Wenn die Session nichts Dauerhaftes hinterlässt, entfällt der Eintrag.
 
@@ -87,39 +89,13 @@ Vor dem Merge:
 
 - Den eigenen Branch gegen den aktuellen `main`-Stand abgleichen (nach
   `git fetch`, falls ein Remote existiert) und rebasen.
-- Noch nicht auf `main` gemergte ADRs und APs umnummerieren, wenn ihre Nummer
-  dort bereits vergeben ist; alle Referenzen im selben Commit aktualisieren,
-  einschließlich der Journal-Einträge aus Abschnitt 6. Diese Berichtigung ist
-  vor dem Merge zulässig und verletzt die Unveränderlichkeit nicht.
-  Auf `main` gemergte Nummern bleiben unverändert, auch bei revidierten ADRs
-  mit `_`-Präfix.
-- Verweise auf `docs/adr/` müssen auf existierende Dateien zeigen; nach einer
-  Revision darf kein Verweis mehr den alten Namen (ohne `_`) nennen.
+- Vorhandene ADR-Verweise nur lesen. ADR-Dateien und ihre Nummern sind
+  Nutzer-Sache und werden vom Agenten nicht geprüft.
 - `just check` ist grün.
-- Jede ADR-Datei in `docs/adr/` folgt dem Muster `_?NNNN-entscheidung.md`;
-  eine vorhandene Leitdatei `README.md` ist davon ausgenommen.
-- ADRs, APs und der Journal-Eintrag sind mit der Aufgabe committet; das gilt
-  nur für Einträge unter `journal/`, die Legacy-`JOURNAL.md` bleibt lokal.
-
-Nach dem Merge die bisherige Duplikatprüfung als Nachkontrolle wiederholen:
-
-```shell
-ls docs/adr 2>/dev/null | sed 's/^_//' | grep -E '^[0-9]{4}-' | cut -c1-4 | sort | uniq -d
-grep -oE '^### AP-[0-9]+' AGENTS.md | sort | uniq -d
-```
-
-Das erste Kommando ignoriert das `_`-Präfix revidierter ADRs. Die AP-Prüfung
-erfasst auch Tombstones, weil ihre Überschrift mit `### AP-N` beginnt. Zusätzlich
-prüfen, dass keine ADR-Datei die Konvention verletzt (die Ausgabe muss leer
-sein; `README.md` ist ausgenommen):
-
-```shell
-ls docs/adr 2>/dev/null | grep -Ev '^(README\.md|_?[0-9]{4}-[a-z0-9-]+\.md)$'
-```
-
-Weicht der Branch von `main` ab, nummeriert er seine noch nicht gemergten
-ADRs und APs auf die nächsten freien Nummern um und aktualisiert alle
-Referenzen im selben Commit.
+- APs und der Journal-Eintrag sind mit der Aufgabe committet; das gilt nur für
+  Einträge unter `journal/`, die Legacy-`JOURNAL.md` bleibt lokal.
+- AP-Überschriften in `AGENTS.md` sind eindeutig; eine Nummern- oder
+  Duplikatprüfung gibt es nicht.
 
 ## 6. Arbeitsbaum
 
@@ -161,12 +137,12 @@ git branch --show-current    # im Hauptcheckout: main
   aus `AGENTS.md`. Der Hauptcheckout bleibt auf `main`. Details in
   [`git-release.md`](git-release.md).
 
-## 9. Bei Unsicherheit
+## 7. Bei Unsicherheit
 
 Wenn unklar ist, ob eine Situation einen AP verdient, den Nutzer fragen. 
 Lieber kein Eintrag als ein spekulativer.
 
-## 10. Übernahme von `JOURNAL.md`
+## 8. Übernahme von `JOURNAL.md`
 
 Für bestehende Projekte, nur nach Zustimmung des Nutzers:
 

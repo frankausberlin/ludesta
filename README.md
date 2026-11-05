@@ -60,7 +60,7 @@ Ohne Verzeichnis legt `new <profil>` im aktuellen Ordner an; das Ziel muss fehle
 
 Der Agent-Skill beschreibt im vollen Umfang das Arbeiten mit allen unterstützten Arbeitsweisen, basierend auf dem Stack-Init. Dafür ist er modular aufgebaut und lädt komplexe Rezepte nur bei Bedarf.
 
-Die `AGENTS.md` enthält das Projektprofil, die **ADR**-Konventionen, gepflegt allein vom Benutzer und die Attention Points. **Attention Points** sind projektbezogene Stolpersteine und Eigenheiten, die Agent und Nutzer gemeinsam pflegen; ADRs halten Architekturentscheidungen in `docs/adr/` fest.
+Die `AGENTS.md` enthält das Projektprofil, einen Hinweis auf die **ADR**-Konventionen und die Attention Points. ADRs und ihre Konventionen pflegt allein der Benutzer; der Agent liest sie nur. **Attention Points** sind projektbezogene Stolpersteine und Eigenheiten, die Agent und Nutzer gemeinsam pflegen; ADRs halten Architekturentscheidungen in `docs/adr/` fest.
 
 
 ## Installation
@@ -86,7 +86,7 @@ Das [Stack-Dokument](Luxus-Python-Stack/Luxus-Python-Stack.md) befindet sich im 
 * Du hast eine komplette **CI/CD** basierend auf **Github Actions** und **Bump-my-version**.
 * Die Sicherung der **Codequalität** wird durch die Verwendung moderner Tools erreicht: **Ruff, Basedpyright, Pytest, Coverage, Vulture**.
 * Ein echter **Stabilitätsbooster** ist das **dreistufige Testkonzept**: automatische **Unittests** als Gate; **e2e-tests** und **e2e-agent-tests** werden als Gerüste standardmäßig erzeugt und bleiben projektspezifisch. Die E2E-Suite läuft lokal nur über `just test-e2e` und in CI automatisch, sobald Tests vorhanden sind; Agent-Tests laufen nur manuell.
-* **Projektdokumentation** mit MkDocs und **Diátaxis-Gerüst** (Bibliothek) oder generierter CLI-Referenz; **ADRs** (Architectural Decision Records).
+* **Projektdokumentation** mit MkDocs und **Diátaxis-Gerüst** (Bibliothek) oder generierter CLI-Referenz; **ADRs** (Architectural Decision Records, vom Benutzer gepflegt).
 * Bewertung der **Codestruktur** mit **just rate-design** dient dem Skill mit seinem **Refactoring-Rezept** Vorschläge zur Codeverbesserung zu machen und **diese dann umzusetzen**.
 * Auch **Agenten** bekommen Unterstützung mit **AGENTS.md** und **journal/** und ihrem **Agenten-Skill**.
 * Das **Sahnehäubchen** ist dann noch eine **DataScience Umgebung** mit **Jupyter und Colab**.

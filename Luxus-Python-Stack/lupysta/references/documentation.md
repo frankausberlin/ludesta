@@ -46,9 +46,10 @@ Ein veralteter Generatorstand lässt das Gate fehlschlagen.
 - `mkdocstrings` liest die öffentliche API aus den Docstrings.
 - Öffentliche Funktionen und Klassen brauchen Google-Style-Docstrings.
 - `just docs-serve` startet eine lokale Vorschau mit Live-Reload.
-- ADRs unter `docs/adr/` (auch revidierte `_`-Dateien) sind absichtlich nicht
-  Teil der Navigation. Wenn `docs-check` sie beanstandet, in `mkdocs.yml` über
-  `not_in_nav` ausschließen oder in die Navigation aufnehmen.
+- ADRs unter `docs/adr/` (auch revidierte `_`-Dateien) sind vom Nutzer
+  gepflegt; der Agent ändert weder Inhalt noch Dateinamen. Sie sind absichtlich
+  nicht Teil der Navigation. Wenn `docs-check` sie beanstandet, in `mkdocs.yml`
+  über `not_in_nav` ausschließen oder in die Navigation aufnehmen.
 
 ## CLI-Apps
 

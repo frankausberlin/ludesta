@@ -165,7 +165,7 @@ scripts/design_report.py
 scripts/test-e2e.sh
 scripts/test-agent.sh
 docs/                       # Lib: Diátaxis-Gerüst + index.md/api.md; App-CLI: reference/cli.md
-docs/adr/                   # ADR-Konvention (README.md für den Nutzer)
+docs/adr/                   # ADR-Konvention (README.md für den Nutzer; ADRs legt der Nutzer an)
 pyinit.toml                 # Herkunft: Profil, Artefakte, Versionen
 pyproject.toml
 uv.lock
@@ -189,7 +189,7 @@ Bibliotheken erhalten von `pyinit` ein Diátaxis-Gerüst: `docs/tutorials/`,
 `docs/how-to/`, `docs/reference/` und `docs/explanation/` mit je einer
 Leitseite und Einträgen in der MkDocs-Navigation. `app-cli` erhält nur
 `docs/reference/cli.md`; `app` und `mcp` erhalten kein Docs-Gerüst. `docs/adr/`
-entsteht mit dem ADR-Gerüst.
+entsteht mit dem ADR-Gerüst; die erste ADR legt der Nutzer an.
 
 * `AGENTS.md` enthält das Projektprofil, die Attention Points und einen Hinweis auf die ADR-Konventionen.
 * Der Skill beschreibt die Arbeitsweisen; die Projektdateien bleiben die ausführbare Quelle.
@@ -209,15 +209,16 @@ Die vierte Ebene besteht aus vier Teilen:
 | Teil | Verantwortung |
 | --- | --- |
 | Installierter lupysta-Skill | Beschreibt die reguläre Projektarbeit als Rezepte. |
-| Projekt-`AGENTS.md` | Enthält Projektprofil, ADR-Konventionen und Attention Points; keine zweite Skill-Kopie. |
+| Projekt-`AGENTS.md` | Enthält Projektprofil, einen Hinweis auf die ADR-Konventionen und Attention Points; keine zweite Skill-Kopie. |
 | `journal/` | Versionierte Session-Chronik; ein unveränderlicher Eintrag pro Session. |
-| `docs/adr/` | Architekturentscheidungen; der Inhalt ist unveränderlich, Revisionen entstehen als neue ADR. |
+| `docs/adr/` | Vom Nutzer gepflegte Architekturentscheidungen; der Agent liest sie nur. Der Inhalt ist unveränderlich, Revisionen entstehen als neue ADR. |
 
 Ablauf:
 
-1. `AGENTS.md` lesen: Projektprofil, ADR-Konventionen und Attention Points.
+1. `AGENTS.md` lesen: Projektprofil, Hinweis auf die ADR-Konventionen und
+   Attention Points.
 2. Die neuesten Einträge unter `journal/` lesen, falls vorhanden.
-3. `docs/adr/` sichten, falls vorhanden.
+3. `docs/adr/` sichten, falls vorhanden; nur lesen, nicht anlegen oder ändern.
 4. `uv sync` und `git status` ausführen.
 5. Nur die Rezepte laden, die zur Aufgabe passen.
 6. Am Ende `just check` grün halten, [`session-close.md`](lupysta/references/session-close.md)
