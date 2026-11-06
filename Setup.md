@@ -21,12 +21,12 @@ sudo nala install -y \
   ca-certificates curl wget gnupg gpg software-properties-common \
   openssh-server fail2ban ufw unattended-upgrades util-linux-extra net-tools \
   util-linux-extra snapd 7zip xz-utils aria2 sqlite3 \
-  zsh gh tmux btop htop iotop nvtop fastfetch tree hwinfo s-tui \
+  zsh gh gitleaks tmux btop htop iotop nvtop fastfetch tree hwinfo s-tui \
   ripgrep fzf zoxide jq tealdeer shellcheck shfmt apt-transport-https \
   build-essential cmake make pkg-config libssl-dev zlib1g-dev libbz2-dev \
   libreadline-dev libsqlite3-dev libncurses-dev libffi-dev liblzma-dev \
   libxml2-dev libxmlsec1-dev tk-dev libyaml-dev libfuse2t64 \
-  python3 pipx
+  python3 pipx 
 
 # just und direnv
 sudo nala install -y just direnv
