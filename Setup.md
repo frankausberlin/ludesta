@@ -31,10 +31,6 @@ sudo nala install -y \
 # just und direnv
 sudo nala install -y just direnv
 
-# morning routine
-echo 'alias suu="sudo nala update && sudo nala upgrade -y"' >> ~/.zshrc
-echo 'alias rlb="exec zsh"' >> ~/.zshrc
-
 # SSH aktivieren
 sudo systemctl enable --now ssh
 # IP mit 'ip a' ermitteln und per 'ssh <user>@<ip>' mit dieser Maschine verbinden
@@ -51,6 +47,10 @@ echo 'setopt INTERACTIVE_COMMENTS' >> ~/.zshrc
 >* ⚠️ **zsh neu öffnen (notwendig, um das Kommentarzeichen '#' verwenden zu können)**
 
 ```shell
+# morning routine
+echo 'alias suu="sudo nala update && sudo nala upgrade -y"' >> ~/.zshrc
+echo 'alias rlb="exec zsh"' >> ~/.zshrc
+
 # Schriftarten (MesloLGS NF)
 mkdir -p ~/.local/share/fonts && cd ~/.local/share/fonts
 wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf
