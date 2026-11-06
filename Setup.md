@@ -32,7 +32,7 @@ sudo nala install -y \
 sudo nala install -y just direnv
 
 # SSH aktivieren
-sudo systemctl enable --now ssh avahi
+sudo systemctl enable --now ssh avahi-daemon
 # per 'ssh <user>@<computername>.local' mit dieser Maschine verbinden
 
 # zu zsh wechseln
@@ -280,19 +280,18 @@ docker run --rm hello-world
 
 ```shell
 # Download and install fnm:
-curl -o- https://fnm.vercel.app/install | bash
+curl -fsSL https://fnm.vercel.app/install | bash
+
+# fnm für die aktuell laufende Shell-Sitzung sofort aktivieren:
+export PATH="$HOME/.local/share/fnm:$PATH"
+eval "$(fnm env --shell zsh)"
 
 # Download and install Node.js:
 fnm install 24
+fnm use 24
 
-# Verify the Node.js version:
-node -v # Should print "v24.22.1".
-
-# Download and install pnpm:
+# pnpm aktivieren:
 corepack enable pnpm
-
-# Verify pnpm version:
-pnpm -v
 ```
 
 ## Überprüfung
