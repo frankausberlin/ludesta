@@ -325,7 +325,7 @@ done
 
 # ── Globale Werkzeuge in frischer interaktiver Shell ─────────────────────────
 # Nicht die Setup-Shell prüfen: sie hat ~/.local/bin nur geerbt. Der Test startet
-# zsh mit einem kontrollierten PATH, damit nur ~/.zshrc zählt.
+# zsh mit einem kontrollierten PATH, damit nur die Shell-Konfiguration zählt.
 zsh_clean 'r=0; for t in just direnv zoxide fzf rg jq gh; do if command -v "$t" >/dev/null; then echo "ok $t"; else echo "MISSING $t"; r=1; fi; done; exit $r' || fail=1
 zsh_clean 'just --version; direnv --version; gh --version | head -1' || fail=1
 
@@ -333,9 +333,29 @@ zsh_clean 'just --version; direnv --version; gh --version | head -1' || fail=1
 [ -d ~/.antidote ] && ok antidote || missing antidote
 [ -f ~/.zsh_plugins.txt ] && ok .zsh_plugins.txt || missing .zsh_plugins.txt
 [ -f ~/.p10k.zsh ] && ok "p10k configured" || missing "p10k configured"
-grep -q 'setopt INTERACTIVE_COMMENTS' ~/.zshrc && ok INTERACTIVE_COMMENTS || missing INTERACTIVE_COMMENTS
-grep -q 'zoxide init zsh' ~/.zshrc && ok "zoxide init" || missing "zoxide init"
-grep -q 'direnv hook zsh' ~/.zshrc && ok "direnv hook" || missing "direnv hook"
+# Nicht ~/.zshrc durchsuchen: shlib verschiebt diese Zeilen nach ~/.shlib/shlibs.
+# Der Laufzeittest deckt beide Layouts ab.
+zsh_clean '
+r=0
+if setopt interactivecomments 2>/dev/null; then
+    echo "ok INTERACTIVE_COMMENTS"
+else
+    echo "MISSING INTERACTIVE_COMMENTS"
+    r=1
+fi
+if typeset -f __zoxide_hook >/dev/null 2>&1; then
+    echo "ok zoxide init"
+else
+    echo "MISSING zoxide init"
+    r=1
+fi
+if typeset -f _direnv_hook >/dev/null 2>&1; then
+    echo "ok direnv hook"
+else
+    echo "MISSING direnv hook"
+    r=1
+fi
+exit "$r"' || fail=1
 [ -x ~/.local/bin/test-ludesta ] && ok "test-ludesta" || missing "test-ludesta"
 zsh_clean 'command -v test-ludesta >/dev/null' && ok "$HOME/.local/bin im PATH" || missing "$HOME/.local/bin im PATH"
 

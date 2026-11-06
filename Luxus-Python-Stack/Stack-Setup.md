@@ -248,7 +248,7 @@ zsh_clean() {
 
 # ── UV / Python-Werkzeuge ────────────────────────────────────────────────────
 # Nicht die Setup-Shell prüfen: sie hat ~/.local/bin nur geerbt. Der Test startet
-# zsh mit einem kontrollierten PATH, damit nur ~/.zshrc zählt.
+# zsh mit einem kontrollierten PATH, damit nur die Shell-Konfiguration zählt.
 zsh_clean 'r=0; for t in uv ruff basedpyright bump-my-version nbstripout pyinit; do if command -v "$t" >/dev/null; then echo "ok $t"; else echo "MISSING $t"; r=1; fi; done; exit $r' || fail=1
 uv --version || fail=1
 uv tool list || fail=1                                # Versionen der globalen uv-Tools
@@ -256,7 +256,9 @@ uv tool list || fail=1                                # Versionen der globalen u
 # ── Shell-Integration ────────────────────────────────────────────────────────
 grep -q 'layout_uv' ~/.config/direnv/direnvrc 2>/dev/null && ok layout_uv || missing layout_uv
 grep -q 'my_jupyter' ~/.p10k.zsh 2>/dev/null && ok "p10k segment" || missing "p10k segment"
-grep -q 'luxuspythonstack.sh' ~/.zshrc && ok "stack functions" || missing "stack functions"
+# Nicht ~/.zshrc durchsuchen: shlib verschiebt die Zeile nach ~/.shlib/shlibs.
+# Der Laufzeittest deckt beide Layouts ab.
+zsh_clean 'typeset -f prompt_my_jupyter >/dev/null' && ok "stack functions" || missing "stack functions"
 [ -f ~/.agents/skills/lupysta/SKILL.md ] && ok "lupysta skill" || missing "lupysta skill"
 [ -x ~/.local/bin/test-lupysta ] && ok "test-lupysta" || missing "test-lupysta"
 zsh_clean 'command -v test-lupysta >/dev/null' && ok "$HOME/.local/bin im PATH" || missing "$HOME/.local/bin im PATH"
