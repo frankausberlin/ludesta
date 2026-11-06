@@ -19,7 +19,7 @@ git clone https://github.com/frankausberlin/ludesta ~/gits/ludesta
 # Systemgrundlagen / CLI-Tools & Produktivität / Build-Grundlagen & Entwicklerbibliotheken
 sudo nala install -y \
   ca-certificates curl wget gnupg gpg software-properties-common \
-  openssh-server fail2ban ufw unattended-upgrades util-linux-extra net-tools \
+  openssh-server fail2ban ufw unattended-upgrades util-linux-extra avahi-daemon net-tools \
   util-linux-extra snapd 7zip xz-utils aria2 sqlite3 \
   zsh gh gitleaks tmux btop htop iotop nvtop fastfetch tree hwinfo s-tui \
   ripgrep fzf zoxide jq tealdeer shellcheck shfmt apt-transport-https \
@@ -32,8 +32,8 @@ sudo nala install -y \
 sudo nala install -y just direnv
 
 # SSH aktivieren
-sudo systemctl enable --now ssh
-# IP mit 'ip a' ermitteln und per 'ssh <user>@<ip>' mit dieser Maschine verbinden
+sudo systemctl enable --now ssh avahi
+# per 'ssh <user>@<computername>.local' mit dieser Maschine verbinden
 
 # zu zsh wechseln
 sudo chsh -s $(which zsh) $USER
@@ -193,9 +193,11 @@ git config --global pull.rebase true
 
 ### Ausführen auf dem Host PC
 ```shell
-# AUF DEM HOST: VM_USER/VM_IP einsetzen, dann ausführen
-# VM_USER="<vm-user>"
-# VM_IP="<vm-ip>"          # NAT: 127.0.0.1, beide ssh-Befehle zusätzlich mit -p <host-port>
+# führe den schnippsel 'copy-paste-freundliche ausgabe von user und ip' auf der vm aus
+# kopiere die ausgabe des befehls, füge sie im terminal des Host PCs ein und führe sie aus
+
+# führe den schnippsel 'copy-paste-freundliche ausgabe des config-schnippsel für ssh (vermeiden von .local)' auf der vm aus
+# kopiere die ausgabe des befehls, füge sie im terminal des Host PCs ein und führe sie aus
 
 [ -f ~/.ssh/id_ed25519 ] || ssh-keygen -t ed25519
 ssh-copy-id -i ~/.ssh/id_ed25519.pub "${VM_USER}@${VM_IP}"
@@ -206,6 +208,11 @@ ssh -o PreferredAuthentications=publickey "${VM_USER}@${VM_IP}" true
 ```shell
 # copy-paste-freundliche ausgabe von user und ip
 printf 'VM_USER="%s"\nVM_IP="%s"\n' "$USER" "$(hostname -I | awk '{print $1}')"
+```
+
+```shell
+# copy-paste-freundliche ausgabe des config-schnippsel für ssh (vermeiden von .local)
+printf "cat << 'EOF' >> ~/.ssh/config\n\nHost vubu\n    HostName %s.local\n    User %s\n    StrictHostKeyChecking accept-new\n   UserKnownHostsFile /dev/null\nEOF\n" $(hostnamectl hostname) $USER
 ```
 
 ```shell
