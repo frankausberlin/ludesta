@@ -155,7 +155,7 @@ exec zsh
 # _________________________________________________________________________________________________________________________________
 py=3.12 && ENV_NAME="ds${py: -2}" && mamba deactivate && mamba remove -y -n $ENV_NAME --all 2>/dev/null # Python 3.XY --> 'dsXY'
 mamba   create -y -n $ENV_NAME python=$py google-colab && mamba activate $ENV_NAME # getestet mit Python 3.11/12/13
-uv pip  install  -U jupyterlab jupyter_http_over_ws jupyter-ai jupyterlab-github xeus-python huggingface-hub ipywidgets==7.7.1
+uv pip  install  -U jupyterlab jupyter_http_over_ws jupyter-ai jupyterlab-github huggingface-hub ipywidgets==7.7.1
 jupyter labextension enable jupyter_http_over_ws && echo $ENV_NAME > ~/.startenv
 python  -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
 # _______________________________________'act'_statt_'mamba_activate'_verwenden_____________________________________________________
