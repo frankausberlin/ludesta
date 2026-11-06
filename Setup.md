@@ -380,19 +380,15 @@ fi
 systemctl is-active --quiet ssh || systemctl is-active --quiet ssh.socket && ok "ssh aktiv" || echo "HINWEIS: ssh nicht aktiv"
 ss -tln 2>/dev/null | grep -q ':22 ' && ok "ssh auf Port 22" || echo "HINWEIS: kein Listener auf 22"
 { grep -qx 'ENABLED=yes' /etc/ufw/ufw.conf && grep -qx 'DEFAULT_INPUT_POLICY="DROP"' /etc/default/ufw && grep -qx 'DEFAULT_OUTPUT_POLICY="ACCEPT"' /etc/default/ufw; } 2>/dev/null && ok "ufw enabled + policies" || echo "HINWEIS: ufw-Status/Policies prüfen"
-if t="$(mktemp -d)" && [ -d "$t" ]; then
-    ssh-keygen -q -t ed25519 -N '' -f "$t/k" 2>/dev/null
-    sshd -T -h "$t/k" 2>/dev/null >"$t/c"
-    r=0
-    for c in "passwordauthentication no" "kbdinteractiveauthentication no" "permitrootlogin no" "permitemptypasswords no"; do
-        grep -qx "$c" "$t/c" || r=1
-    done
-    grep -Eq "^allowusers( .*)? $USER( .*)?$" "$t/c" || r=1
-    rm -rf -- "$t"
-    [ "$r" = 0 ] && ok "sshd hardening" || echo "HINWEIS: sshd-Config prüfen"
-else
-    echo "HINWEIS: sshd-Hardening nicht prüfbar (mktemp fehlgeschlagen)"
-fi
+
+# sshd hardening Prüfung direkt in sshd_config.d
+r=0
+for opt in "PasswordAuthentication no" "KbdInteractiveAuthentication no" "PermitRootLogin no" "PermitEmptyPasswords no"; do
+    grep -qis "^${opt}" /etc/ssh/sshd_config.d/*.conf /etc/ssh/sshd_config || r=1
+done
+grep -qis "^AllowUsers.*$USER" /etc/ssh/sshd_config.d/*.conf /etc/ssh/sshd_config || r=1
+
+[ "$r" = 0 ] && ok "sshd hardening" || echo "HINWEIS: sshd-Config prüfen"
 
 exit "$fail"
 EOF
